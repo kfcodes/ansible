@@ -1,2 +1,2 @@
 # ansible
-Collection of scripts for server setup
+This is the scripts I use to automate setup of my local linux system
