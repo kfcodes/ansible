@@ -1,12 +1,12 @@
----
-  - name: "Setting up local Linux machine"
-    hosts: localhost
-    connection: local 
-    become: yes
+# Corrected the indentation for yaml local file
+- name: "Setting up local Linux machine"
+hosts: localhost
+connection: local 
+become: yes
 
-    pre_tasks:
-      - name: update and upgrade the system
-        pacman:
-          update_cache: yes
-          upgrade: yes
+pre_tasks:
+- name: update and upgrade the system
+pacman:
+update_cache: yes
+upgrade: yes
 
