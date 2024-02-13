@@ -1,4 +1,3 @@
-# Added task to create test user on local machine 
 ---
   - name: "Setting up local Linux machine"
     hosts: localhost
@@ -15,8 +14,28 @@
       - name: Create a login user
         ansible.builtin.user:
           name: test
+          password: 'test'
+          - docker
+          - sudo
           state: present
           shell: /bin/bash       # Defaults to /bin/bash
           system: no             # Defaults to no
           createhome: yes        # Defaults to yes
           home: /home/test  # Defaults to /home/<username>
+
+      - name: install applications for the system
+        pacman:
+          name: 
+            - htop
+            - mc
+            - tmux
+            - github-cli
+            - xorg-server
+            - xorg-xwininfo
+            - xorg-xinit
+            - ttf-linux-libertine
+            - bc
+            - xcompmgr
+            - xorg-xprop
+            - arandr
+            - dosfstools
