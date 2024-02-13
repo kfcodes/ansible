@@ -1,3 +1,4 @@
+# Added task to install more packages on local system
 ---
   - name: "Setting up local Linux machine"
     hosts: localhost
@@ -14,9 +15,10 @@
       - name: Create a login user
         ansible.builtin.user:
           name: test
-          password: 'test'
-          - docker
-          - sudo
+          # password: 'test'
+          # groups: # Empty by default, here we give it some groups
+          # - docker
+          # - sudo
           state: present
           shell: /bin/bash       # Defaults to /bin/bash
           system: no             # Defaults to no
@@ -39,3 +41,14 @@
             - xorg-xprop
             - arandr
             - dosfstools
+            - libnotify
+            - dunst
+            - exfat-utils
+            - sxiv
+            - xwallpaper
+            - ffmpeg
+            - gnome-keyring
+            - neovim
+            - mpd
+            - mpc
+            - mpv
