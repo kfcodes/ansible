@@ -1,12 +1,22 @@
-# Corrected the indentation for yaml local file
-- name: "Setting up local Linux machine"
-hosts: localhost
-connection: local 
-become: yes
+# Added task to create test user on local machine 
+---
+  - name: "Setting up local Linux machine"
+    hosts: localhost
+    connection: local
+    become: yes
 
-pre_tasks:
-- name: update and upgrade the system
-pacman:
-update_cache: yes
-upgrade: yes
+    pre_tasks:
+      - name: update and upgrade the system
+        pacman:
+          update_cache: yes
+          upgrade: yes
 
+    tasks:
+      - name: Create a login user
+        ansible.builtin.user:
+          name: test
+          state: present
+          shell: /bin/bash       # Defaults to /bin/bash
+          system: no             # Defaults to no
+          createhome: yes        # Defaults to yes
+          home: /home/test  # Defaults to /home/<username>
