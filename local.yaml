@@ -1,4 +1,4 @@
-# Added task to install more packages on local system
+# Added more packages to local system
 ---
   - name: "Setting up local Linux machine"
     hosts: localhost
@@ -52,3 +52,40 @@
             - mpd
             - mpc
             - mpv
+            - man-db
+            - ncmpcpp
+            - newsboat
+            - noto-fonts-emoji
+            - ntfs-3g
+            - pulsemixer
+            - pamixer
+            - maim
+            - unclutter
+            - unrar
+            - unzip
+            - lynx
+            - xcape
+            - xclip
+            - xdotool
+            - xorg-xdpyinfo
+            - youtube-dl
+            - zathura
+            - zathura-pdf-mupdf
+            - poppler
+            - mediainfo
+            - fzf
+            - highlight
+            - xorg-xbacklight
+            - slock
+            - socat
+            - moreutils
+            - docker
+            - hostapd
+            - python
+            - python-pip
+            - nodejs
+            - gvim
+            - yamllint
+            - cmake
+            - prettier
+            - eslint
