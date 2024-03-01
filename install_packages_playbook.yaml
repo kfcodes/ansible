@@ -12,19 +12,6 @@
           upgrade: yes
 
     tasks:
-      - name: Create a login user
-        ansible.builtin.user:
-          name: test
-          # password: 'test'
-          # groups: # Empty by default, here we give it some groups
-          # - docker
-          # - sudo
-          state: present
-          shell: /bin/bash       # Defaults to /bin/bash
-          system: no             # Defaults to no
-          createhome: yes        # Defaults to yes
-          home: /home/test  # Defaults to /home/<username>
-
       - name: install applications for the system
         pacman:
           name: 
@@ -93,16 +80,3 @@
             # - atool
             # - abook
             # - sc-im
-
-      # - name: Create home folders for the user
-      - name: create Direcotories
-        file:
-          # path: /tmp/test 
-          # state: directory
-          path: /tmp/{{ item.path }} 
-          mode: "{{ item.mode  }}"
-          state: directory
-        with_items:
-          - { path: "test777", mode: "u=rwX,g=rwX,o=rwX" }
-          - { path: "test755", mode: "u=rwX,g=rX,o=rX" }
-          - { path: "test740", mode: "u=rwX,g=r" }
