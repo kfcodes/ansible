@@ -1,0 +1,8 @@
+[local]
+localhost
+
+#IP Address for Mariadb server
+#[DBserver]
+
+#IP Address Backend API
+[backend API]
