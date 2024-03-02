@@ -1,26 +1,25 @@
-# Added task to create directories on local system
 ---
-  - name: "Setting up local Linux machine"
-    hosts: localhost
-    connection: local 
-    become: yes
+- name: "Setting up local Linux machine"
+  hosts: localhost
+  connection: local 
+  become: yes
 
-    pre_tasks:
-      - name: update and upgrade the system
-        pacman:
-          update_cache: yes
-          upgrade: yes
+  pre_tasks:
+    - name: update and upgrade the system
+      pacman:
+        update_cache: yes
+        upgrade: yes
 
-    tasks:
-      - name: Create a login user
-        ansible.builtin.user:
-          name: test
-          # password: 'test'
-          # groups: # Empty by default, here we give it some groups
-          # - docker
-          # - sudo
-          state: present
-          shell: /bin/bash       # Defaults to /bin/bash
-          system: no             # Defaults to no
-          createhome: yes        # Defaults to yes
-          home: /home/test  # Defaults to /home/<username>
+  tasks:
+    - name: Create a login user
+      ansible.builtin.user:
+        name: test
+        # password: 'test'
+        # groups: # Empty by default, here we give it some groups
+        # - docker
+        # - sudo
+        state: present
+        shell: /bin/bash       # Defaults to /bin/bash
+        system: no             # Defaults to no
+        createhome: yes        # Defaults to yes
+        home: /home/test  # Defaults to /home/<username>
