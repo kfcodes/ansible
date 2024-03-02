@@ -1,8 +1,14 @@
-[local]
-localhost
+# DATABASE SERVER
+# [db]
 
-#IP Address for Mariadb server
-#[DBserver]
+# APPLICATION API SERVER
+# [api]
 
-#IP Address Backend API
-[backend API]
+# APPLICATION FRONTEND SERVER
+# [app]
+
+# GROUP OF MULTI WITH ALL SERVERS 
+# [multi:children]
+# app
+# db
+# api
