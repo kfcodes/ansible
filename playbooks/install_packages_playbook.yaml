@@ -1,11 +1,12 @@
 # Added task to create directories on local system
 ---
-- name: "Setting up local Linux machine"
+- name: "UPDATING AND INSTALLING PACKAGES ON SYSTEM"
   hosts: localhost
   connection: local 
   become: yes
+
   pre_tasks:
-    - name: update and upgrade the system
+    - name: UPDATEING AND UPGRADING SYSTEM PACKAGES
       pacman:
         update_cache: yes
         upgrade: yes

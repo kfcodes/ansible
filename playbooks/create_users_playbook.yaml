@@ -1,5 +1,5 @@
 ---
-- name: "Setting up local Linux machine"
+- name: "CREATING USERS IF THEY DO NOT EXIT ON SYSTEM"
   hosts: localhost
   connection: local 
   become: yes
@@ -14,8 +14,8 @@
     - name: Create a login user
       ansible.builtin.user:
         name: test
-        # password: 'test'
-        # groups: # Empty by default, here we give it some groups
+        password: 'test'
+        groups: # Empty by default, here we give it some groups
         # - docker
         # - sudo
         state: present
