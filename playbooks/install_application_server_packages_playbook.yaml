@@ -1,0 +1,21 @@
+# Added task to create directories on local system
+---
+- name: "UPDATING AND INSTALLING PACKAGES ON APPLICATION SERVER"
+  hosts: localhost
+  become: yes
+
+  pre_tasks:
+    - name: UPDATEING AND UPGRADING SERVER SOFTWAREPACKAGES
+      ansible.builtin.package:
+        update_cache: yes
+        upgrade: yes
+
+  tasks:
+    - name: install applications for the system
+      ansible.builtin.package:
+        name: 
+          - htop
+          - tmux
+          - neovim
+          - python
+          - nodejs
