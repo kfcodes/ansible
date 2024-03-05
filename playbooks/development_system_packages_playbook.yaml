@@ -5,78 +5,8 @@
   connection: local 
   become: yes
 
-  pre_tasks:
+  tasks:
     - name: UPDATEING AND UPGRADING SYSTEM PACKAGES
       pacman:
         update_cache: yes
         upgrade: yes
-
-  tasks:
-    - name: install applications for the system
-      pacman:
-        name: 
-          - htop
-          - mc
-          - tmux
-          - github-cli
-          - xorg-server
-          - xorg-xwininfo
-          - xorg-xinit
-          - ttf-linux-libertine
-          - bc
-          - xcompmgr
-          - xorg-xprop
-          - arandr
-          - dosfstools
-          - libnotify
-          - dunst
-          - exfat-utils
-          - sxiv
-          - xwallpaper
-          - ffmpeg
-          - gnome-keyring
-          - neovim
-          - mpd
-          - mpc
-          - mpv
-          - man-db
-          - ncmpcpp
-          - newsboat
-          - noto-fonts-emoji
-          - ntfs-3g
-          - pulsemixer
-          - pamixer
-          - maim
-          - unclutter
-          - unrar
-          - unzip
-          - lynx
-          - xcape
-          - xclip
-          - xdotool
-          - xorg-xdpyinfo
-          - youtube-dl
-          - zathura
-          - zathura-pdf-mupdf
-          - poppler
-          - mediainfo
-          - fzf
-          - highlight
-          - xorg-xbacklight
-          - slock
-          - socat
-          - moreutils
-          - docker
-          - hostapd
-          - python
-          - python-pip
-          - nodejs
-          - gvim
-          - yamllint
-          - cmake
-          - prettier
-          - eslint
-          # These are not available on arch
-          # - atool
-          # - abook
-          # - sc-im
