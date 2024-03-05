@@ -1,17 +1,14 @@
 ---
-- name: "Setting up local Linux machine"
-  hosts: localhost
-  connection: local 
+- name: Creating directories on remote server
+  hosts: app
   become: yes
   tasks:
-    - name: create Direcotories
+    - name: Creating Folders
       file:
-        path: /tmp/test 
-        state: directory
         path: /tmp/{{ item.path }} 
         mode: "{{ item.mode  }}"
         state: directory
       with_items:
-        - { path: "test777", mode: "u=rwX,g=rwX,o=rwX" }
-        - { path: "test755", mode: "u=rwX,g=rX,o=rX" }
-        - { path: "test740", mode: "u=rwX,g=r" }
+        - { path: "test_directory_777", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: "test_directory_755", mode: "u=rwX,g=rX,o=rX" }
+        - { path: "test_directory_740", mode: "u=rwX,g=r" }
