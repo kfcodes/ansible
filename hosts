@@ -1,14 +1,21 @@
+# DEVELOPMENT SYSTEM
+[dev]
+localhost
+
 # DATABASE SERVER
-# [db]
+[db]
+192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
 # APPLICATION API SERVER
-# [api]
+#[api]
+#192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
 # APPLICATION FRONTEND SERVER
 # [app]
+#192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
 # GROUP OF MULTI WITH ALL SERVERS 
-# [multi:children]
+[app:children]
+db
 # app
-# db
 # api
