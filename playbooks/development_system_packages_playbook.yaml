@@ -1,12 +1,12 @@
 # Added task to create directories on local system
 ---
-- name: "UPDATING AND INSTALLING PACKAGES ON SYSTEM"
+- name: "updating and installing packages on development system"
   hosts: localhost
   connection: local 
   become: yes
 
   tasks:
-    - name: UPDATEING AND UPGRADING SYSTEM PACKAGES
+    - name: updating and upgrading system packages
       pacman:
         update_cache: yes
         upgrade: yes
