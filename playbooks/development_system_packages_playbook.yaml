@@ -1,6 +1,7 @@
 ---
 - name: Updating and installing packages on development system
   hosts: dev
+  ansible_connection: local
   become: yes
 
   tasks:

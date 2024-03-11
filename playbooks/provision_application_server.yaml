@@ -16,6 +16,7 @@
           - htop
           - tmux
           - neovim
+          - npm
           - nodejs
         state: present
 

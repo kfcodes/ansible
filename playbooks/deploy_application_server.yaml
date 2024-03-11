@@ -34,3 +34,13 @@
         requirements: /home/test/fastAPI/requirements.txt
         virtualenv: /home/test/fastAPI/venv
 
+    - name: Update packages based on package.json to their latest version
+      community.general.npm:
+        path: /home/test/product_database_API/
+        state: latest
+
+    - name: Update React packages based on package.json to their latest version
+      community.general.npm:
+        path: /home/test/front_end/
+        state: latest
+
