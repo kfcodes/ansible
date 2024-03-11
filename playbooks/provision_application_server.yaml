@@ -1,0 +1,39 @@
+---
+- name: Provisioning server for hosting application
+  hosts: app
+  become: yes
+
+  pre_tasks:
+    - name: Updating installed packages
+      ansible.builtin.package:
+        update_cache: yes
+        upgrade: yes
+
+  tasks:
+    - name: Installing required packages
+      ansible.builtin.package:
+        name: 
+          - htop
+          - tmux
+          - neovim
+          - nodejs
+        state: present
+
+    - name: Creating test user
+      ansible.builtin.user:
+        name: test
+        password: 'test'
+        groups: # Empty by default, here we give it some groups
+        - docker
+        - sudo
+        state: present
+
+    - name: Creating Folders
+      file:
+        path: /tmp/{{ item.path }} 
+        mode: "{{ item.mode  }}"
+        state: directory
+      with_items:
+        - { path: "test_directory_777", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: "test_directory_755", mode: "u=rwX,g=rX,o=rX" }
+        - { path: "test_directory_740", mode: "u=rwX,g=r" }
