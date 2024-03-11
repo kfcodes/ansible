@@ -2,6 +2,7 @@
 - name: Creating directories on remote server
   hosts: app
   become: yes
+
   tasks:
     - name: Creating Folders
       file:

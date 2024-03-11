@@ -1,12 +1,10 @@
-# Added task to create directories on local system
 ---
-- name: "updating and installing packages on development system"
-  hosts: localhost
-  connection: local 
+- name: Updating and installing packages on development system
+  hosts: dev
   become: yes
 
   tasks:
     - name: updating and upgrading system packages
-      pacman:
+      ansible.builtin.package:
         update_cache: yes
         upgrade: yes
