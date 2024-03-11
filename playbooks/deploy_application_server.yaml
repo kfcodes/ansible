@@ -1,0 +1,12 @@
+---
+- name: Deploying application reposotories to application server
+  hosts: app
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Ensure fastAPI git repo is present
+      ansible.builtin.git:
+        repo: 'https://github.com/kfcodes/pandas_scripts.git'
+        dest: /home/m/fastAPI_2/
+        version: production
