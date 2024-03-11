@@ -8,5 +8,17 @@
     - name: Ensure fastAPI git repo is present
       ansible.builtin.git:
         repo: 'https://github.com/kfcodes/pandas_scripts.git'
-        dest: /home/m/fastAPI_2/
+        dest: /home/test/fastAPI/
         version: production
+
+  tasks:
+    - name: Ensure Nodejs API git repo is present
+      ansible.builtin.git:
+        repo: 'https://github.com/kfcodes/product_database_api.git'
+        dest: /home/test/product_database_API/
+
+  tasks:
+    - name: Ensure React app git repo is present
+      ansible.builtin.git:
+        repo: 'https://github.com/kfcodes/production_documentation.git'
+        dest: /home/test/front_end/
