@@ -37,8 +37,14 @@
         path: /home/test/front_end/
         state: latest
 
-    - name: Synchronize files in dest with src on localhost.
+    - name: Synchronize local config files with application server
       ansible.posix.synchronize:
         checksum: yes
-        src: ~/app_config_files/
+        src: ~/app_config_files/test.txt
         dest: /home/test/app_config_files/
+
+    - name: Synchronize local production documentation directory with server
+      ansible.posix.synchronize:
+        checksum: yes
+        src: ~/production_documentation/
+        dest: /home/test/production_documentation/
