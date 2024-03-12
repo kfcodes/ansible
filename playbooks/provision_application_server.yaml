@@ -16,9 +16,8 @@
           - htop
           - tmux
           - neovim
-          - npm
-          - nodejs
-        state: present
+          - rsync
+        state: latest
 
     - name: Creating test user
       ansible.builtin.user:
@@ -31,10 +30,9 @@
 
     - name: Creating Folders
       file:
-        path: /tmp/{{ item.path }} 
+        path: /home/test/{{ item.path }} 
         mode: "{{ item.mode  }}"
         state: directory
       with_items:
-        - { path: "test_directory_777", mode: "u=rwX,g=rwX,o=rwX" }
-        - { path: "test_directory_755", mode: "u=rwX,g=rX,o=rX" }
-        - { path: "test_directory_740", mode: "u=rwX,g=r" }
+        - { path: "app_config_files", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: "production_documentation", mode: "u=rwX,g=rwX,o=rwX" }
