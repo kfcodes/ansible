@@ -9,7 +9,6 @@
       ansible.builtin.git:
         repo: 'https://github.com/kfcodes/pandas_scripts.git'
         dest: /home/test/fastAPI/
-        version: production
 
     - name: Ensure Nodejs API git repo is present
       ansible.builtin.git:
@@ -21,16 +20,10 @@
         repo: 'https://github.com/kfcodes/production_documentation.git'
         dest: /home/test/front_end/
 
-    - name: Synchronize files in dest with src on localhost.
-      ansible.posix.synchronize:
-        src: /tmp/config_files
-        dest: /home/test/config_files
-        rsync_opts:
-            - "--no-motd"
-            - "--exclude=.git"
-
     - name: Install specified python requirements for fastAPI
       ansible.builtin.pip:
+        virtualenv: /home/test/fastAPI/venv
+        virtualenv_command: python3 -m venv
         requirements: /home/test/fastAPI/requirements.txt
         virtualenv: /home/test/fastAPI/venv
 
@@ -44,3 +37,8 @@
         path: /home/test/front_end/
         state: latest
 
+    - name: Synchronize files in dest with src on localhost.
+      ansible.posix.synchronize:
+        checksum: yes
+        src: ~/app_config_files/
+        dest: /home/test/app_config_files/
