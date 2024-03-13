@@ -12,5 +12,5 @@
   - name: Synchronize local production documentation directory with server
     ansible.posix.synchronize:
       checksum: yes
-      src: ~/production_documentation/
+      src: ~/production_documentation/hello.txt
       dest: /home/test/production_documentation/

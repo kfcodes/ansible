@@ -1,0 +1,13 @@
+---
+- name: Start application
+  hosts: app
+
+  tasks:
+    - name: Starting MariaDB
+
+    - name: Starting fastAPI
+
+    - name: Starting Nodejs API
+
+    - name: Starting React app
+
