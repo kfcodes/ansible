@@ -5,12 +5,12 @@
   tasks:
   - name: Synchronize local config files with application server
     ansible.posix.synchronize:
-      checksum: yes
-      src: ~/app_config_files/fastAPI.env
-      dest: /home/test/app_config_files/
+      checksum: true
+      src: ~/app_config_files/{{ item.name }}
+      dest: /home/test/app_config_files/{{ item.dest }}
+    with_items:
+        - { name: "fastAPI.env", dest: "fastAPI.env"}
+        - { name: "fastAPI.env", dest: "fastAPI_2.env"}
+        - { name: "test.txt", dest: "fastAPI_2.txt"}
+        - { name: "test.txt", dest: "test.txt"}
 
-  - name: Synchronize local production documentation directory with server
-    ansible.posix.synchronize:
-      checksum: yes
-      src: ~/production_documentation/hello.txt
-      dest: /home/test/production_documentation/
