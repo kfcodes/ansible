@@ -3,7 +3,7 @@
   hosts: app
   become: yes
   vars:
-    container_count: 4
+    container_count: 1
     default_container_name: docker
     default_container_image: ubuntu
     default_container_command: sleep 1d
@@ -58,13 +58,13 @@
         name: "{{ default_container_image }}"
         source: pull
 
-    - name: Create default containers
-      community.docker.docker_container:
-        name: "{{ default_container_name }}{{ item }}"
-        image: "{{ default_container_image }}"
-        command: "{{ default_container_command }}"
-        state: present
-      with_sequence: count={{ container_count }}
+    #- name: Create default containers
+        #community.docker.docker_container:
+        #  name: "{{ default_container_name }}{{ item }}"
+        #image: "{{ default_container_image }}"
+        #command: "{{ default_container_command }}"
+        #state: present
+      #with_sequence: count={{ container_count }}
 
     - name: Creating test user
       ansible.builtin.user:
