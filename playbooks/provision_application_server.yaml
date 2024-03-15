@@ -81,5 +81,5 @@
         mode: "{{ item.mode  }}"
         state: directory
       with_items:
-        - { path: "config_files", mode: "u=rwX,g=rwX,o=rwX" }
-        - { path: "production_documentation", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".configFiles", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".productionDocumentation", mode: "u=rwX,g=rwX,o=rwX" }
