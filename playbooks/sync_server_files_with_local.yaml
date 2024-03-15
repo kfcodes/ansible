@@ -6,7 +6,7 @@
   - name: Synchronize local application and config files with remote server
     ansible.posix.synchronize:
       checksum: true
-      src: ~/.webAppConfigFiles/{{ item.name }}
+      src: ~/.configFiles/{{ item.name }}
       dest: /home/test/.configFiles/{{ item.dest }}
     with_items:
         - { name: "fastAPI.env", dest: "fastAPI.env"}
