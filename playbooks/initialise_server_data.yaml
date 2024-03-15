@@ -1,16 +1,29 @@
 ---
-- name: Synchronize local config files with application server
+- name: Synchronize data
   hosts: app
 
   tasks:
-  - name: Synchronize local config files with application server
+  - name: Synchronize local application config files with application server
     ansible.posix.synchronize:
       checksum: true
-      src: ~/app_config_files/{{ item.name }}
-      dest: /home/test/app_config_files/{{ item.dest }}
+      src: ~/config_files/{{ item.name }}
+      dest: /home/test/config_files/{{ item.dest }}
     with_items:
         - { name: "fastAPI.env", dest: "fastAPI.env"}
         - { name: "fastAPI.env", dest: "fastAPI_2.env"}
         - { name: "test.txt", dest: "fastAPI_2.txt"}
         - { name: "test.txt", dest: "test.txt"}
 
+  - name: Synchronize server backup data with local system
+    ansible.posix.synchronize:
+      checksum: true
+      mode: pull
+      src: /home/m/sqlBackupData/
+      dest: ~/backupdata/
+
+  - name: Synchronize production documentation with local system
+    ansible.posix.synchronize:
+      checksum: true
+      mode: pull
+      src: /home/m/production_documentation/
+      dest: ~/production_documentation/
