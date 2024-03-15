@@ -3,7 +3,7 @@
   hosts: app
 
   tasks:
-  - name: Synchronize local application config files with application server
+  - name: Synchronize local application and config files with remote server
     ansible.posix.synchronize:
       checksum: true
       src: ~/config_files/{{ item.name }}
@@ -14,14 +14,14 @@
         - { name: "test.txt", dest: "fastAPI_2.txt"}
         - { name: "test.txt", dest: "test.txt"}
 
-  - name: Synchronize server backup data with local system
+  - name: Synchronize remote server backup data with local system
     ansible.posix.synchronize:
       checksum: true
       mode: pull
       src: /home/m/sqlBackupData/
       dest: ~/backupdata/
 
-  - name: Synchronize production documentation with local system
+  - name: Synchronize remote server production documentation with local system
     ansible.posix.synchronize:
       checksum: true
       mode: pull
