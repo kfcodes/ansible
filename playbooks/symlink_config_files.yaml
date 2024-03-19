@@ -6,7 +6,7 @@
   tasks:
   - name: create symbolic link for fastAPI environment variables
     ansible.builtin.file:
-        src: /home/test/app_config_files/fastAPI.env
+        src: /home/test/.configFiles/fastAPI.env
         dest: /home/test/front_end/.env
         owner: test
         group: test
@@ -14,7 +14,7 @@
 
   - name: create symbolic link for NodeJS environment variables
     ansible.builtin.file:
-        src: /home/test/app_config_files/fastAPI.env
+        src: /home/test/.configFiles/fastAPI.env
         dest: /home/test/product_database_API/.env
         owner: test
         group: test
@@ -22,7 +22,7 @@
 
   - name: create symbolic link for fastAPI environment variables
     ansible.builtin.file:
-        src: /home/test/app_config_files/fastAPI.env
+        src: /home/test/.configFiles/fastAPI.env
         dest: /home/test/fastAPI/.env
         owner: test
         group: test
