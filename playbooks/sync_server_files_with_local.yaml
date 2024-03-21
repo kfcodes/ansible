@@ -10,9 +10,9 @@
       dest: /home/test/.configFiles/{{ item.dest }}
     with_items:
         - { name: "fastAPI.env", dest: "fastAPI.env"}
-        - { name: "fastAPI.env", dest: "fastAPI_2.env"}
-        - { name: "test.txt", dest: "fastAPI_2.txt"}
-        - { name: "test.txt", dest: "test.txt"}
+        - { name: "nodejs.env", dest: "nodejs.env"}
+        - { name: "reactApp.env", dest: "reactApp.env"}
+
 
   - name: Synchronize remote server backup data with local system
     ansible.posix.synchronize:
