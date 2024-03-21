@@ -14,11 +14,13 @@
       ansible.builtin.git:
         repo: 'https://github.com/kfcodes/product_database_api.git'
         dest: /home/test/product_database_API/
+        version: removing_unused_routes
 
     - name: Ensure React app git repo is present
       ansible.builtin.git:
         repo: 'https://github.com/kfcodes/production_documentation.git'
         dest: /home/test/front_end/
+        version: new_api_routes
 
     - name: Install specified python requirements for fastAPI
       ansible.builtin.pip:
@@ -26,6 +28,7 @@
         virtualenv_command: python3 -m venv
         requirements: /home/test/fastAPI/requirements.txt
         virtualenv: /home/test/fastAPI/venv
+        state: latest
 
     - name: Update packages based on package.json to their latest version
       community.general.npm:
