@@ -4,16 +4,13 @@
 
   tasks:
 
-  - name: Synchronize local application and config files with remote server
+  - name: Synchronize local scripts with remote server
     ansible.posix.synchronize:
       checksum: true
-      src: ~/.configFiles/{{ item.name }}
-      dest: /home/test/.configFiles/{{ item.dest }}
+      src: ~/.server_scripts/{{ item.name }}
+      dest: /home/test/.scripts/{{ item.dest }}
     with_items:
-        - { name: "fastAPI.env", dest: "fastAPI.env"}
-        - { name: "nodejs.env", dest: "nodejs.env"}
-        - { name: "reactApp.env", dest: "reactApp.env"}
-
+        - { name: "backup_sql_database.sh", dest: "backup_sql_database.sh"}
 
   - name: Synchronize remote server backup data with local system
     ansible.posix.synchronize:
@@ -31,6 +28,18 @@
 
   - name: Create cron job to run every hour to backup DB
     ansible.builtin.cron:
-      name: Create cron job to run every hour to backup DB
+      name: Backup test DB every hour
       special_time: hourly
-      job: "/home/m/backup_sql_database.sh"
+      job: "/home/test/.scripts/backup_sql_database.sh"
+      state: present
+
+  - name: Synchronize local config files with remote server
+    ansible.posix.synchronize:
+      checksum: true
+      links: false
+      src: ~/.configFiles/{{ item.name }}
+      dest: /home/test/.configFiles/{{ item.dest }}
+    with_items:
+        - { name: "fastAPI.env", dest: "fastAPI.env"}
+        - { name: "nodejs.env", dest: "nodejs.env"}
+        - { name: "reactApp.env", dest: "reactApp.env"}
