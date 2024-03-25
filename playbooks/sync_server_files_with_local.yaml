@@ -3,6 +3,7 @@
   hosts: app
 
   tasks:
+
   - name: Synchronize local application and config files with remote server
     ansible.posix.synchronize:
       checksum: true
@@ -27,3 +28,9 @@
       mode: pull
       src: /home/test/.productionDocumentation/
       dest: ~/.productionDocumentation/
+
+  - name: Create cron job to run every hour to backup DB
+    ansible.builtin.cron:
+      name: Create cron job to run every hour to backup DB
+      special_time: hourly
+      job: "/home/m/backup_sql_database.sh"
