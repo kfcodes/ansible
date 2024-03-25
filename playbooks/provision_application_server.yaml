@@ -83,3 +83,5 @@
       with_items:
         - { path: ".configFiles", mode: "u=rwX,g=rwX,o=rwX" }
         - { path: ".productionDocumentation", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".scripts", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".sql_backup_data", mode: "u=rwX,g=rwX,o=rwX" }
