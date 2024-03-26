@@ -1,29 +1,13 @@
 ---
 - name: Synchronize local config files with application server
   hosts: app
-  become: yes
 
   tasks:
   - name: create symbolic link for fastAPI environment variables
-    ansible.builtin.file:
+    ansible.builtin.copy:
+        remote_src: true
         src: /home/test/.configFiles/reactApp.env
         dest: /home/test/front_end/.env
         owner: test
         group: test
-        state: link
-
-  - name: create symbolic link for NodeJS environment variables
-    ansible.builtin.file:
-        src: /home/test/.configFiles/nodejs.env
-        dest: /home/test/product_database_API/.env
-        owner: test
-        group: test
-        state: link
-
-  - name: create symbolic link for fastAPI environment variables
-    ansible.builtin.file:
-        src: /home/test/.configFiles/fastAPI.env
-        dest: /home/test/fastAPI/.env
-        owner: test
-        group: test
-        state: link
+        mode: "0755"
