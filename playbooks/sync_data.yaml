@@ -1,8 +1,27 @@
 ---
-- name: Synchronize data
+- name: Synchronize data between local system and server
   hosts: app
 
   tasks:
+  - name: Ensure cron job to backup DB exists
+    ansible.builtin.cron:
+      name: Backup test DB every hour
+      special_time: hourly
+      job: "/home/test/.scripts/backup_sql_database.sh"
+      state: present
+
+  - name: Synchronize remote server database backup data with local system
+    ansible.posix.synchronize:
+      checksum: true
+      mode: pull
+      src: /home/m/sqlBackupData/
+      dest: ~/.backupdata/
+  - name: Synchronize remote server production documentation with local system
+    ansible.posix.synchronize:
+      checksum: true
+      mode: pull
+      src: /home/test/.productionDocumentation/
+      dest: ~/.productionDocumentation/
 
   - name: Synchronize local scripts with remote server
     ansible.posix.synchronize:
@@ -11,28 +30,6 @@
       dest: /home/test/.scripts/{{ item.dest }}
     with_items:
         - { name: "backup_sql_database.sh", dest: "backup_sql_database.sh"}
-
-  - name: Synchronize remote server backup data with local system
-    ansible.posix.synchronize:
-      checksum: true
-      mode: pull
-      src: /home/m/sqlBackupData/
-      dest: ~/.backupdata/
-
-  - name: Synchronize remote server production documentation with local system
-    ansible.posix.synchronize:
-      checksum: true
-      mode: pull
-      src: /home/test/.productionDocumentation/
-      dest: ~/.productionDocumentation/
-
-  - name: Create cron job to run every hour to backup DB
-    ansible.builtin.cron:
-      name: Backup test DB every hour
-      special_time: hourly
-      job: "/home/test/.scripts/backup_sql_database.sh"
-      state: present
-
   - name: Synchronize local config files with remote server
     ansible.posix.synchronize:
       checksum: true
