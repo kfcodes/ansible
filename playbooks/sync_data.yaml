@@ -10,32 +10,34 @@
       job: "/home/test/.scripts/backup_sql_database.sh"
       state: present
 
+    # DOWNLOAD REMOTE FILES TO LOCAL SYSTEM
   - name: Synchronize remote server database backup data with local system
     ansible.posix.synchronize:
       checksum: true
       mode: pull
-      src: /home/m/sqlBackupData/
-      dest: ~/.backupdata/
+      src: /home/m/.server_sql_backup/
+      dest: ~/.server_sql_backup/
   - name: Synchronize remote server production documentation with local system
     ansible.posix.synchronize:
       checksum: true
       mode: pull
-      src: /home/test/.productionDocumentation/
-      dest: ~/.productionDocumentation/
+      src: /home/test/.server_production_documentation/
+      dest: ~/.server_production_documentation/
 
+    # UPLOAD LOCAL FILES TO SERVER
   - name: Synchronize local scripts with remote server
     ansible.posix.synchronize:
       checksum: true
       src: ~/.server_scripts/{{ item.name }}
-      dest: /home/test/.scripts/{{ item.dest }}
+      dest: /home/test/.server_scripts/{{ item.dest }}
     with_items:
         - { name: "backup_sql_database.sh", dest: "backup_sql_database.sh"}
   - name: Synchronize local config files with remote server
     ansible.posix.synchronize:
       checksum: true
       links: false
-      src: ~/.configFiles/{{ item.name }}
-      dest: /home/test/.configFiles/{{ item.dest }}
+      src: ~/.server_config_files/{{ item.name }}
+      dest: /home/test/.server_config_files/{{ item.dest }}
     with_items:
         - { name: "fastAPI.env", dest: "fastAPI.env"}
         - { name: "nodejs.env", dest: "nodejs.env"}

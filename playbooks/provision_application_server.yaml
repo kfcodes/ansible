@@ -69,7 +69,7 @@
     - name: Creating test user
       ansible.builtin.user:
         name: test
-        password: 'test'
+        password: f
         groups: # Empty by default, here we give it some groups
         - docker
         - sudo
@@ -81,7 +81,7 @@
         mode: "{{ item.mode  }}"
         state: directory
       with_items:
-        - { path: ".configFiles", mode: "u=rwX,g=rwX,o=rwX" }
-        - { path: ".productionDocumentation", mode: "u=rwX,g=rwX,o=rwX" }
-        - { path: ".scripts", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".server_config_files", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".server_production_documentation", mode: "u=rwX,g=rwX,o=rwX" }
+        - { path: ".server_scripts", mode: "u=rwX,g=rwX,o=rwX" }
         - { path: ".sql_backup_data", mode: "u=rwX,g=rwX,o=rwX" }

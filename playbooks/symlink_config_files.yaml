@@ -6,8 +6,8 @@
   - name: create symbolic link for fastAPI environment variables
     ansible.builtin.copy:
         remote_src: true
-        src: /home/test/.configFiles/reactApp.env
-        dest: /home/test/front_end/.env
         owner: test
         group: test
         mode: "0755"
+        src: /home/test/.server_config_files/reactApp.env
+        dest: /home/test/front_end/.env
