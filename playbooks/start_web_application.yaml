@@ -1,13 +1,15 @@
 ---
 - name: Start application
   hosts: app
-
   tasks:
-    - name: Starting MariaDB
+    - name: Also specify working directory where running pm2 command
+      pm2:
+        name: myapp
+        state: started
+        executable: /home/test/product_database_api/index.js
 
-    - name: Starting fastAPI
-
-    - name: Starting Nodejs API
-
-    - name: Starting React app
+    #- name: Starting MariaDB
+    #- name: Starting fastAPI
+    #- name: Starting Nodejs API
+    #- name: Starting React app
 
