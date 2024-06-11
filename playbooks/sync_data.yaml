@@ -1,6 +1,6 @@
 ---
 - name: Synchronize data between local system and server
-  hosts: app
+  hosts: db
 
   tasks:
   - name: Ensure cron job to backup DB exists

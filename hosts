@@ -1,0 +1,26 @@
+# DEVELOPMENT SYSTEM
+[dev]
+localhost
+
+# DATABASE SERVER
+[db]
+192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
+
+# [dbservers]
+# dbserver1.example.com
+# dbserver2.example.com
+
+# [webservers]
+# webserver1.example.com
+# webserver2.example.com
+
+# [all]
+# server1 ansible_host=192.168.1.1 ansible_user=ubuntu
+# server2 ansible_host=192.168.1.2 ansible_user=ubuntu
+
+# [webservers:vars]
+# nginx_port=80
+
+# [dbservers:vars]
+# db_user=root
+# db_pass=password
