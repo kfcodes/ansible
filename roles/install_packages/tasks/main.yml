@@ -1,0 +1,19 @@
+---
+- name: Installing required packages
+  ansible.builtin.package:
+    name: 
+      - htop
+      - tmux
+      - neovim
+      - rsync
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+      - ripgrep
+    state: latest
+    update_cache: true
+

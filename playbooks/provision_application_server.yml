@@ -1,0 +1,9 @@
+---
+- name: Provisioning server for hosting application
+  hosts: app
+  become: yes
+
+  roles:
+    -update_and_upgrade_system
+    -install_packages
+    -create_users_and_directories
