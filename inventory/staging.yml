@@ -1,18 +1,12 @@
 # DEVELOPMENT SYSTEM
-[dev]
+[devservers]
 localhost
 
-# DATABASE SERVER
-[db]
+[dbservers]
 192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
-# [dbservers]
-# dbserver1.example.com
-# dbserver2.example.com
-
-# [webservers]
-# webserver1.example.com
-# webserver2.example.com
+[webservers]
+192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
 # [all]
 # server1 ansible_host=192.168.1.1 ansible_user=ubuntu
