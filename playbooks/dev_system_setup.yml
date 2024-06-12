@@ -1,0 +1,11 @@
+---
+- name: Updating and installing packages on development system
+  hosts: devservers
+  ansible_connection: local
+  become: yes
+
+  roles:
+    -update_and_upgrade_system
+    -install_packages
+    -docker_ubuntu_install
+    -create_users_and_directories
