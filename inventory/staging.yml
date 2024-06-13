@@ -1,14 +1,21 @@
 # DEVELOPMENT SYSTEM
-[devservers]
-localhost
+[control_node]
+localhost ansible_connection=local ansible_user=root
 
-[dbservers]
+# [dev_servers]
+# localhost
+
+[db_servers]
 192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
-[webservers]
+[web_servers]
 192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/ansible_rsa
 
-# [all]
+[all:children]
+control_node
+db_servers
+# webservers
+
 # server1 ansible_host=192.168.1.1 ansible_user=ubuntu
 # server2 ansible_host=192.168.1.2 ansible_user=ubuntu
 

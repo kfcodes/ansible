@@ -1,0 +1,8 @@
+---
+- name: Update and upgrade system packages
+  hosts: all
+  become: true
+
+  roles:
+    - update_and_upgrade_system
+  
