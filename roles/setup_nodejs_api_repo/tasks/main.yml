@@ -1,0 +1,10 @@
+---
+- name: Ensure Nodejs API git repo is present
+  ansible.builtin.git:
+    repo: 'https://github.com/kfcodes/product_database_api.git'
+    dest: /home/test/product_database_API/
+    version: removing_unused_routes
+- name: Update packages based on package.json to their latest version
+  community.general.npm:
+    path: /home/test/product_database_API/
+    state: latest

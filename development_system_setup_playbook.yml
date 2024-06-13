@@ -9,3 +9,6 @@
     - install_packages
     - docker_ubuntu_install
     - create_users_and_directories
+    - setup_fastAPI_repo
+    - setup_nodejs_api_repo
+    - setup_react_frontend_repo

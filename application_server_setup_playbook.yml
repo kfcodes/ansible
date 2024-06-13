@@ -2,6 +2,7 @@
 - name: Provisioning server for hosting application
   hosts: app
   become: yes
+  gather_facts: no
 
   roles:
     - update_and_upgrade_system
@@ -9,3 +10,6 @@
     - docker_ubuntu_install
     - create_users_and_directories
     - create_server_symlinks
+    - setup_fastAPI_repo
+    - setup_nodejs_api_repo
+    - setup_react_frontend_repo
