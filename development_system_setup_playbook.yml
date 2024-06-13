@@ -5,7 +5,7 @@
   become: yes
 
   roles:
-    -update_and_upgrade_system
-    -install_packages
-    -docker_ubuntu_install
-    -create_users_and_directories
+    - update_and_upgrade_system
+    - install_packages
+    - docker_ubuntu_install
+    - create_users_and_directories

@@ -1,0 +1,10 @@
+---
+
+- name: Ensure cron job to backup DB exists
+  ansible.builtin.cron:
+    name: Backup test DB every hour
+    special_time: hourly
+    job: "/home/test/.scripts/backup_sql_database.sh"
+    state: present
+
+

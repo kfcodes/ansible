@@ -4,4 +4,6 @@
 
   roles:
     - sync_server_data
+    - db_backup_cron
+    # - update_and_upgrade_system
   

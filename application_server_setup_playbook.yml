@@ -4,8 +4,8 @@
   become: yes
 
   roles:
-    -update_and_upgrade_system
-    -install_packages
-    -docker_ubuntu_install
-    -create_users_and_directories
-    -create_server_symlinks
+    - update_and_upgrade_system
+    - install_packages
+    - docker_ubuntu_install
+    - create_users_and_directories
+    - create_server_symlinks

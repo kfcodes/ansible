@@ -1,48 +1,39 @@
 ---
-  - name: Ensure cron job to backup DB exists
-    ansible.builtin.cron:
-      name: Backup test DB every hour
-      special_time: hourly
-      job: "/home/test/.scripts/backup_sql_database.sh"
-      state: present
+- name: Synchronize remote server database backup data with local system
+  ansible.posix.synchronize:
+    checksum: true
+    mode: pull
+    src: /home/m/.server_sql_backup/
+    dest: ~/.server_sql_backup/
 
+- name: Synchronize remote server production documentation with local system
+  ansible.posix.synchronize:
+    checksum: true
+    mode: pull
+    src: /home/test/.server_production_documentation/
+    dest: ~/.server_production_documentation/
 
-    # DOWNLOAD REMOTE FILES TO LOCAL SYSTEM
-  - name: Synchronize remote server database backup data with local system
-    ansible.posix.synchronize:
-      checksum: true
-      mode: pull
-      src: /home/m/.server_sql_backup/
-      dest: ~/.server_sql_backup/
+  
+  # UPLOAD LOCAL FILES TO SERVER
+- name: Synchronize local scripts with remote server
+  ansible.posix.synchronize:
+    checksum: true
+    src: ~/.server_scripts/{{ item.name }}
+    dest: /home/test/.server_scripts/{{ item.dest }}
+  with_items:
+      - { name: "backup_sql_database.sh", dest: "backup_sql_database.sh"}
+      - { name: "box_label_table_updates.sql", dest: "box_label_table_updates.sql"}
+      - { name: "restore_db_command.sh", dest: "restore_db_command.sh"}
+      - { name: "connect_to_db.sh", dest: "connect_to_db.sh"}
+      - { name: "create_new.sh", dest: "create_new.sh"}
 
-  - name: Synchronize remote server production documentation with local system
-    ansible.posix.synchronize:
-      checksum: true
-      mode: pull
-      src: /home/test/.server_production_documentation/
-      dest: ~/.server_production_documentation/
-
-    
-    # UPLOAD LOCAL FILES TO SERVER
-  - name: Synchronize local scripts with remote server
-    ansible.posix.synchronize:
-      checksum: true
-      src: ~/.server_scripts/{{ item.name }}
-      dest: /home/test/.server_scripts/{{ item.dest }}
-    with_items:
-        - { name: "backup_sql_database.sh", dest: "backup_sql_database.sh"}
-        - { name: "box_label_table_updates.sql", dest: "box_label_table_updates.sql"}
-        - { name: "restore_db_command.sh", dest: "restore_db_command.sh"}
-        - { name: "connect_to_db.sh", dest: "connect_to_db.sh"}
-        - { name: "create_new.sh", dest: "create_new.sh"}
-
-  - name: Synchronize local config files with remote server
-    ansible.posix.synchronize:
-      checksum: true
-      links: false
-      src: ~/.server_config_files/{{ item.name }}
-      dest: /home/test/.server_config_files/{{ item.dest }}
-    with_items:
-        - { name: "fastAPI.env", dest: "fastAPI.env"}
-        - { name: "nodejs.env", dest: "nodejs.env"}
-        - { name: "reactApp.env", dest: "reactApp.env"}
+- name: Synchronize local config files with remote server
+  ansible.posix.synchronize:
+    checksum: true
+    links: false
+    src: ~/.server_config_files/{{ item.name }}
+    dest: /home/test/.server_config_files/{{ item.dest }}
+  with_items:
+      - { name: "fastAPI.env", dest: "fastAPI.env"}
+      - { name: "nodejs.env", dest: "nodejs.env"}
+      - { name: "reactApp.env", dest: "reactApp.env"}
