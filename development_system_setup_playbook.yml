@@ -1,7 +1,6 @@
 ---
 - name: Updating and installing packages on development system
   hosts: devservers
-  ansible_connection: local
   become: yes
 
   roles:
@@ -12,3 +11,4 @@
     - setup_fastAPI_repo
     - setup_nodejs_api_repo
     - setup_react_frontend_repo
+    - configure_development_environment
