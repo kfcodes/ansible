@@ -1,6 +1,6 @@
 ---
 - name: Synchronize data between local system and server
-  hosts: dbservers
+  hosts: db_servers
 
   roles:
     - sync_server_data

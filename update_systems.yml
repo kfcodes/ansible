@@ -1,5 +1,5 @@
 ---
-- name: Update and upgrade system packages
+- name: Update and upgrade system packages for all machines
   hosts: all
   become: true
 

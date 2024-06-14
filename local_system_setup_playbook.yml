@@ -1,0 +1,12 @@
+---
+- name: Updating and installing packages on development system
+  hosts: local_system
+  ansible_connection: local
+  become: yes
+
+  roles:
+    - update_and_upgrade_system
+    - install_local_machine_packages
+    - create_local_user_and_directories
+    - configure_local_environment
+
