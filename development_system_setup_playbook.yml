@@ -5,9 +5,10 @@
 
   roles:
     - update_and_upgrade_system
-    - install_packages
+    - install_web_application_system_packages
     - docker_ubuntu_install
-    - create_users_and_directories
+    - initialise_web_application_users_and_directories
+    - create_web_application_symlinks
     - setup_fastAPI_repo
     - setup_nodejs_api_repo
     - setup_react_frontend_repo
