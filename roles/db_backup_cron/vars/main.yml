@@ -1,2 +1,5 @@
 ---
-# vars file for db_backup_cron
+scripts_directory: .scripts
+regular_backup_script: backup_sql_database.sh
+semi_regular_backup_script: backup_sql_database.sh
+
