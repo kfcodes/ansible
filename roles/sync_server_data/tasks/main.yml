@@ -1,39 +1,32 @@
 ---
-- name: Synchronize remote server database backup data with local system
+
+- name: Synchronize WebAppServer database backup data with deveolopment system
   ansible.posix.synchronize:
     checksum: true
     mode: pull
-    src: /home/m/.server_sql_backup/
-    dest: ~/.server_sql_backup/
+    src: "{{ db_backup_source_directory }}"
+    dest: "{{ db_backup_destination_directory }}"
 
-- name: Synchronize remote server production documentation with local system
+- name: Synchronize WebAppServer production documentation with deveolopment system
   ansible.posix.synchronize:
     checksum: true
     mode: pull
-    src: /home/test/.server_production_documentation/
-    dest: ~/.server_production_documentation/
-
+    src: "{{ production_documentation_source_directory }}"
+    dest: "{{ production_documentation_destination_directory }}"
   
-  # UPLOAD LOCAL FILES TO SERVER
-- name: Synchronize local scripts with remote server
+- name: Synchronize development scripts with webAppServer
   ansible.posix.synchronize:
     checksum: true
-    src: ~/.server_scripts/{{ item.name }}
-    dest: /home/test/.server_scripts/{{ item.dest }}
+    src: "{{ scripts_source_directory }}{{ item }}"
+    dest: "{{ scripts_destination_directory }}{{ item }}"
   with_items:
-      - { name: "backup_sql_database.sh", dest: "backup_sql_database.sh"}
-      - { name: "box_label_table_updates.sql", dest: "box_label_table_updates.sql"}
-      - { name: "restore_db_command.sh", dest: "restore_db_command.sh"}
-      - { name: "connect_to_db.sh", dest: "connect_to_db.sh"}
-      - { name: "create_new.sh", dest: "create_new.sh"}
+    - "{{ server_scripts }}"
 
-- name: Synchronize local config files with remote server
+- name: Synchronize development config files with WebAppServer
   ansible.posix.synchronize:
     checksum: true
     links: false
-    src: ~/.server_config_files/{{ item.name }}
-    dest: /home/test/.server_config_files/{{ item.dest }}
+    src: "{{ config_files_source_directory }}{{ item }}"
+    dest: "{{ config_files_destination_directory }}{{ item }}"
   with_items:
-      - { name: "fastAPI.env", dest: "fastAPI.env"}
-      - { name: "nodejs.env", dest: "nodejs.env"}
-      - { name: "reactApp.env", dest: "reactApp.env"}
+      - "{{ config_files }}"
