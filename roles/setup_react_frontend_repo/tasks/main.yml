@@ -1,10 +1,12 @@
 ---
-- name: Ensure React app git repo is present
+- name: Get the latest version of the React App
   ansible.builtin.git:
     repo: 'https://github.com/kfcodes/production_documentation.git'
-    dest: /home/test/front_end/
+    dest: /home/ReactApp/
+    single_branch: yes
     version: new_api_routes
+
 - name: Update React packages based on package.json to their latest version
   community.general.npm:
-    path: /home/test/front_end/
+    path: /home/ReactApp/
     state: latest

@@ -1,12 +1,15 @@
 ---
-- name: Ensure fastAPI git repo is present
+- name: Get the latest version of the fastAPI App
   ansible.builtin.git:
     repo: 'https://github.com/kfcodes/pandas_scripts.git'
-    dest: /home/test/fastAPI/
+    dest: /home/fastAPI/
+    single_branch: yes
+    version: master
+
 - name: Install specified python requirements for fastAPI
   ansible.builtin.pip:
-    virtualenv: /home/test/fastAPI/venv
+    virtualenv: /home/fastAPI/venv
     virtualenv_command: python3 -m venv
-    requirements: /home/test/fastAPI/requirements.txt
-    virtualenv: /home/test/fastAPI/venv
+    requirements: /home/fastAPI/requirements.txt
+    virtualenv: /home/fastAPI/venv
     state: latest
