@@ -4,12 +4,6 @@
   become: yes
 
   roles:
-    - update_and_upgrade_system
-    - install_web_application_system_packages
-    - docker_ubuntu_install
-    - initialise_web_application_users_and_directories
-    - create_web_application_symlinks
-    - setup_fastAPI_repo
-    - setup_nodejs_api_repo
-    - setup_react_frontend_repo
+    - update_system
+    - install_development_system_packages
     - configure_development_environment

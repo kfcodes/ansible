@@ -5,7 +5,7 @@
   become: yes
 
   roles:
-    - update_and_upgrade_system
+    - update_system
     - install_local_system_packages
     - create_local_user_and_directories
     - configure_local_environment
