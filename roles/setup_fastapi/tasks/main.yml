@@ -4,7 +4,7 @@
     repo: 'https://github.com/kfcodes/pandas_scripts.git'
     dest: /home/fastAPI/
     single_branch: yes
-    version: master
+    version: main
 
 - name: Install specified python requirements for fastAPI
   ansible.builtin.pip:

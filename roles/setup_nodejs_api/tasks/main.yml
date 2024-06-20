@@ -1,5 +1,4 @@
 ---
-- name: Ensure repo is present
 - name: Get the latest version of the Nodejs API
   ansible.builtin.git:
     repo: 'https://github.com/kfcodes/product_database_api.git'

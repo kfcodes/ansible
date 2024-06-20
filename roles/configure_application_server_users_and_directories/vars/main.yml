@@ -1,2 +1,9 @@
 ---
 # vars file for create_users_and_directories
+application_username: test
+application_username_pwd: test
+server_directories:
+    - { path: ".server_config_files", attrs: "u=rwX,g=rwX,o=rwX"}
+    - { path: ".server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: ".server_scripts", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: ".sql_backup_data", attrs: "u=rwX,g=rwX,o=rwX" }

@@ -1,21 +1,18 @@
 ---
 - name: Creating test user
   ansible.builtin.user:
-    name: test
-    password: f
+    name: "{{ application_username }}"
+    password: "{{ application_username_pwd }}"
     groups: # Empty by default, here we give it some groups
     - docker
     - sudo
     state: present
 
-- name: Creating Folders
+- name: Creating Folders for storing server data
   file:
-    path: /home/test/{{ item.path }} 
-    mode: "{{ item.mode  }}"
+    path: /home/{{ item.path }} 
+    mode: "{{ item.attrs }}"
     state: directory
   with_items:
-    - { path: ".server_config_files", mode: "u=rwX,g=rwX,o=rwX" }
-    - { path: ".server_production_documentation", mode: "u=rwX,g=rwX,o=rwX" }
-    - { path: ".server_scripts", mode: "u=rwX,g=rwX,o=rwX" }
-    - { path: ".sql_backup_data", mode: "u=rwX,g=rwX,o=rwX" }
+    "{{ server_directories }}"
 
