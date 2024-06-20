@@ -1,15 +1,14 @@
 ---
 - name: Provisioning server for hosting application
-  hosts: app
+  hosts: web_servers
   become: yes
-  gather_facts: no
 
   roles:
-    - update_and_upgrade_system
-    - install_web_application_system_packages
-    - docker_ubuntu_install
-    - initialise_web_application_users_and_directories
-    - create_web_application_symlinks
-    - setup_fastAPI_repo
-    - setup_nodejs_api_repo
-    - setup_react_frontend_repo
+    - update_system
+    - install_application_server_packages
+    - configure_docker_on_ubuntu
+    - configure_application_server_users_and_directories
+    - setup_fastapi
+    - setup_nodejs_api
+    - setup_react_app
+    # - create_web_application_symlinks

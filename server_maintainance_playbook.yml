@@ -3,5 +3,5 @@
   hosts: db_servers
 
   roles:
-    - sync_server_data
     - db_backup_cron
+    - sync_application_data
