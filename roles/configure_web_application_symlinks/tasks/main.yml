@@ -1,0 +1,30 @@
+---
+- name: Soft link fastAPI environment variables file
+  ansible.builtin.file:
+    src: /home/test/.server_config_files/.server_config_files/fastAPI.env
+    dest: /home/test/fastAPI/.env
+    state: link
+
+- name: Soft link fastAPI data models module
+  ansible.builtin.file:
+    src: /home/test/.server_config_files/.server_config_files/data_models_layer/table_models.py
+    dest: /home/test/fastAPI/app/physical_layer/data_models_layer/table_models.py
+    state: link
+- name: Soft link fastAPI data models module
+  ansible.builtin.file:
+    src: /home/test/.server_config_files/.server_config_files/data_models_layer/object_models.py
+    dest: /home/test/fastAPI/app/physical_layer/data_models_layer/object_models.py
+    state: link
+
+- name: Soft link Nodejs API environment variables file
+  ansible.builtin.file:
+    src: /home/test/.server_config_files/.server_config_files/nodejs.env
+    dest: /home/test/product_database_API/.env
+    state: link
+
+- name: Soft link React App environment variables file
+  ansible.builtin.file:
+    src: /home/test/.server_config_files/.server_config_files/reactApp.env
+    dest: /home/test/ReactApp/.env
+    state: link
+
