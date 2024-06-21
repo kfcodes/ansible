@@ -13,6 +13,7 @@
     path: /home/{{ item.path }} 
     mode: "{{ item.attrs }}"
     state: directory
+    recurse: yes
   with_items:
     "{{ server_directories }}"
 

@@ -3,7 +3,10 @@
 application_username: test
 application_username_pwd: test
 server_directories:
-    - { path: ".server_config_files", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: ".server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX" }
-    - { path: ".server_scripts", attrs: "u=rwX,g=rwX,o=rwX" }
-    - { path: ".sql_backup_data", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "test/.server_config_files", attrs: "u=rwX,g=rwX,o=rwX"}
+    - { path: "test/.server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "test/.server_scripts", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "test/.sql_backup_data", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "test/fastAPI", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "test/ReactApp", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "test/product_database_API", attrs: "u=rwX,g=rwX,o=rwX" }

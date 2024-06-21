@@ -1,12 +1,13 @@
 ---
-- name: Get the latest version of the Nodejs API
+- name: Update to the latest version of Nodejs API
   ansible.builtin.git:
     repo: 'https://github.com/kfcodes/product_database_api.git'
-    dest: /home/product_database_API/
+    dest: /home/test/product_database_API/
+    force: yes
     single_branch: yes
     version: removing_unused_routes
 
-- name: Update packages based on package.json to their latest version
+- name: Install npm packages for Nodejs API
   community.general.npm:
-    path: /home/product_database_API/
+    path: /home/test/product_database_API/
     state: latest
