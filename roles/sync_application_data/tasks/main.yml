@@ -17,16 +17,14 @@
 - name: Synchronize development scripts with webAppServer
   ansible.posix.synchronize:
     checksum: true
-    src: "{{ scripts_source_directory }}{{ item }}"
-    dest: "{{ scripts_destination_directory }}{{ item }}"
-  with_items:
-    - "{{ server_scripts }}"
+    links: false
+    src: "{{ scripts_source_directory }}"
+    dest: "{{ scripts_destination_directory }}"
 
 - name: Synchronize development config files with WebAppServer
   ansible.posix.synchronize:
     checksum: true
     links: false
-    src: "{{ config_files_source_directory }}{{ item }}"
-    dest: "{{ config_files_destination_directory }}{{ item }}"
-  with_items:
-      - "{{ config_files }}"
+    recursive: true
+    src: "{{ config_files_source_directory }}"
+    dest: "{{ config_files_destination_directory }}"
