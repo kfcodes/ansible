@@ -1,9 +1,9 @@
 ---
-db_backup_source_directory: /home/m/.server_sql_backup
-db_backup_destination_directory: ~/.server_sql_backup
+db_backup_source_directory: /home/m/.server_sql_backup/
+db_backup_destination_directory: ~/.server_sql_backup/
 
-production_documentation_source_directory: /home/test/.server_production_documentation
-production_documentation_destination_directory: ~/.server_production_documentation
+production_documentation_source_directory: /home/test/.server_production_documentation/
+production_documentation_destination_directory: ~/.server_production_documentation/
 
 scripts_source_directory: ~/.server_scripts
 scripts_destination_directory: /home/test/.server_scripts

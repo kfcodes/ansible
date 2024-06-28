@@ -18,6 +18,7 @@
   ansible.posix.synchronize:
     checksum: true
     links: false
+    delete: true
     src: "{{ scripts_source_directory }}"
     dest: "{{ scripts_destination_directory }}"
 
@@ -26,5 +27,6 @@
     checksum: true
     links: false
     recursive: true
+    delete: true
     src: "{{ config_files_source_directory }}"
     dest: "{{ config_files_destination_directory }}"
