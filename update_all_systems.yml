@@ -4,5 +4,5 @@
   become: true
 
   roles:
-    - update_and_upgrade_system
+    - update_system
   
