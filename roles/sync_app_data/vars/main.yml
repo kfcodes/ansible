@@ -1,12 +1,12 @@
 ---
 db_backup_source_directory: /home/m/.server_sql_backup/
-db_backup_destination_directory: ~/.server_sql_backup/
+db_backup_destination_directory: ~/.application/server_sql_backup/
 
-production_documentation_source_directory: /home/test/.server_production_documentation/
-production_documentation_destination_directory: ~/.server_production_documentation/
+production_documentation_source_directory: /home/test/.application/server_production_documentation
+production_documentation_destination_directory: ~/.application/
 
-scripts_source_directory: ~/.server_scripts
-scripts_destination_directory: /home/test/.server_scripts
+scripts_source_directory: ~/.application/server_scripts
+scripts_destination_directory: /home/test/.application
 
-config_files_source_directory: ~/.server_config_files
-config_files_destination_directory: /home/test/.server_config_files
+config_files_source_directory: ~/.application/server_config_files
+config_files_destination_directory: /home/test/.application

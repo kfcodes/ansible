@@ -3,14 +3,14 @@
   ansible.builtin.git:
     repo: 'https://github.com/kfcodes/pandas_scripts.git'
     dest: /home/test/fastAPI/
-    # single_branch: yes
-    # force: yes
-    # version: main
+    single_branch: yes
+    force: yes
+    version: production
 
 - name: Install fastAPI requirements
   ansible.builtin.pip:
     virtualenv: /home/test/fastAPI/venv
     virtualenv_command: python3 -m venv
     requirements: /home/test/fastAPI/requirements.txt
-    virtualenv: /home/test/fastAPI/venv
+    virtualenv: /home/test/fastAPI/.venv
     state: latest

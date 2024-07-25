@@ -4,5 +4,5 @@
 
   roles:
     - db_backup_cron
-    - sync_application_data
+    - sync_app_data
     - configure_web_application_symlinks
