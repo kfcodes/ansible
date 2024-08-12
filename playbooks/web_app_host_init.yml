@@ -9,7 +9,7 @@
   roles:
     - update_system
     - install_packages
-    - configure_docker_for_ubuntu
+    - docker_for_ubuntu
     - role: usr_and_dirs
       vars: 
         user_name: "{{ web_app_usr }}"
