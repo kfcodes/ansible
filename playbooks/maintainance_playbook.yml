@@ -1,8 +1,0 @@
----
-- name: Synchronize data between local system and server
-  hosts: db_servers
-
-  roles:
-    - db_backup_cron
-    - sync_app_data
-    - configure_web_application_symlinks

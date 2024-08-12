@@ -1,0 +1,12 @@
+---
+- name: Synchronize data between local system and server
+  hosts: db_servers
+
+  roles:
+    - cron_jobs
+    - synchronise_application_data
+    # - pull-docker-image
+    # - build_docker_container
+    # - clone_git_repo
+    # - build_docker_container
+    # - clone_git_repo
