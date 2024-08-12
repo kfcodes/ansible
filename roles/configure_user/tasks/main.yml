@@ -1,7 +1,7 @@
 ---
 - name: Creating test user
   ansible.builtin.user:
-    name: "{{ application_username }}"
+    name: "{{ user_name }}"
     password: "{{ application_username_pwd }}"
     groups: # Empty by default, here we give it some groups
     - docker
@@ -10,7 +10,7 @@
 
 - name: Creating Folders for storing server data
   file:
-    path: /home/{{ item.path }} 
+    path: /home/{{ user_name }}/{{ item.path }} 
     mode: "{{ item.attrs }}"
     state: directory
     recurse: yes

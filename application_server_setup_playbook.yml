@@ -3,11 +3,19 @@
   hosts: web_servers
   become: yes
 
+  vars:
+    user_name: app_user
+
   roles:
     - update_system
     - install_system_packages
     - configure_docker_on_ubuntu
-    - configure_user
-    - setup_fastapi
+    # - setup_fastapi
+    - setup_react_app
+    # - role: configure_user
+    #   user_name: {{ user_name }}
+    # - role: setup_fastapi
+    #   user_name: app_user
+    # - role: setup_react_app
+    #   user_name: app_user
     # - setup_nodejs_api
-    # - setup_react_app

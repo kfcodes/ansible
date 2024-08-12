@@ -1,2 +1,3 @@
 ---
 # vars file for setup_fastAPI_repo
+user_name: test

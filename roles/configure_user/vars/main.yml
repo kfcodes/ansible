@@ -1,12 +1,12 @@
 ---
 # vars file for create_users_and_directories
-application_username: test
+application_username: {{ user_name }}
 application_username_pwd: test
 server_directories:
-    - { path: "test/fastAPI", attrs: "u=rwX,g=rwX,o=rwX" }
-    - { path: "test/ReactApp", attrs: "u=rwX,g=rwX,o=rwX" }
-    - { path: "test/product_database_API", attrs: "u=rwX,g=rwX,o=rwX" }
-    - { path: "test/.application", attrs: "u=rwX,g=rwX,o=rwX"}
+    - { path: "/fastAPI", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "/ReactApp", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "/product_database_API", attrs: "u=rwX,g=rwX,o=rwX" }
+    - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
 
     # - { path: "test/.server_config_files", attrs: "u=rwX,g=rwX,o=rwX"}
     # - { path: "test/.server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX" }
