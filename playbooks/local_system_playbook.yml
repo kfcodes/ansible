@@ -1,0 +1,12 @@
+---
+- name: Configuring the local system
+  hosts: local_system
+  ansible_connection: local
+  become: yes
+
+  roles:
+    - update_system
+    - install_packages
+    - user_and_home_dir
+    - local_env
+
