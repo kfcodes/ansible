@@ -1,0 +1,13 @@
+---
+- name: Provisioning server for hosting application
+  hosts: web_servers
+  become: yes
+
+  vars:
+    user_name: app_user
+
+  roles:
+    - update_system
+    - install_packages
+    - configure_docker_for_ubuntu
+    - user_and_home_dir
