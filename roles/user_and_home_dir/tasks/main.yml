@@ -1,5 +1,5 @@
 ---
-- name: Creating test user
+- name: "Creating user {{ user_name }}"
   ansible.builtin.user:
     name: "{{ user_name }}"
     password: "{{ application_username_pwd }}"
@@ -8,7 +8,7 @@
     - sudo
     state: present
 
-- name: Creating Folders for storing server data
+- name: "Creating home directory for {{ user_name }}"
   file:
     path: /home/{{ user_name }}/{{ item.path }} 
     mode: "{{ item.attrs }}"
