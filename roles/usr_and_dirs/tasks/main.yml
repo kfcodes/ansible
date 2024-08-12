@@ -1,0 +1,19 @@
+---
+- name: "Creating user: {{ user_name }}"
+  ansible.builtin.user:
+    state: present
+    name: "{{ user_name }}"
+    password: "{{ pwd }}"
+    groups:
+    - docker
+    - sudo
+
+- name: "Creating directory in {{ user_name }} directory for application data"
+  file:
+    path: /home/{{ user_name }}/{{ item.path }} 
+    mode: "{{ item.attrs }}"
+    state: directory
+    recurse: yes
+  with_items:
+    "{{ directories }}"
+
