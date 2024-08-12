@@ -1,12 +1,53 @@
 ---
 - name: Synchronize data between local system and server
-  hosts: db_servers
+  # hosts: db_servers
+  hosts: control_node
+  become: yes
+
+  vars: 
+    user_name: application
+    fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
+    react_repo_url: "https://github.com/kfcodes/production_documentation.git"
+    fastapi_stable:
+      repo_name: fastAPI
+      repo_url: "{{ fastapi_repo_url }}"
+      version: production
+      user_name: "{{ user_name }}"
+    fastapi_update:
+      repo_name: fastAPI_update
+      repo_url: "{{ fastapi_repo_url }}"
+      version: dev
+      user_name: "{{ user_name }}"
+    react_stable:
+      repo_name: react
+      repo_url: "{{ fastapi_repo_url }}"
+      version: production
+      user_name: "{{ user_name }}"
+    react_update:
+      repo_name: react_update
+      repo_url: "https://github.com/kfcodes/pandas_scripts.git"
+      version: main
+      user_name: "{{ user_name }}"
 
   roles:
-    - cron_jobs
-    - synchronise_application_data
-    # - pull-docker-image
+    # - cron_jobs
+    - role: git_clone
+      vars: 
+        repo_info: "{{ fastapi_stable }}"
+    - role: git_clone
+      vars: 
+        repo_info: "{{ fastapi_update }}"
+    - role: git_clone
+      vars: 
+        repo_info: "{{ react_stable }}"
+    - role: git_clone
+      vars: 
+        repo_info: "{{ react_update }}"
+    # - synchronise_application_data
+    # - role: pull_docker_image
+    #   vars: 
+    #     image_name: mariadb
+    #     version: latest
     # - build_docker_container
-    # - clone_git_repo
     # - build_docker_container
     # - clone_git_repo
