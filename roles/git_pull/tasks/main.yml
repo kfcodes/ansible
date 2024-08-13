@@ -1,0 +1,13 @@
+---
+- name: DOWNLOADING GITHUB DATA TO SYSTEM
+  ansible.builtin.git:
+    repo: "{{ item.repo_url }}"
+    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/"
+    single_branch: yes
+    force: yes
+    version: "{{ item.version }}"
+  with_items:
+    - "{{fastapi_stable}}"
+    - "{{fastapi_update}}"
+    - "{{react_stable}}"
+    - "{{react_update}}"
