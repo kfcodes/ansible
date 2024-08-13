@@ -1,8 +1,0 @@
----
-- name: "Clone the {{ repo_info.version }} version for {{ repo_info.repo_name }}"
-  ansible.builtin.git:
-    repo: "{{ repo_info.repo_url }}"
-    dest: "/home/{{ repo_info.user_name }}/{{ repo_info.repo_name }}/"
-    single_branch: yes
-    force: yes
-    version: "{{ repo_info.version }}"
