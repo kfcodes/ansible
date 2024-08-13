@@ -8,9 +8,9 @@
     - docker
     - sudo
 
-- name: "Creating directory in {{ user_name }} directory for application data"
+- name: "Creating directory for application data in {{ user_name }} home directory"
   file:
-    path: /home/{{ user_name }}/{{ item.path }} 
+    path: "/home/{{ user_name }}/{{ item.path }}"
     mode: "{{ item.attrs }}"
     state: directory
     recurse: yes
