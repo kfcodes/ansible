@@ -1,5 +1,5 @@
 ---
-- name: DOWNLOADING GITHUB DATA TO SYSTEM
+- name: DOWNLOADING GIT REPOSITORY DATA
   ansible.builtin.git:
     repo: "{{ item.repo_url }}"
     dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/"
