@@ -1,5 +1,4 @@
 ---
-
 - name: Synchronize WebAppServer database backup data with deveolopment system
   ansible.posix.synchronize:
     checksum: true
