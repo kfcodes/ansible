@@ -6,13 +6,6 @@
     src: "{{ db_backup_source_directory }}"
     dest: "{{ db_backup_destination_directory }}"
 
-- name: Synchronize WebAppServer production documentation with deveolopment system
-  ansible.posix.synchronize:
-    checksum: true
-    mode: pull
-    src: "{{ production_documentation_source_directory }}"
-    dest: "{{ production_documentation_destination_directory }}"
-  
 - name: Synchronize development scripts with webAppServer
   ansible.posix.synchronize:
     checksum: true
@@ -29,3 +22,10 @@
     delete: true
     src: "{{ config_files_source_directory }}"
     dest: "{{ config_files_destination_directory }}"
+
+- name: Synchronize WebAppServer production documentation with deveolopment system
+  ansible.posix.synchronize:
+    checksum: true
+    mode: pull
+    src: "{{ production_documentation_source_directory }}"
+    dest: "{{ production_documentation_destination_directory }}"
