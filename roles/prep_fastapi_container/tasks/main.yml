@@ -8,3 +8,8 @@
     remote_src: yes
     src: "/home/{{ item.user_name }}/.application/server_config_files/data_models_layer/"
     dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/app/physical_layer/data_models_layer/"
+
+- name: "Create the docker compose file for {{ item.repo_name }}"
+  template:
+    src: templates/fastapi_docker_compose.j2
+    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/docker-compose.yml"

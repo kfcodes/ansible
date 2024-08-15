@@ -1,0 +1,9 @@
+# docker-compose.yml
+services:
+  "{{ item.repo_name }}":
+    build: .
+    container_name: "{{ item.repo_name }}"
+    ports: 
+      - "{{ item.port }}:3000"
+    restart: unless-stopped
+

@@ -4,3 +4,8 @@
     remote_src: yes
     src: "/home/{{ item.user_name }}/.application/server_config_files/reactApp.env"
     dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/.env"
+
+- name: "Create the docker compose file for {{ item.repo_name }}"
+  template:
+    src: templates/react_docker_compose.j2
+    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/docker-compose.yml"
