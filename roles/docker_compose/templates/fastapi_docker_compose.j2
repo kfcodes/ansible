@@ -5,7 +5,6 @@ services:
     container_name: "{{ item.repo_name }}"
     volumes:
       - ./app:/app
-    ports:
-      - "{{ item.port }}:8000"
+    ports: "{{ item.port }}:8000"
     restart: unless-stopped
 
