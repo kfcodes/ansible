@@ -1,6 +1,1 @@
 ---
-# # REPOSTORY DETAILS
-fastapi_stable: { repo_name: "fastAPI", repo_url: "{{ fastapi_repo_url }}", version: "{{ stable_branch }}", user_name: "{{ user_name }}" }
-fastapi_update: { repo_name: fastAPI_update, repo_url: "{{ fastapi_repo_url }}", version: "{{ fastapi_update_tag }}", user_name: "{{ user_name }}" }
-react_stable: { repo_name: react, repo_url: "{{ react_repo_url }}", version: "{{ stable_branch }}", user_name: "{{ user_name }}" }
-react_update: { repo_name: react_update, repo_url: "{{ react_repo_url }}", version: "{{ react_update_tag }}", user_name: "{{ user_name }}" }
