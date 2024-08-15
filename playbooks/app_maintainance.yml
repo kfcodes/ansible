@@ -25,7 +25,18 @@
     - synchronise_application_data
     - role: git_pull
       become: true
-    - configure_containers
+    - role: prep_fastapi_container
+      become: true
+      item : "{{ fastapi_stable }}"
+    - role: prep_fastapi_container
+      become: true
+      item : "{{ fastapi_update }}"
+    - role: prep_react_container
+      become: true
+      item : "{{ react_stable }}"
+    - role: prep_react_container
+      become: true
+      item : "{{ react_update }}"
     # - role: pull_docker_image
     #   vars: 
     #     image_name: mariadb
