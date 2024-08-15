@@ -15,3 +15,11 @@
   with_items:
     - "{{ fastapi_stable }}"
     - "{{ fastapi_update }}"
+
+- name: Create docker compose file
+  ansible.builtin.template:
+    src: "templates/fastapi_docker_compose.j2"
+    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/docker-compose.yml"
+  with_items:
+    - "{{ fastapi_stable }}"
+    - "{{ fastapi_update }}"
