@@ -1,0 +1,39 @@
+# GIT BRANCH DETAILS
+fastapi_stable_tag: production
+fastapi_update_tag: dev
+react_stable_tag: production
+react_update_tag: main
+
+# GIT URL PATHS
+fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
+react_repo_url: "https://github.com/kfcodes/production_documentation.git"
+
+# APPLICATION HOME FOLDER AND USERNAME
+user_name: application
+web_app_usr: "application"
+
+# REPOSITORY OBJECT DETAILS
+repos:
+  - repo_name: "fastAPI"
+    repo_url: "{{ fastapi_repo_url }}"
+    version: "{{ fastapi_stable_tag }}"
+    user_name: "{{ user_name }}"
+    port: "8005"
+    
+  - repo_name: "fastAPI_update"
+    repo_url: "{{ fastapi_repo_url }}"
+    version: "{{ fastapi_update_tag }}"
+    user_name: "{{ user_name }}"
+    port: "8006"
+    
+  - repo_name: "react"
+    repo_url: "{{ react_repo_url }}"
+    version: "{{ react_stable_tag }}"
+    user_name: "{{ user_name }}"
+    port: "3002"
+    
+  - repo_name: "react_update"
+    repo_url: "{{ react_repo_url }}"
+    version: "{{ react_update_tag }}"
+    user_name: "{{ user_name }}"
+    port: "3003"
