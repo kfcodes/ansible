@@ -8,7 +8,3 @@
   roles:
   - cron_jobs
   - synchronise_application_data
-  - role: prep_fastapi_container
-    become: yes
-  - role: prep_react_container
-    become: yes

@@ -63,6 +63,44 @@
         git_user_name: "{{ react_update_repo.user_name }}"
         git_port: "{{ react_update_repo.port }}"
 
+    - name: Prep fastapi container
+      include_role:
+        name: prep_fastapi_container
+      vars:
+        git_repo_name: "{{ react_update_repo.repo_name }}"
+        git_repo_url: "{{ react_update_repo.repo_url }}"
+        git_version: "{{ react_update_repo.version }}"
+        git_user_name: "{{ react_update_repo.user_name }}"
+        git_port: "{{ react_update_repo.port }}"
+    - name: Prep fastapi update container
+      include_role:
+        name: prep_fastapi_container
+      vars:
+        git_repo_name: "{{ react_update_repo.repo_name }}"
+        git_repo_url: "{{ react_update_repo.repo_url }}"
+        git_version: "{{ react_update_repo.version }}"
+        git_user_name: "{{ react_update_repo.user_name }}"
+        git_port: "{{ react_update_repo.port }}"
+    - name: Prep react container
+      include_role:
+        name: prep_react_container
+      vars:
+        git_repo_name: "{{ react_update_repo.repo_name }}"
+        git_repo_url: "{{ react_update_repo.repo_url }}"
+        git_version: "{{ react_update_repo.version }}"
+        git_user_name: "{{ react_update_repo.user_name }}"
+        git_port: "{{ react_update_repo.port }}"
+    - name: Prep react update container
+      include_role:
+        name: prep_react_container
+      vars:
+        git_repo_name: "{{ react_update_repo.repo_name }}"
+        git_repo_url: "{{ react_update_repo.repo_url }}"
+        git_version: "{{ react_update_repo.version }}"
+        git_user_name: "{{ react_update_repo.user_name }}"
+        git_port: "{{ react_update_repo.port }}"
+    - role: 
+
   # - name: DEBUG REPOSITORY VARIABLES
   #   debug:
   #     var: repos

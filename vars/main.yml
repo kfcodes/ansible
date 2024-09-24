@@ -11,16 +11,15 @@ react_repo_url: "https://github.com/kfcodes/production_documentation.git"
 # APPLICATION HOME FOLDER AND USERNAME
 user_name: application
 web_app_usr: "application"
-
 pwd: test
 
 application_directories:
-    - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: "/.application/server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: "/.application/fastAPI", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: "/.application/fastAPI_update", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: "/.application/react", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: "/.application/react_update", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/fastAPI", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/fastAPI_update", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/react", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/react_update", attrs: "u=rwX,g=rwX,o=rwX"}
 
 # REPOSITORY OBJECT DETAILS
 fastapi_repo:
@@ -29,24 +28,31 @@ fastapi_repo:
   version: "{{ fastapi_stable_tag }}"
   user_name: "{{ user_name }}"
   port: "8005"
-
 fastapi_update_repo:
   repo_name: "fastAPI_update"
   repo_url: "{{ fastapi_repo_url }}"
   version: "{{ fastapi_update_tag }}"
   user_name: "{{ user_name }}"
   port: "8006"
-
 react_repo:
   repo_name: "react"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_stable_tag }}"
   user_name: "{{ user_name }}"
   port: "3002"
-
 react_update_repo:
   repo_name: "react_update"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_update_tag }}"
   user_name: "{{ user_name }}"
   port: "3003"
+
+# DATA SYNC DIRECTORES
+db_backup_source_directory: /home/m/.server_sql_backup/
+db_backup_destination_directory: ~/.application/server_sql_backup/
+scripts_source_directory: ~/.application/server_scripts
+scripts_destination_directory: "/home/{{ user_name }}/.application"
+config_files_source_directory: ~/.application/server_config_files
+config_files_destination_directory: "/home/{{ user_name }}/.application"
+production_documentation_source_directory: "/home/{{ user_name }}/.application/server_production_documentation/"
+production_documentation_destination_directory: "~/.application/server_production_documentation/"
