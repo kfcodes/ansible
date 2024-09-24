@@ -2,15 +2,15 @@
 - name: "copying config files for {{ item.repo_name }}"
   ansible.builtin.copy:
     remote_src: yes
-    src: "/home/{{ item.user_name }}/.application/server_config_files/reactApp.env"
-    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/.env"
+    src: "/home/{{ user_name }}/.application/server_config_files/reactApp.env"
+    dest: "/home/{{ user_name }}/{{ item.repo_name }}/.env"
   with_items:
-    - "{{ fastapi_stable }}"
-    - "{{ fastapi_update }}"
+    - "{{ react_repo }}"
+    - "{{ react_update_repo }}"
 - name: "Create the docker compose file for {{ item.repo_name }}"
   template:
     src: templates/react_docker_compose.j2
-    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/docker-compose.yml"
+    dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml"
   with_items:
-    - "{{ react_stable }}"
-    - "{{ react_update }}"
+    - "{{ react_repo }}"
+    - "{{ react_update_repo }}"

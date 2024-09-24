@@ -1,7 +1,7 @@
 ---
 - name: Update and upgrade system packages for all machines
   hosts: all
-  become: true
+  become: yes
 
   roles:
     - update_system
