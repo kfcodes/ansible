@@ -1,34 +1,14 @@
 ---
-- name: Synchronize data between local system and server
-  hosts: db_servers
+- name: Playbook to pull and manage repositories
+  hosts: web_servers
 
-  vars:
-
-    # GIT URL PATHS
-    fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
-    react_repo_url: "https://github.com/kfcodes/production_documentation.git"
-
-    # APPLICATION HOME FOLDER AND USERNAME
-    user_name: application
-    web_app_usr: "application"
-
-    # GIT BRANCH DETAILS
-    stable_branch: production
-    fastapi_update_tag: dev
-    react_update_tag: main
-
-    # REPOSTORY OBJECT DETAILS
-    fastapi_stable: { repo_name: "fastAPI", repo_url: "{{ fastapi_repo_url }}", version: "{{ stable_branch }}", user_name: "{{ user_name }}", port: "8005" }
-    fastapi_update: { repo_name: fastAPI_update, repo_url: "{{ fastapi_repo_url }}", version: "{{ fastapi_update_tag }}", user_name: "{{ user_name }}" , port: "8006" }
-    react_stable: { repo_name: react, repo_url: "{{ react_repo_url }}", version: "{{ stable_branch }}", user_name: "{{ user_name }}", port: "3002" }
-    react_update: { repo_name: react_update, repo_url: "{{ react_repo_url }}", version: "{{ react_update_tag }}", user_name: "{{ user_name }}", port: "3003" }
+  vars_files:
+    - ../vars/main.yml
 
   roles:
-    - cron_jobs
-    - synchronise_application_data
-    - role: git_pull
-      become: true
-    - role: prep_fastapi_container
-      become: true
-    - role: prep_react_container
-      become: true
+  - cron_jobs
+  - synchronise_application_data
+  - role: prep_fastapi_container
+    become: yes
+  - role: prep_react_container
+    become: yes

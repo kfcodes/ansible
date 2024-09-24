@@ -1,13 +1,8 @@
 ---
-- name: DOWNLOADING GIT REPOSITORY DATA
+- name: DOWNLOADING GIT REPOSITORY DATA {{ git_repo_name }} - {{ git_version }}
   ansible.builtin.git:
-    repo: "{{ item.repo_url }}"
-    dest: "/home/{{ item.user_name }}/{{ item.repo_name }}/"
+    repo: "{{ git_repo_url }}"
+    dest: "/home/{{ git_user_name }}/{{ git_repo_name }}/"
     single_branch: yes
     force: yes
-    version: "{{ item.version }}"
-  with_items:
-    - "{{ fastapi_stable }}"
-    - "{{ fastapi_update }}"
-    - "{{ react_stable }}"
-    - "{{ react_update }}"
+    version: "{{ git_version }}"

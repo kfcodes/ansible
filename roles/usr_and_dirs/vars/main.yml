@@ -1,6 +1,0 @@
----
-pwd: test
-
-directories:
-    - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
-    - { path: "/.application/server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX"}

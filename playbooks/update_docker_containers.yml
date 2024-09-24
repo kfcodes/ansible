@@ -1,0 +1,77 @@
+---
+- name: Playbook to pull and manage repositories
+  hosts: web_servers
+  become: yes
+
+  vars_files:
+    - ../vars/main.yml
+
+  tasks:
+    - name: DEBUG fastAPI Repository
+      debug:
+        msg: "Processing {{ fastapi_repo.repo_name }} with URL {{ fastapi_repo.repo_url }} on version {{ fastapi_repo.version }} for user {{ fastapi_repo.user_name }}"
+
+    - name: PULL fastAPI Repository
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ fastapi_repo.repo_name }}"
+        git_repo_url: "{{ fastapi_repo.repo_url }}"
+        git_version: "{{ fastapi_repo.version }}"
+        git_user_name: "{{ fastapi_repo.user_name }}"
+        git_port: "{{ fastapi_repo.port }}"
+
+    - name: DEBUG fastAPI_update Repository
+      debug:
+        msg: "Processing {{ fastapi_update_repo.repo_name }} with URL {{ fastapi_update_repo.repo_url }} on version {{ fastapi_update_repo.version }} for user {{ fastapi_update_repo.user_name }}"
+
+    - name: PULL fastAPI_update Repository
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ fastapi_update_repo.repo_name }}"
+        git_repo_url: "{{ fastapi_update_repo.repo_url }}"
+        git_version: "{{ fastapi_update_repo.version }}"
+        git_user_name: "{{ fastapi_update_repo.user_name }}"
+        git_port: "{{ fastapi_update_repo.port }}"
+
+    - name: DEBUG React Repository
+      debug:
+        msg: "Processing {{ react_repo.repo_name }} with URL {{ react_repo.repo_url }} on version {{ react_repo.version }} for user {{ react_repo.user_name }}"
+
+    - name: PULL React Repository
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ react_repo.repo_name }}"
+        git_repo_url: "{{ react_repo.repo_url }}"
+        git_version: "{{ react_repo.version }}"
+        git_user_name: "{{ react_repo.user_name }}"
+        git_port: "{{ react_repo.port }}"
+
+    - name: DEBUG React_update Repository
+      debug:
+        msg: "Processing {{ react_update_repo.repo_name }} with URL {{ react_update_repo.repo_url }} on version {{ react_update_repo.version }} for user {{ react_update_repo.user_name }}"
+
+    - name: PULL React_update Repository
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ react_update_repo.repo_name }}"
+        git_repo_url: "{{ react_update_repo.repo_url }}"
+        git_version: "{{ react_update_repo.version }}"
+        git_user_name: "{{ react_update_repo.user_name }}"
+        git_port: "{{ react_update_repo.port }}"
+
+  # - name: DEBUG REPOSITORY VARIABLES
+  #   debug:
+  #     var: repos
+  #   debug:
+  #     msg: "Pulling {{ item.repo_name }} from {{ item.repo_url }} using version {{ item.version }}"
+    # roles:
+    # - cron_jobs
+    # - synchronise_application_data
+    # - role: prep_fastapi_container
+    #   become: true
+    # - role: prep_react_container
+    #   become: true
