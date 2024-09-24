@@ -1,8 +1,8 @@
 # GIT BRANCH DETAILS
-fastapi_stable_tag: production
+fastapi_stable_tag: v0.01
 fastapi_update_tag: dev
-react_stable_tag: production
-react_update_tag: main
+react_stable_tag: v_0.01
+react_update_tag: rc_0.01
 
 # GIT URL PATHS
 fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
