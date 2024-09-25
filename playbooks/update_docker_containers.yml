@@ -35,6 +35,10 @@
         git_user_name: "{{ fastapi_update_repo.user_name }}"
         git_port: "{{ fastapi_update_repo.port }}"
 
+    - name: PREP FASTAPI CONTAINERS
+      include_role:
+        name: prep_fastapi_container
+
     - name: DEBUG REACT REPOSITORY
       debug:
         msg: "Processing {{ react_repo.repo_name }} with URL {{ react_repo.repo_url }} on version {{ react_repo.version }} for user {{ react_repo.user_name }}"
@@ -63,10 +67,6 @@
         git_user_name: "{{ react_update_repo.user_name }}"
         git_port: "{{ react_update_repo.port }}"
 
-    - name: PREP FASTAPI CONTAINER
-      include_role:
-        name: prep_fastapi_container
-        
-    - name: PREP REACT CONTAINER
+    - name: PREP REACT UPDATE CONTAINERS
       include_role:
         name: prep_react_container
