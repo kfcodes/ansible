@@ -1,0 +1,4 @@
+#! /bin/bash
+# update.sh
+docker compose up --build --detach && docker network connect application_network {{ item.repo_name }}
+

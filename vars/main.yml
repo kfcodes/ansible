@@ -16,31 +16,30 @@ pwd: test
 application_directories:
   - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
   - { path: "/.application/server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX"}
-  - { path: "/.application/fastAPI", attrs: "u=rwX,g=rwX,o=rwX"}
-  - { path: "/.application/fastAPI_update", attrs: "u=rwX,g=rwX,o=rwX"}
-  - { path: "/.application/react", attrs: "u=rwX,g=rwX,o=rwX"}
-  - { path: "/.application/react_update", attrs: "u=rwX,g=rwX,o=rwX"}
 
 # REPOSITORY OBJECT DETAILS
 fastapi_repo:
-  repo_name: "fastAPI"
+  repo_name: "fastapi_new"
   repo_url: "{{ fastapi_repo_url }}"
   version: "{{ fastapi_stable_tag }}"
   user_name: "{{ user_name }}"
   port: "8005"
+
 fastapi_update_repo:
-  repo_name: "fastAPI_update"
+  repo_name: "fastapi_update"
   repo_url: "{{ fastapi_repo_url }}"
   version: "{{ fastapi_update_tag }}"
   user_name: "{{ user_name }}"
   port: "8006"
+
 react_repo:
-  repo_name: "react"
+  repo_name: "react_new"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_stable_tag }}"
   user_name: "{{ user_name }}"
   port: "3002"
 react_update_repo:
+
   repo_name: "react_update"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_update_tag }}"
