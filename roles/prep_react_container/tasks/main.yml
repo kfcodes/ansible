@@ -1,31 +1,25 @@
 ---
-- name: "copying config files for {{ item.repo_name }}"
-  ansible.builtin.copy:
-    remote_src: yes
-    src: "/home/{{ user_name }}/.application/server_config_files/reactApp.env"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/.env"
-  with_items:
-    - "{{ react_repo }}"
-    - "{{ react_update_repo }}"
+  - name: DOWNLOADING CONFIG DATA
+    ansible.builtin.copy:
+      remote_src: yes
+      src: "/home/{{ user_name }}/.application/server_config_files/reactApp.env"
+      dest: "/home/{{ user_name }}/{{ item.repo_name }}/.env"
+    with_items:
+      - "{{ react_repo }}"
+      - "{{ react_update_repo }}"
 
-- name: "Create the docker compose file for {{ item.repo_name }}"
-  template:
-    src: templates/react_docker_compose.j2
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml"
-  with_items:
+  - name: GENERATE DOCKER COMPOSE FILE FROM TEMPLATE
+    template:
+      src: "templates/react_docker_compose.yml.j2"
+      dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml" 
+    with_items:
+      - "{{ react_repo }}"
+      - "{{ react_update_repo }}"
 
-- name: GENERATE DOCKER COMPOSE FILE FROM TEMPLATE
-  template:
-    src: "templates/react_docker_compose.yml.j2"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml" 
-  with_items:
-    - "{{ react_repo }}"
-    - "{{ react_update_repo }}"
-
-- name: GENERATE CONTAINER START BASH SCRIPT
-  template:
-    src: "templates/react_update.sh.j2"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh" 
-  with_items:
-    - "{{ react_repo }}"
-    - "{{ react_update_repo }}"
+  - name: GENERATE CONTAINER START BASH SCRIPT
+    template:
+      src: "templates/react_update.sh.j2"
+      dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh" 
+    with_items:
+      - "{{ react_repo }}"
+      - "{{ react_update_repo }}"
