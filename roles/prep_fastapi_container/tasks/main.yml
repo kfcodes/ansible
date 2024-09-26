@@ -8,6 +8,7 @@
     - "{{ fastapi_repo }}"
     - "{{ fastapi_update_repo }}"
 
+- name: DOWNLOADING MODELS DATA
   ansible.builtin.copy:
     remote_src: yes
     src: "/home/{{ user_name }}/.application/server_config_files/data_models_layer/"
