@@ -2,7 +2,7 @@
 fastapi_stable_tag: v0.01-hotfix01
 fastapi_update_tag: rc0.1.2
 react_stable_tag: v_0.01
-react_update_tag: rc_0.01
+react_update_tag: dev
 
 # GIT URL PATHS
 fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
