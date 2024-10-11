@@ -7,11 +7,8 @@
     - ../vars/main.yml
 
   tasks:
-    - name: DEBUG FASTAPI REPOSITORY
-      debug:
-        msg: "Processing {{ fastapi_repo.repo_name }} with URL {{ fastapi_repo.repo_url }} on version {{ fastapi_repo.version }} for user {{ fastapi_repo.user_name }}"
 
-    - name: PULL FASTAPI REPOSITORY
+    - name: PULL THE MOST RECENT FASTAPI REPOSITORY
       include_role:
         name: git_pull_repo
       vars:
@@ -21,11 +18,7 @@
         git_user_name: "{{ fastapi_repo.user_name }}"
         git_port: "{{ fastapi_repo.port }}"
 
-    - name: DEBUG FASTAPI UPDATE REPOSITORY
-      debug:
-        msg: "Processing {{ fastapi_update_repo.repo_name }} with URL {{ fastapi_update_repo.repo_url }} on version {{ fastapi_update_repo.version }} for user {{ fastapi_update_repo.user_name }}"
-
-    - name: PULL FASTAPI UPDATE REPOSITORY
+    - name: PULL THE MOST RECENT FASTAPI UPDATE REPOSITORY
       include_role:
         name: git_pull_repo
       vars:
@@ -35,15 +28,7 @@
         git_user_name: "{{ fastapi_update_repo.user_name }}"
         git_port: "{{ fastapi_update_repo.port }}"
 
-    - name: PREP FASTAPI CONTAINERS
-      include_role:
-        name: prep_fastapi_container
-
-    - name: DEBUG REACT REPOSITORY
-      debug:
-        msg: "Processing {{ react_repo.repo_name }} with URL {{ react_repo.repo_url }} on version {{ react_repo.version }} for user {{ react_repo.user_name }}"
-
-    - name: PULL REACT REPOSITORY
+    - name: PULL THE MOST RECENT REACT REPOSITORY
       include_role:
         name: git_pull_repo
       vars:
@@ -53,11 +38,7 @@
         git_user_name: "{{ react_repo.user_name }}"
         git_port: "{{ react_repo.port }}"
 
-    - name: DEBUG REACT UPDATE REPOSITORY
-      debug:
-        msg: "Processing {{ react_update_repo.repo_name }} with URL {{ react_update_repo.repo_url }} on version {{ react_update_repo.version }} for user {{ react_update_repo.user_name }}"
-
-    - name: PULL REACT UPDATE REPOSITORY
+    - name: PULL the most recent REACT UPDATE REPOSITORY
       include_role:
         name: git_pull_repo
       vars:
@@ -67,6 +48,10 @@
         git_user_name: "{{ react_update_repo.user_name }}"
         git_port: "{{ react_update_repo.port }}"
 
-    - name: PREP REACT UPDATE CONTAINERS
+    - name: CONFIGURE FILES FOR FASTAPI CONTAINERS
+      include_role:
+        name: prep_fastapi_container
+
+    - name: CONFIGURE FILES FOR REACT UPDATE CONTAINERS
       include_role:
         name: prep_react_container
