@@ -1,12 +1,40 @@
 ---
 - name: Configuring the local system
-  hosts: local_system
-  ansible_connection: local
+  hosts: control
   become: yes
 
-  roles:
-    - update_system
-    - install_packages
-    - user_and_home_dir
-    - local_env
+  vars_files:
+    - ../vars/main.yml
 
+  tasks:
+    - name: UPDATE LOCAL SYSTEM
+      include_role:
+        name: update_system
+
+    - name: INSTALL PACKAGES FOR LOCAL SYSTEM
+      include_role:
+        name: install_packages
+
+    - name: INSTALL AND CONFIGURE DOCKER ON UBUNTU
+      include_role:
+        name: docker_for_ubuntu
+
+    - name: CREATE USERS AND DIRECTORIES
+      include_role:
+        name: usr_and_dirs
+
+    - name: DOWLOAD LOCAL GITHUB REPOS
+      include_role:
+        name: local_git_repos
+
+    - name: GENERATE SSH KEY PAIRS
+      include_role:
+        name: ssh_keys
+
+    - name: CREATE GIT CONFIG FILE
+      include_role:
+        name: gitconfig
+          
+          #    - name: CONFIGURE LOCAL ENVIRONMENT
+          #     include_role:
+          #name: local_env_config

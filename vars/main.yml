@@ -3,35 +3,39 @@ fastapi_stable_tag: v0.01-hotfix01
 fastapi_update_tag: rc0.1.3.2
 react_stable_tag: v0.02
 react_update_tag: dev
+default_branch: main
 
-# GIT URL PATHS
+# GITHUB URL PATHS
 fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
 react_repo_url: "https://github.com/kfcodes/production_documentation.git"
+dotfiles_url: "https://github.com/kfcodes/production_documentation.git"
+docker_scripts_url: "https://github.com/kfcodes/production_documentation.git"
+bin_files_url: "https://github.com/kfcodes/production_documentation.git"
+ansible_url: "https://github.com/kfcodes/production_documentation.git"
 
-# APPLICATION HOME FOLDER AND USERNAME
-user_name: application
+# USER INFO
+local_usr: "m"
+user_name: "application"
 web_app_usr: "application"
-pwd: test
+pwd: "test"
 
 application_directories:
   - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
   - { path: "/.application/server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX"}
 
-# REPOSITORY OBJECT DETAILS
+# REPOSITORY DETAILS
 fastapi_repo:
   repo_name: "fastAPI"
   repo_url: "{{ fastapi_repo_url }}"
   version: "{{ fastapi_stable_tag }}"
   user_name: "{{ user_name }}"
   port: "8001"
-
 fastapi_update_repo:
   repo_name: "fastAPI_update"
   repo_url: "{{ fastapi_repo_url }}"
   version: "{{ fastapi_update_tag }}"
   user_name: "{{ user_name }}"
   port: "8002"
-
 react_repo:
   repo_name: "react"
   repo_url: "{{ react_repo_url }}"
@@ -39,7 +43,6 @@ react_repo:
   user_name: "{{ user_name }}"
   port: "3000"
 react_update_repo:
-
   repo_name: "react_update"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_update_tag }}"

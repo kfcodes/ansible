@@ -1,7 +1,6 @@
 ---
 - name: Update and upgrade system packages for all machines
-  # hosts: all
-  hosts: web_servers
+  hosts: all
   become: yes
 
   roles:
