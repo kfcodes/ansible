@@ -1,10 +1,19 @@
 ---
-- name: Playbook to pull and manage repositories
+- name: Playbook to manage application data and backups
   hosts: web_servers
 
   vars_files:
     - ../vars/main.yml
 
-  roles:
-  - cron_jobs
-  - synchronise_application_data
+  tasks:
+    - name: Update host system
+      include_role:
+        name: update_system
+
+    - name: Update local cron jobs
+      include_role:
+        name: cron_jobs
+
+    - name: Sync application data
+      include_role:
+        name: synchronise_application_data

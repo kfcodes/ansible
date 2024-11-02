@@ -1,16 +1,24 @@
 ---
-- name: Provisioning server for hosting application
+- name: Provision Linux System For Hosting Application
   hosts: web_servers
   become: yes
 
   vars_files:
     - ../vars/main.yml
 
-  roles:
-    - update_system
-    - install_packages
-    - docker_for_ubuntu
-    - role: usr_and_dirs
-      vars: 
-        user_name: "{{ web_app_usr }}"
+  tasks:
+    - name: UPDATE HOST SYSTEM
+      include_role:
+        name: update_system
 
+    - name: Install packages for host system
+      include_role:
+        name: install_packages
+
+    - name: Install and configure docker on ubuntu
+      include_role:
+        name: docker_for_ubuntu
+
+    - name: CREATE USERS AND DIRECTORIES
+      include_role:
+        name: usr_and_dirs

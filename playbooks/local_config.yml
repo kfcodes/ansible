@@ -7,9 +7,9 @@
     - ../vars/main.yml
 
   tasks:
-    - name: DOWLOAD LOCAL GITHUB REPOS
-      include_role:
-        name: local_git_repos
+    #    - name: DOWLOAD LOCAL GITHUB REPOS
+    #  include_role:
+    #    name: local_git_repos
 
     - name: Configure local system
       include_role:
