@@ -46,6 +46,18 @@
     state: link
     force: yes
 
+# Create application directories for holding application data
+- name: "Creating directory for application data in {{ local_usr }} home directory"
+  ansible.builtin.file:
+    path: "/home/{{ local_usr }}/{{ item.path }}"
+    mode: "{{ item.attrs }}"
+    state: directory
+    recurse: yes
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+  with_items:
+    "{{ application_directories }}"
+
 # Configure Gnome environment
 
 # Configure Suckless software 
