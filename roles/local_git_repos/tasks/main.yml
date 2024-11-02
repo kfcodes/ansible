@@ -1,0 +1,64 @@
+---
+- name: GENERATE THE GLOBAL GITCONFIG FILE
+  template:
+    src: "templates/gitconfig.j2"
+    dest: "/home/{{ local_usr }}/.gitconfig" 
+    owner: "{{ local_usr }}"
+
+- name: PULL THE MOST RECENT NEOVIM FILES
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/neovim.git
+    dest: "/home/{{ local_usr }}/.nvim/"
+    accept_hostkey: yes
+  become: no
+
+- name: PULL THE MOST RECENT DOTFILES
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/dotfiles.git
+    dest: "/home/{{ local_usr }}/.dotfiles/"
+    accept_hostkey: yes
+  become: no
+
+- name: PULL THE MOST BINARY COMMANDS
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/bash_scripts.git
+    dest: "/home/{{ local_usr }}/.bin/"
+    accept_hostkey: yes
+  become: no
+
+- name: PULL THE MOST RECENT DOCKER SCRIPTS
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/docker_scripts.git
+    dest: "/home/{{ local_usr }}/.docker_scripts/"
+    accept_hostkey: yes
+  become: no
+
+- name: PULL THE MOST RECENT ANSIBLE SCRIPTS
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/ansible.git
+    dest: "/home/{{ local_usr }}/.my_ansible/"
+    accept_hostkey: yes
+  become: no
+
+- name: PULL THE MOST RECENT DMENU
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/dmenu.git
+    dest: "/home/{{ local_usr }}/.suckless/dmenu/"
+    accept_hostkey: yes
+  become: no
+- name: PULL THE MOST RECENT DWM
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/dwm.git
+    dest: "/home/{{ local_usr }}/.suckless/dwm/"
+    accept_hostkey: yes
+  become: no
+
+      #- name: PULL THE MOST RECENT REACT APP
+      #  ansible.builtin.git:
+      #    repo: https://github.com/kfcodes/reactapp.git
+      #    dest: "/home/{{ local_usr }}/.reactapp/"
+      #- name: Change file ownership, group and permissions
+      #  ansible.builtin.file:
+      #    path: "/home/{{ local_usr }}/.reactapp/"
+      #    owner: "{{ local_usr }}"
+      #    mode: '0644'

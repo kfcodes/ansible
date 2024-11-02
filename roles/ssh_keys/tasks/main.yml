@@ -1,0 +1,30 @@
+---
+- name: GENERATE ANSIBLE SSH KEYPAIR
+  community.crypto.openssh_keypair:
+    path: "/home/{{ local_usr }}/.ssh/application_key"
+    type: ed25519
+    state: present
+    size: 4096
+    owner: "{{ local_usr }}"
+    mode: '0600'
+
+- name: GENERATE GITHUB OPENSSH KEYPAIR
+  community.crypto.openssh_keypair:
+    path: "/home/{{ local_usr }}/.ssh/github_key"
+    type: ed25519
+    state: present
+    size: 4096
+    owner: "{{ local_usr }}"
+    mode: '0600'
+
+- name: CREATE THE SSH CONFIG FILE
+  template:
+    src: "templates/ssh_config.j2"
+    dest: "/home/{{ local_usr }}/.ssh/config" 
+    owner: "{{ local_usr }}"
+
+- name: Evaluating the authentication agent & adding the key...
+  shell: |
+    eval "$(ssh-agent)"
+    ssh-add /home/m/.ssh/github_key
+    ssh-add /home/m/.ssh/application_key
