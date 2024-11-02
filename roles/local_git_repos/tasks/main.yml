@@ -53,6 +53,20 @@
     accept_hostkey: yes
   become: no
 
+- name: PULL THE MOST RECENT DWM
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/reactapp.git
+    dest: "/home/{{ local_usr }}/.reactapp"
+    accept_hostkey: yes
+  become: no
+
+- name: PULL THE MOST RECENT DWM
+  ansible.builtin.git:
+    repo: git@github.com:kfcodes/fastapi.git
+    dest: "/home/{{ local_usr }}/.fastapi"
+    accept_hostkey: yes
+  become: no
+
       #- name: PULL THE MOST RECENT REACT APP
       #  ansible.builtin.git:
       #    repo: https://github.com/kfcodes/reactapp.git
