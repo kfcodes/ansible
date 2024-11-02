@@ -1,5 +1,5 @@
 ---
-# Create the symbolic links for the dot files
+# Create the symbolic links for the linux dot files
 - name: Create symbolic link for directory colours
   ansible.builtin.file:
     src: "/home/{{ local_usr }}/.dotfiles/.dircolours"
@@ -27,7 +27,7 @@
     state: link
     force: yes
 
-- name: Create symbolic link for MVP config
+- name: Create symbolic link for MPV config
   ansible.builtin.file:
     src: "/home/{{ local_usr }}/.dotfiles/mpv.conf"
     dest: "/home/{{ local_usr }}/.config/mpv/mpv.conf" 
@@ -36,8 +36,16 @@
     state: link
     force: yes
 
-# Configure Neovim
-
-# Configure Suckless software 
+# Create symbolic link to the NeoVIM config directory
+- name: Create symbolic link for NeoVIM config
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.nvim"
+    dest: "/home/{{ local_usr }}/.config/nvim" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
 
 # Configure Gnome environment
+
+# Configure Suckless software 
