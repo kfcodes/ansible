@@ -1,2 +1,39 @@
 ---
-# tasks file for local_env_config
+# Create the symbolic links for the dot files
+- name: Create symbolic link for directory colours
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.dotfiles/.dircolours"
+    dest: "/home/{{ local_usr }}/.dircolours" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+
+- name: Create symbolic for X resources
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.dotfiles/.Xresources"
+    dest: "/home/{{ local_usr }}/.Xresources" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+
+- name: Create symbolic link for X session
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.dotfiles/.xsession"
+    dest: "/home/{{ local_usr }}/.xsession" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+
+- name: Create symbolic link for MVP config
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.dotfiles/mpv.conf"
+    dest: "/home/{{ local_usr }}/.config/mpv/mpv.conf" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+
+# Configure Neovim
+
+# Configure Suckless software 
+
+# Configure Gnome environment
