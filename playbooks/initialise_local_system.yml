@@ -23,14 +23,6 @@
       include_role:
         name: usr_and_dirs
 
-    - name: DOWLOAD LOCAL GITHUB REPOS
-      include_role:
-        name: local_git_repos
-
     - name: GENERATE SSH KEY PAIRS
       include_role:
         name: ssh_keys
-          
-          #    - name: CONFIGURE LOCAL ENVIRONMENT
-          #     include_role:
-          #name: local_env_config
