@@ -30,10 +30,6 @@
     - name: GENERATE SSH KEY PAIRS
       include_role:
         name: ssh_keys
-
-    - name: CREATE GIT CONFIG FILE
-      include_role:
-        name: gitconfig
           
           #    - name: CONFIGURE LOCAL ENVIRONMENT
           #     include_role:
