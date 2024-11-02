@@ -7,6 +7,7 @@
     owner: "{{ local_usr }}"
     group: "{{ local_usr }}"
     state: link
+    force: yes
 
 - name: Create symbolic for X resources
   ansible.builtin.file:
@@ -15,6 +16,7 @@
     owner: "{{ local_usr }}"
     group: "{{ local_usr }}"
     state: link
+    force: yes
 
 - name: Create symbolic link for X session
   ansible.builtin.file:
@@ -23,6 +25,7 @@
     owner: "{{ local_usr }}"
     group: "{{ local_usr }}"
     state: link
+    force: yes
 
 - name: Create symbolic link for MVP config
   ansible.builtin.file:
@@ -31,6 +34,7 @@
     owner: "{{ local_usr }}"
     group: "{{ local_usr }}"
     state: link
+    force: yes
 
 # Configure Neovim
 
