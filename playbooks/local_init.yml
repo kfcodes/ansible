@@ -1,5 +1,5 @@
 ---
-- name: Configuring the local system
+- name: Initialise the local system
   hosts: control
   become: yes
 

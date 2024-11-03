@@ -2,8 +2,8 @@
 # Create the symbolic links for the linux dot files
 - name: Create symbolic link for directory colours
   ansible.builtin.file:
-    src: "/home/{{ local_usr }}/.dotfiles/.dircolours"
-    dest: "/home/{{ local_usr }}/.dircolours" 
+    src: "/home/{{ local_usr }}/.dotfiles/.dircolors"
+    dest: "/home/{{ local_usr }}/.dircolors" 
     owner: "{{ local_usr }}"
     group: "{{ local_usr }}"
     state: link

@@ -11,6 +11,7 @@
     dest: "/home/{{ local_usr }}/.nvim/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST RECENT DOTFILES
   ansible.builtin.git:
@@ -18,6 +19,7 @@
     dest: "/home/{{ local_usr }}/.dotfiles/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST BINARY COMMANDS
   ansible.builtin.git:
@@ -25,6 +27,7 @@
     dest: "/home/{{ local_usr }}/.bin/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST RECENT DOCKER SCRIPTS
   ansible.builtin.git:
@@ -32,6 +35,7 @@
     dest: "/home/{{ local_usr }}/.docker_scripts/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST RECENT ANSIBLE SCRIPTS
   ansible.builtin.git:
@@ -39,6 +43,7 @@
     dest: "/home/{{ local_usr }}/.my_ansible/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST RECENT DMENU
   ansible.builtin.git:
@@ -46,12 +51,14 @@
     dest: "/home/{{ local_usr }}/.suckless/dmenu/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 - name: PULL THE MOST RECENT DWM
   ansible.builtin.git:
     repo: git@github.com:kfcodes/dwm.git
     dest: "/home/{{ local_usr }}/.suckless/dwm/"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST RECENT DWM
   ansible.builtin.git:
@@ -59,6 +66,7 @@
     dest: "/home/{{ local_usr }}/.reactapp"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
 - name: PULL THE MOST RECENT DWM
   ansible.builtin.git:
@@ -66,6 +74,7 @@
     dest: "/home/{{ local_usr }}/.fastapi"
     accept_hostkey: yes
   become: no
+  ignore_errors: true
 
       #- name: PULL THE MOST RECENT REACT APP
       #  ansible.builtin.git:
