@@ -21,4 +21,4 @@
 
     - name: CREATE USERS AND DIRECTORIES
       include_role:
-        name: usr_and_dirs
+        name: host_usr_config

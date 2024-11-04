@@ -27,6 +27,25 @@
     state: link
     force: yes
 
+# THIS IS REMOVED FOR NOW TO USE THE DEFAULT BASH RC FILE
+# - name: Create symbolic link for input rc config
+#   ansible.builtin.file:
+#     src: "/home/{{ local_usr }}/.dotfiles/.bashrc"
+#     dest: "/home/{{ local_usr }}/.bashrc" 
+#     owner: "{{ local_usr }}"
+#     group: "{{ local_usr }}"
+#     state: link
+#     force: yes
+
+- name: Create symbolic link for input rc config
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.dotfiles/.inputrc"
+    dest: "/home/{{ local_usr }}/.inputrc" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+
 - name: Create symbolic link for MPV config
   ansible.builtin.file:
     src: "/home/{{ local_usr }}/.dotfiles/mpv.conf"

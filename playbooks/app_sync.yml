@@ -12,8 +12,8 @@
 
     - name: Update local cron jobs
       include_role:
-        name: cron_jobs
+        name: app_cron_jobs
 
     - name: Sync application data
       include_role:
-        name: synchronise_application_data
+        name: manage_app_data

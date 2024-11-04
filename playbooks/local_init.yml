@@ -21,8 +21,12 @@
 
     - name: CREATE USERS AND DIRECTORIES
       include_role:
-        name: usr_and_dirs
+        name: host_usr_config
 
     - name: GENERATE SSH KEY PAIRS
       include_role:
         name: ssh_keys
+
+    - name: Print instructions to the user
+      ansible.builtin.debug:
+        msg: 'Before the next step copy the public ssh keys to the remote servers and Github' 
