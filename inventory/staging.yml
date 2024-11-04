@@ -3,12 +3,12 @@
 localhost ansible_connection=local ansible_user=root
 
 # APPLICATION SERVER
-[db_servers]
+[host_servers]
 192.168.1.26 ansible_ssh_private_key_file=/home/m/.ssh/application_key
 
 [all:children]
 control
-db_servers
+host_servers
 
 # webservers
 # server1 ansible_host=192.168.1.1 ansible_user=ubuntu

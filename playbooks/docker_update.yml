@@ -1,6 +1,6 @@
 ---
 - name: Playbook to pull and manage repositories
-  hosts: web_servers
+  hosts: host_servers
   become: yes
 
   vars_files:
@@ -53,8 +53,8 @@
 
     - name: CONFIGURE FASTAPI CONTAINERS
       include_role:
-        name: prep_fastapi_container
+        name: fastapi_docker_container_config
 
     - name: CONFIGURE REACT CONTAINERS
       include_role:
-        name: prep_react_container
+        name: react_app_docker_container_config

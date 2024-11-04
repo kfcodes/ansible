@@ -1,6 +1,7 @@
 ---
 - name: Playbook to manage application data and backups
-  hosts: web_servers
+  hosts: host_servers
+  become: true
 
   vars_files:
     - ../vars/main.yml

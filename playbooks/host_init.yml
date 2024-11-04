@@ -1,6 +1,6 @@
 ---
 - name: Provision Linux System For Hosting Application
-  hosts: web_servers
+  hosts: host_servers
   become: yes
 
   vars_files:
@@ -17,7 +17,7 @@
 
     - name: Install and configure docker on ubuntu
       include_role:
-        name: docker_for_ubuntu
+        name: init_docker_ubuntu
 
     - name: CREATE USERS AND DIRECTORIES
       include_role:

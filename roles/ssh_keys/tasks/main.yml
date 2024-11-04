@@ -5,8 +5,7 @@
     type: ed25519
     state: present
     size: 4096
-    owner: "{{ local_usr }}"
-    mode: '0600'
+  become: no
 
 - name: GENERATE GITHUB OPENSSH KEYPAIR
   community.crypto.openssh_keypair:
@@ -14,17 +13,18 @@
     type: ed25519
     state: present
     size: 4096
-    owner: "{{ local_usr }}"
-    mode: '0600'
+  become: no
 
 - name: CREATE THE SSH CONFIG FILE
   template:
     src: "templates/ssh_config.j2"
     dest: "/home/{{ local_usr }}/.ssh/config" 
     owner: "{{ local_usr }}"
+  become: no
 
 - name: Evaluating the authentication agent & adding the key...
   shell: |
     eval "$(ssh-agent)"
     ssh-add /home/m/.ssh/github_key
     ssh-add /home/m/.ssh/application_key
+  become: no

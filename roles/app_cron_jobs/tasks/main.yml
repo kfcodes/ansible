@@ -6,6 +6,7 @@
     special_time: hourly
     job: "/home/{{ scripts_directory }}/{{ regular_backup_script }}"
     state: present
+  become: false
 
 - name: Configure Cron job for semi-regular DB backup
   ansible.builtin.cron:
@@ -13,5 +14,5 @@
     special_time: daily
     job: "/home/{{ scripts_directory }}/{{ semi_regular_backup_script }}"
     state: present
-
+  become: false
 

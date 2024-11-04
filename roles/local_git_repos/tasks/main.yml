@@ -4,6 +4,7 @@
     src: "templates/gitconfig.j2"
     dest: "/home/{{ local_usr }}/.gitconfig" 
     owner: "{{ local_usr }}"
+  become: no
 
 - name: PULL THE MOST RECENT NEOVIM FILES
   ansible.builtin.git:
