@@ -55,6 +55,15 @@
     state: link
     force: yes
 
+- name: Create symbolic link for Tmux config
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.dotfiles/.tmux.conf"
+    dest: "/home/{{ local_usr }}/.tmux.conf" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+
 # Create symbolic link to the NeoVIM config directory
 - name: Create symbolic link for NeoVIM config
   ansible.builtin.file:
