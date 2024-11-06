@@ -3,7 +3,11 @@
   ansible.builtin.user:
     state: present
     name: "{{ user_name }}"
-    password: "{{ pwd }}"
+    create_home: yes
+    shell: /bin/bash
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/rsa_id
     groups:
     - docker
     - sudo

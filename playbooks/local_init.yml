@@ -25,7 +25,7 @@
 
     - name: GENERATE SSH KEY PAIRS
       include_role:
-        name: ssh_keys
+        name: local_ssh_keys
 
     - name: Print instructions to the user
       ansible.builtin.debug:
