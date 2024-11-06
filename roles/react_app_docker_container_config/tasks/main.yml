@@ -16,7 +16,7 @@
       - "{{ react_repo }}"
       - "{{ react_update_repo }}"
 
-  - name: GENERATE CONTAINER START BASH SCRIPT
+  - name: GENERATE CONTAINER BASH SCRIPT
     template:
       src: "templates/react_update.sh.j2"
       dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh" 
