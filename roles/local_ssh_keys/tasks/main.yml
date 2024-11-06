@@ -1,7 +1,7 @@
 ---
 - name: GENERATE ANSIBLE SSH KEYPAIR
   community.crypto.openssh_keypair:
-    path: "/home/{{ local_usr }}/.ssh/application_key"
+    path: "/home/{{ local_usr }}/.ssh/application"
     type: ed25519
     state: present
     size: 4096
@@ -9,7 +9,7 @@
 
 - name: GENERATE GITHUB OPENSSH KEYPAIR
   community.crypto.openssh_keypair:
-    path: "/home/{{ local_usr }}/.ssh/github_key"
+    path: "/home/{{ local_usr }}/.ssh/github"
     type: ed25519
     state: present
     size: 4096
