@@ -58,11 +58,8 @@ react_update_repo:
 db_backup_source_directory: /home/m/.server_sql_backup/
 db_backup_destination_directory: ~/.application/app_db_backups/
 
-scripts_source_directory: ~/.application/server_scripts
+scripts_source_directory: ~/.application/app_control
 scripts_destination_directory: "/home/{{ user_name }}/.application/app_control/"
 
-config_files_source_directory: ~/.application/server_config_files
-config_files_destination_directory: "/home/{{ user_name }}/.application/app_control/"
-
-production_documentation_source_directory: "/home/{{ user_name }}/.application/server_production_documentation/"
-production_documentation_destination_directory: "~/.application/app_files/"
+config_files_source_directory: ~/.application/app_files
+config_files_destination_directory: "/home/{{ user_name }}/.application/app_files/"
