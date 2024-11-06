@@ -1,13 +1,18 @@
 # GIT BRANCH DETAILS
 fastapi_stable_tag: v0.02
 fastapi_update_tag: rc0.1.3.2
-react_stable_tag: v0.02-hotfix-combine-pallets
+react_stable_tag: v0.02.01-router_hotfix
 react_update_tag: rc0.02.01
 default_branch: main
 
 # GITHUB URL PATHS
-fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
-react_repo_url: "https://github.com/kfcodes/production_documentation.git"
+# fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
+fastapi_repo_url: "git@github.com:kfcodes/fastapi.git"
+    # repo: git@github.com:kfcodes/fastapi.git
+# react_repo_url: "https://github.com/kfcodes/production_documentation.git"
+# react_repo_url: "https://github.com/kfcodes/reactapp.git"
+react_repo_url: "git@github.com:kfcodes/reactapp.git"
+    # repo: git@github.com:kfcodes/reactapp.git
 dotfiles_url: "https://github.com/kfcodes/production_documentation.git"
 docker_scripts_url: "https://github.com/kfcodes/production_documentation.git"
 bin_files_url: "https://github.com/kfcodes/production_documentation.git"
@@ -15,7 +20,7 @@ ansible_url: "https://github.com/kfcodes/production_documentation.git"
 
 # USER INFO
 local_usr: "m"
-user_name: "application"
+user_name: "new_application"
 web_app_usr: "application"
 pwd: "test"
 

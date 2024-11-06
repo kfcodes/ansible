@@ -17,7 +17,7 @@
 
     - name: INSTALL AND CONFIGURE DOCKER ON UBUNTU
       include_role:
-        name: init_docker_ubuntu
+        name: ubuntu_docker
 
     - name: CREATE USERS AND DIRECTORIES
       include_role:

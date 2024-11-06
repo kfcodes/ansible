@@ -61,4 +61,4 @@
 
     - name: CONFIGURE REACT CONTAINERS
       include_role:
-        name: react_app_docker_container_config
+        name: reactapp_docker_container_config
