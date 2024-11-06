@@ -3,6 +3,9 @@
   ansible.builtin.git:
     repo: "{{ git_repo_url }}"
     dest: "/home/{{ git_user_name }}/{{ git_repo_name }}/"
+    key_file: "/home/{{ git_user_name }}/.ssh/{{ git_repo_key }}"
     single_branch: yes
     force: yes
     version: "{{ git_version }}"
+    accept_hostkey: yes
+  become_user: "{{ git_user_name }}"

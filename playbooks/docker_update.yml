@@ -20,6 +20,7 @@
         git_version: "{{ fastapi_repo.version }}"
         git_user_name: "{{ fastapi_repo.user_name }}"
         git_port: "{{ fastapi_repo.port }}"
+        git_repo_key: fastapi
 
     - name: PULL THE MOST RECENT FASTAPI UPDATE REPOSITORY
       include_role:
@@ -30,6 +31,7 @@
         git_version: "{{ fastapi_update_repo.version }}"
         git_user_name: "{{ fastapi_update_repo.user_name }}"
         git_port: "{{ fastapi_update_repo.port }}"
+        git_repo_key: fastapi
 
     - name: PULL THE MOST RECENT REACT REPOSITORY
       include_role:
@@ -40,6 +42,7 @@
         git_version: "{{ react_repo.version }}"
         git_user_name: "{{ react_repo.user_name }}"
         git_port: "{{ react_repo.port }}"
+        git_repo_key: react
 
     - name: PULL the most recent REACT UPDATE REPOSITORY
       include_role:
@@ -50,6 +53,7 @@
         git_version: "{{ react_update_repo.version }}"
         git_user_name: "{{ react_update_repo.user_name }}"
         git_port: "{{ react_update_repo.port }}"
+        git_repo_key: react
 
     - name: CONFIGURE FASTAPI CONTAINERS
       include_role:
