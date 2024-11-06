@@ -2,7 +2,7 @@
   - name: DOWNLOADING CONFIG DATA
     ansible.builtin.copy:
       remote_src: yes
-      src: "/home/{{ user_name }}/.application/server_config_files/reactApp.env"
+      src: "/home/{{ user_name }}/.application/app_control/env_vars/reactApp.env"
       dest: "/home/{{ user_name }}/{{ item.repo_name }}/.env"
     with_items:
       - "{{ react_repo }}"
