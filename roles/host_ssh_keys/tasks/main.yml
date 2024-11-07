@@ -1,23 +1,23 @@
 ---
 - name: GENERATE ANSIBLE SSH KEYPAIR
   community.crypto.openssh_keypair:
-    path: "/home/{{ local_usr }}/.ssh/reactapp"
+    path: "/home/{{ user_name }}/.ssh/reactapp"
     type: ed25519
     state: present
     size: 4096
-  become: no
+  become_user: "{{ user_name }}"
 
 - name: GENERATE GITHUB OPENSSH KEYPAIR
   community.crypto.openssh_keypair:
-    path: "/home/{{ local_usr }}/.ssh/fastapi"
+    path: "/home/{{ user_name }}/.ssh/fastapi"
     type: ed25519
     state: present
     size: 4096
-  become: no
+  become_user: "{{ user_name }}"
 
 - name: Evaluating the authentication agent & adding the key...
   shell: |
     eval "$(ssh-agent)"
-    ssh-add /home/m/.ssh/reactapp
-    ssh-add /home/m/.ssh/fastapi
-  become: no
+    ssh-add "/home/{{ user_name }}/.ssh/react"
+    ssh-add "/home/{{ user_name }}/.ssh/fastapi"
+  become_user: "{{ user_name }}"

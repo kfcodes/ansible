@@ -20,7 +20,7 @@
 # - name: COPYING LABEL DATA FILES TO FASTAPI DIRECTORIES
 #   ansible.builtin.copy:
 #     remote_src: yes
-#     src: "/home/{{ user_name }}/.application/server_config_files/labels/"
+    # src: "/home/{{ user_name }}/.application/app_files/labels/"
 #     dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/physical_layer/labels/"
 #   with_items:
 #     - "{{ fastapi_repo }}"

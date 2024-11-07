@@ -42,7 +42,7 @@
         git_version: "{{ react_repo.version }}"
         git_user_name: "{{ react_repo.user_name }}"
         git_port: "{{ react_repo.port }}"
-        git_repo_key: react
+        git_repo_key: reactapp
 
     - name: PULL the most recent REACT UPDATE REPOSITORY
       include_role:
@@ -53,7 +53,7 @@
         git_version: "{{ react_update_repo.version }}"
         git_user_name: "{{ react_update_repo.user_name }}"
         git_port: "{{ react_update_repo.port }}"
-        git_repo_key: react
+        git_repo_key: reactapp
 
     - name: CONFIGURE FASTAPI CONTAINERS
       include_role:

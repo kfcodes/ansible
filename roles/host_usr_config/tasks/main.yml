@@ -6,8 +6,8 @@
     create_home: yes
     shell: /bin/bash
     generate_ssh_key: yes
-    ssh_key_bits: 2048
-    ssh_key_file: .ssh/rsa_id
+    ssh_key_bits: 4096
+    ssh_key_file: ".ssh/{{ user_name }}_rsa"
     groups:
     - docker
     - sudo
