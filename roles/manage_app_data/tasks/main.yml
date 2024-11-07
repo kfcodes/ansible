@@ -12,16 +12,27 @@
     checksum: true
     links: false
     delete: true
-    src: "{{ scripts_source_directory }}"
-    dest: "{{ scripts_destination_directory }}"
+    recursive: true
+    owner: false
+    group: false
+    perms: false
+    times: false
+    src: "{{ app_control_source_directory }}"
+    dest: "{{ app_control_destination_directory }}"
   become: false
+  ignore_errors: true
 
 - name: Synchronize application files with WebAppServer
   ansible.posix.synchronize:
     checksum: true
     links: false
-    recursive: true
     delete: true
-    src: "{{ config_files_source_directory }}"
-    dest: "{{ config_files_destination_directory }}"
+    recursive: true
+    owner: false
+    group: false
+    perms: false
+    times: false
+    src: "{{ app_files_source_directory }}"
+    dest: "{{ app_files_destination_directory }}"
   become: false
+  ignore_errors: true

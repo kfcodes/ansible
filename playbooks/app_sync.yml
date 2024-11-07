@@ -11,9 +11,9 @@
       include_role:
         name: update_system
 
-    - name: Update local cron jobs
+    - name: Update host cron jobs
       include_role:
-        name: app_cron_jobs
+        name: host_cron_jobs
 
     - name: Sync application data
       include_role:

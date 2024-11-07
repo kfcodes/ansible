@@ -26,7 +26,9 @@ pwd: "test"
 
 application_directories:
   - { path: "/.application", attrs: "u=rwX,g=rwX,o=rwX"}
-  - { path: "/.application/server_production_documentation", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/app_control", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/app_files", attrs: "u=rwX,g=rwX,o=rwX"}
+  - { path: "/.application/app_db_backups", attrs: "u=rwX,g=rwX,o=rwX"}
 
 # REPOSITORY DETAILS
 fastapi_repo:
@@ -58,8 +60,8 @@ react_update_repo:
 db_backup_source_directory: /home/m/.server_sql_backup/
 db_backup_destination_directory: ~/.application/app_db_backups/
 
-scripts_source_directory: ~/.application/app_control
-scripts_destination_directory: "/home/{{ user_name }}/.application/app_control/"
+app_control_source_directory: "~/.application/app_control/"
+app_control_destination_directory: "/home/{{ user_name }}/.application/app_control/"
 
-config_files_source_directory: ~/.application/app_files
-config_files_destination_directory: "/home/{{ user_name }}/.application/app_files/"
+app_files_source_directory: "~/.application/app_files/"
+app_files_destination_directory: "/home/{{ user_name }}/.application/app_files/"
