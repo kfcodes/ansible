@@ -86,6 +86,46 @@
   with_items:
     "{{ application_directories }}"
 
+- name: creating link to the .env file for the react app dev repo
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.application/app_control/env_vars/reactApp.env"
+    dest: "/home/{{ local_usr }}/.reactapp/.env" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: creating link to the .env file for the fastAPI dev repo
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.application/app_control/env_vars/fastAPI.env"
+    dest: "/home/{{ local_usr }}/.fastapi/app/.env" 
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Linking the data models layer directory for the fastAPI app to the dev repo
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.application/app_files/data_models_layer"
+    dest: "/home/{{ local_usr }}/.fastapi/app/physical_layer/data_models_layer" 
+    state: link
+    force: yes
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Linking the label structure layer directory for the fastAPI app to the dev repo
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.application/app_files/label_structure_layer"
+    dest: "/home/{{ local_usr }}/.fastapi/app/physical_layer/label_structure_layer" 
+    state: link
+    force: yes
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
 # Configure Gnome environment
 
 # Configure Suckless software 
