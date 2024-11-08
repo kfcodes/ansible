@@ -74,6 +74,7 @@
     repo: git@github.com:kfcodes/fastapi.git
     dest: "/home/{{ local_usr }}/.fastapi"
     accept_hostkey: yes
+    version: dev
   become: no
   ignore_errors: true
 
@@ -82,6 +83,7 @@
     repo: https://github.com/tmux-plugins/tpm
     dest: "/home/{{ local_usr }}/.tmux/plugins/tpm"
     accept_hostkey: yes
+    version: dev
   become: no
   ignore_errors: true
       #- name: PULL THE MOST RECENT REACT APP
