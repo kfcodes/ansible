@@ -126,6 +126,27 @@
   ignore_errors: true
   become_user: "{{ local_usr }}"
 
+- name: Installing npm packages for reactapp from package.json to their latest versions
+  community.general.npm:
+    path: "/home/{{ local_usr }}/.reactapp/" 
+    state: latest
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Installing packages from requirements fastAPI into virtualenv
+  ansible.builtin.pip:
+    requirements: /home/{{ local_usr }}/.fastapi/requirements.txt
+    virtualenv: /home/{{ local_usr }}/.fastapi/.venv
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: add the .bin folder of scripts to the PATH
+  ansible.builtin.lineinfile:
+    path: /home/{{ local_usr }}/.bashrc
+    insertafter: EOF
+    line: export PATH="/home/{{ local_usr }}/.bin:$PATH"
+    state: present
+
 # Configure Gnome environment
 
 # Configure Suckless software 
