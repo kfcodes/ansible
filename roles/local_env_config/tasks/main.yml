@@ -37,7 +37,7 @@
 #     state: link
 #     force: yes
 
-- name: Create symbolic link for input rc config
+- name: Create symbolic link for inputrc config
   ansible.builtin.file:
     src: "/home/{{ local_usr }}/.dotfiles/.inputrc"
     dest: "/home/{{ local_usr }}/.inputrc" 
@@ -57,7 +57,7 @@
 
 - name: Create symbolic link for Tmux config
   ansible.builtin.file:
-    src: "/home/{{ local_usr }}/.dotfiles/.tmux.conf"
+    src: "/home/{{ local_usr }}/.dotfiles/tmux.conf"
     dest: "/home/{{ local_usr }}/.tmux.conf" 
     owner: "{{ local_usr }}"
     group: "{{ local_usr }}"
@@ -140,12 +140,12 @@
   ignore_errors: true
   become_user: "{{ local_usr }}"
 
-- name: add the .bin folder of scripts to the PATH
-  ansible.builtin.lineinfile:
-    path: /home/{{ local_usr }}/.bashrc
-    insertafter: EOF
-    line: export PATH="/home/{{ local_usr }}/.bin:$PATH"
-    state: present
+# - name: add the .bin folder of scripts to the PATH
+#   ansible.builtin.lineinfile:
+#     path: /home/{{ local_usr }}/.bashrc
+#     insertafter: EOF
+#     line: export PATH="/home/{{ local_usr }}/.bin:$PATH"
+#     state: present
 
 # Configure Gnome environment
 

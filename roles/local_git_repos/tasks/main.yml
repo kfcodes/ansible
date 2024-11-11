@@ -22,10 +22,10 @@
   become: no
   ignore_errors: true
 
-- name: PULL THE MOST BINARY COMMANDS
+- name: Pull Personal local bash scripts
   ansible.builtin.git:
     repo: git@github.com:kfcodes/bash_scripts.git
-    dest: "/home/{{ local_usr }}/.bin/"
+    dest: "/home/{{ local_usr }}/.local/bin/"
     accept_hostkey: yes
   become: no
   ignore_errors: true
