@@ -14,6 +14,22 @@
       - virtualenv
       - python3-setuptools
       - ripgrep
+      - remmina
     state: latest
     update_cache: true
 
+# - name: Pull the most recent version of conda for the web
+#   ansible.builtin.uri:
+#     url: https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
+#     dest: /tmp
+#     method: GET
+#   delegate_to: localhost
+# - name: Install Anaconda onto system
+#   expect:
+#     command: cd /tmp && bash Anaconda3-2020.11-Linux-x86_64.sh
+#     responses:
+#       "Please, press ENTER to continue": "\cr"
+#       "Please answer yes or no": "yes"
+
+  # ignore_errors: true
+  # delegate_to: localhost
