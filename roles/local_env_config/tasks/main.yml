@@ -140,6 +140,14 @@
   ignore_errors: true
   become_user: "{{ local_usr }}"
 
+  # https://github.com/Ultimaker/Cura/releases/download/5.8.1/UltiMaker-Cura-5.8.1-linux-X64.AppImage
+# - name: adding existing user '{{ local_usr }}' to group docker
+#   ansible.builtin.user:
+#       name: '{{ user }}'
+#       groups: docker
+#       append: yes
+#   ignore_errors: true
+
 # - name: Pull the most recent version of conda for the web
 #   ansible.builtin.uri:
 #     url: https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
