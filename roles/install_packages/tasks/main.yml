@@ -17,6 +17,7 @@
       - remmina
       - mariadb-server
       - fuse
+      - texlive-full
     state: latest
     update_cache: true
 
