@@ -1,8 +1,8 @@
 # GIT BRANCH DETAILS
 fastapi_stable_tag: v0.02
-fastapi_update_tag: rc0.1.4
+fastapi_update_tag: rc0.1.4hf02
 react_stable_tag: v0.02.01-router_hotfix
-react_update_tag: rc0.02.01
+react_update_tag: rc0.02.02
 default_branch: main
 
 # GITHUB URL PATHS
