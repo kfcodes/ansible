@@ -1,6 +1,6 @@
 # GIT BRANCH DETAILS
 fastapi_stable_tag: v0.02
-fastapi_update_tag: rc0.1.4hf02
+fastapi_update_tag: rc0.1.4.3
 react_stable_tag: v0.02.01-router_hotfix
 react_update_tag: rc0.02.02
 default_branch: main
@@ -38,7 +38,7 @@ fastapi_repo:
   user_name: "{{ user_name }}"
   port: "8001"
 fastapi_update_repo:
-  repo_name: "fastAPI_update"
+  repo_name: "fastAPI_update_2"
   repo_url: "{{ fastapi_repo_url }}"
   version: "{{ fastapi_update_tag }}"
   user_name: "{{ user_name }}"
