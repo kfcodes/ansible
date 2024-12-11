@@ -7,7 +7,7 @@
     - ../vars/main.yml
 
   tasks:
-    - name: Update host system
+    - name: Update systems
       include_role:
         name: update_system
 
