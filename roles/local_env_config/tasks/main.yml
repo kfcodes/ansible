@@ -126,6 +126,24 @@
   ignore_errors: true
   become_user: "{{ local_usr }}"
 
+- name: Linking the production images directory for the fastAPI app to the dev repo
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.application/app_files/production_images"
+    dest: "/home/{{ local_usr }}/.fastapi/app/physical_layer/production_images" 
+    state: link
+    force: yes
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Linking the report images directory for the fastAPI app to the dev repo
+  ansible.builtin.file:
+    src: "/home/{{ local_usr }}/.application/app_files/report_images"
+    dest: "/home/{{ local_usr }}/.fastapi/app/physical_layer/report_images" 
+    state: link
+    force: yes
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
 - name: Installing npm packages for reactapp from package.json to their latest versions
   community.general.npm:
     path: "/home/{{ local_usr }}/.reactapp/" 
