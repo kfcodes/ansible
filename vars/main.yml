@@ -6,13 +6,8 @@ react_update_tag: rc0.02.02
 default_branch: main
 
 # GITHUB URL PATHS
-# fastapi_repo_url: "https://github.com/kfcodes/pandas_scripts.git"
 fastapi_repo_url: "git@github.com:kfcodes/fastapi.git"
-    # repo: git@github.com:kfcodes/fastapi.git
-# react_repo_url: "https://github.com/kfcodes/production_documentation.git"
-# react_repo_url: "https://github.com/kfcodes/reactapp.git"
 react_repo_url: "git@github.com:kfcodes/reactapp.git"
-    # repo: git@github.com:kfcodes/reactapp.git
 dotfiles_url: "https://github.com/kfcodes/production_documentation.git"
 docker_scripts_url: "https://github.com/kfcodes/production_documentation.git"
 bin_files_url: "https://github.com/kfcodes/production_documentation.git"
