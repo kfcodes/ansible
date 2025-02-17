@@ -1,0 +1,16 @@
+---
+# Application setup tasks
+- name: Install application packages
+  apt:
+    name: "{{ packages_to_install }}"
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Ensure Apache service is running
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+  become: yes
+

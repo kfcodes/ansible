@@ -1,0 +1,7 @@
+---
+  new_user: "localuser"
+  ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtLOCALKEY..."
+  packages_to_install:
+    - git
+    - curl
+    - htop

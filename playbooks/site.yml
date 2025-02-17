@@ -1,0 +1,15 @@
+---
+# Main playbook applying roles to appropriate groups
+
+- name: Configure Local System
+  hosts: local_system
+  become: true
+  roles:
+    - common
+
+- name: Configure Application Server
+  hosts: application_server
+  become: true
+  roles:
+    - application
+
