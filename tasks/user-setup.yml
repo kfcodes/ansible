@@ -1,0 +1,19 @@
+- name: Create app user
+  user:
+    name: "{{ app_user }}"
+    shell: /bin/bash
+    create_home: yes
+
+- name: Create app directory
+  file:
+    path: "{{ deploy_path }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"
+
+- name: Configure SSH key
+  authorized_key:
+    user: "{{ app_user }}"
+    state: present
+    key: "{{ lookup('file', ssh_public_key_path) }}"

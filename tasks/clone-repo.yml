@@ -1,0 +1,5 @@
+- name: Clone application repo
+  git:
+    repo: "{{ github_repo_url }}"
+    dest: "{{ deploy_path }}/{{ repo_name }}"
+    version: "{{ repo_branch }}"

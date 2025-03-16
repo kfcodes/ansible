@@ -1,0 +1,4 @@
+- name: Build Docker image
+  command: docker build -t {{ docker_image_name }} .
+  args:
+    chdir: "{{ deploy_path }}/{{ repo_name }}"
