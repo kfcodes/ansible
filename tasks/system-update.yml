@@ -1,7 +1,8 @@
-- name: Update apt cache
-  apt:
+---
+- name: Updating installed packages
+  ansible.builtin.package:
     update_cache: yes
-    cache_valid_time: 3600
+    upgrade: yes
 
 - name: Upgrade all packages
   apt:
