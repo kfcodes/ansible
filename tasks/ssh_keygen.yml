@@ -1,5 +1,5 @@
 ---
-- name: GENERATE ANSIBLE SSH KEYPAIR
+- name: generate ansible ssh keypair
   community.crypto.openssh_keypair:
     path: "/home/{{ local_usr }}/.ssh/application"
     type: ed25519
@@ -7,7 +7,7 @@
     size: 4096
   become: no
 
-- name: GENERATE GITHUB OPENSSH KEYPAIR
+- name: generate github openssh keypAIR
   community.crypto.openssh_keypair:
     path: "/home/{{ local_usr }}/.ssh/github"
     type: ed25519
@@ -15,14 +15,14 @@
     size: 4096
   become: no
 
-- name: CREATE THE SSH CONFIG FILE
+- name: create the ssh config file
   template:
     src: "templates/ssh_config.j2"
     dest: "/home/{{ local_usr }}/.ssh/config"
     owner: "{{ local_usr }}"
   become: no
 
-- name: Evaluating the authentication agent & adding the key...
+- name: evaluating the authentication agent & adding the key...
   shell: |
     eval "$(ssh-agent)"
     ssh-add /home/m/.ssh/github_key
