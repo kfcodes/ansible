@@ -1,0 +1,11 @@
+# docker-compose.yml
+services:
+  "{{ user_name }}":
+    build: .
+    container_name: "{{ item.repo_name }}"
+    volumes:
+      - ./app:/app
+    ports: 
+      - "{{ item.port }}:8000"
+    restart: unless-stopped
+

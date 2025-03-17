@@ -1,0 +1,68 @@
+---
+- name: COPY THE ENVIRONMENT VARIABLES FILE TO THE REPO DIRECTORY
+  ansible.builtin.copy:
+    remote_src: yes
+    src: "/home/{{ user_name }}/.application/app_control/env_vars/fastAPI.env"
+    dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/.env"
+  with_items:
+    - "{{ fastapi_repo }}"
+    - "{{ fastapi_update_repo }}"
+
+- name: COPYING MODELS DATA FILES TO FASTAPI DIRECTORIES
+  ansible.builtin.copy:
+    remote_src: yes
+    src: "/home/{{ user_name }}/.application/app_files/data_models_layer/"
+    dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/physical_layer/data_models_layer/"
+  with_items:
+    - "{{ fastapi_repo }}"
+    - "{{ fastapi_update_repo }}"
+
+# - name: COPYING LABEL DATA FILES TO FASTAPI DIRECTORIES
+#   ansible.builtin.copy:
+#     remote_src: yes
+    # src: "/home/{{ user_name }}/.application/app_files/labels/"
+#     dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/physical_layer/labels/"
+#   with_items:
+#     - "{{ fastapi_repo }}"
+#     - "{{ fastapi_update_repo }}"
+
+- name: GENERATE DOCKER COMPOSE FILE FOR INDIVIDUAL FASTAPI CONTAINERS 
+  template:
+    src: "templates/fastapi_docker_compose.yml.j2"
+    dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml" 
+  with_items:
+    - "{{ fastapi_repo }}"
+    - "{{ fastapi_update_repo }}"
+
+- name: GENERATE INDIVIDUAL START UP SCRIPTS FOR FASTAPI CONTAINERS
+  template:
+    src: "templates/fastapi_update.sh.j2"
+    dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh" 
+  with_items:
+    - "{{ fastapi_repo }}"
+    - "{{ fastapi_update_repo }}"
+
+# - name: Build the FastAPI Docker image
+#   command: docker-compose up --build -d
+#   args:
+#     chdir: "/home/{{ user_name }}/{{ item.repo_name }}/" 
+#   with_items:
+#     - "{{ fastapi_repo }}"
+#     - "{{ fastapi_update_repo }}"
+#
+# - name: Start the FastAPI container
+#   command: docker-compose -f /home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml up -d
+#   args:
+#     chdir: "/home/{{ user_name }}/{{ item.repo_name }}/" 
+#   with_items:
+#     - "{{ fastapi_repo }}"
+#     - "{{ fastapi_update_repo }}"
+
+# - name: Verify the FastAPI container is running
+#   command: docker-compose -f /home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml ps
+#   args:
+#     chdir: "/home/{{ user_name }}/{{ item.repo_name }}/" 
+#   with_items:
+#     - "{{ fastapi_repo }}"
+#     - "{{ fastapi_update_repo }}"
+
