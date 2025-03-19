@@ -1,5 +1,5 @@
 ---
-  - name: DOWNLOADING CONFIG DATA
+  - name: Downloading Config Data
     ansible.builtin.copy:
       remote_src: yes
       src: "/home/{{ user_name }}/.application/app_control/env_vars/reactApp.env"
@@ -8,18 +8,18 @@
       - "{{ react_repo }}"
       - "{{ react_update_repo }}"
 
-  - name: GENERATE DOCKER COMPOSE FILE FROM TEMPLATE
+  - name: Generating Docker Compose File
     template:
       src: "templates/react_docker_compose.yml.j2"
-      dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml" 
+      dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml"
     with_items:
       - "{{ react_repo }}"
       - "{{ react_update_repo }}"
 
-  - name: GENERATE CONTAINER BASH SCRIPT
+  - name: Generate Container Bash Script
     template:
       src: "templates/react_update.sh.j2"
-      dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh" 
+      dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh"
     with_items:
       - "{{ react_repo }}"
       - "{{ react_update_repo }}"
