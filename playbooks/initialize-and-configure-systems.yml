@@ -1,0 +1,82 @@
+---
+- name: Provision Linux System For Hosting Application
+  hosts: host_servers
+  become: yes
+
+  vars_files:
+    - ../vars/main.yml
+
+  tasks:
+    - name: UPDATE HOST SYSTEM
+      include_role:
+        name: update_system
+
+    - name: Install packages for host system
+      include_role:
+        name: install_packages
+
+    - name: Install and configure docker on ubuntu
+      include_role:
+        name: ubuntu_docker
+
+    - name: CREATE USERS AND DIRECTORIES
+      include_role:
+        name: host_usr_config
+
+    - name: GENERATE SSH KEY PAIRS
+      include_role:
+        name: host_ssh_keys
+
+    - name: Print instructions to the user
+      ansible.builtin.debug:
+        msg: 'Next steps (1) Copy the public ssh keys to the remote servers and Github (2) Run the app_sync playbook (3) Run docker_update playbook'
+
+---
+- name: Initialise the local system
+  hosts: control
+  become: yes
+
+  vars_files:
+    - ../vars/main.yml
+
+  tasks:
+    - name: UPDATE LOCAL SYSTEM
+      include_role:
+        name: update_system
+
+    - name: INSTALL PACKAGES FOR LOCAL SYSTEM
+      include_role:
+        name: install_packages
+
+    - name: INSTALL AND CONFIGURE DOCKER ON UBUNTU
+      include_role:
+        name: ubuntu_docker
+
+    - name: CREATE USERS AND DIRECTORIES
+      include_role:
+        name: host_usr_config
+
+    - name: GENERATE SSH KEY PAIRS
+      include_role:
+        name: local_ssh_keys
+
+    - name: Print instructions to the user
+      ansible.builtin.debug:
+        msg: 'Before the next step copy the public ssh keys to the remote servers and Github'
+
+---
+- name: Configuring the local system
+  hosts: control
+  become: yes
+
+  vars_files:
+    - ../vars/main.yml
+
+  tasks:
+    - name: DOWLOAD LOCAL GITHUB REPOS
+      include_role:
+        name: local_git_repos
+
+    - name: Configure local system
+      include_role:
+        name: local_env_config
