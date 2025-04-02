@@ -5,21 +5,20 @@
 
 - name: Create docker containers
   community.docker.docker_image:
-    name: "{{ default_container_name }}"
-    image: "{{ default_container_image }}"
-    command: "{{ default_container_command }}"
+    name: "{{ container_name }}"
+    image: "{{ container_image }}"
+    command: "{{ container_command }}"
     state: present
   with_sequence: count={{ container_count }}
 
-  # roles/download_github_repo/tasks/main.yml
 - name: Ensure destination directory exists
   file:
-    path: "{{ git_repo_info.dest_path }}"
+    path: "{{ repo.dest_path }}"
     state: directory
 
 - name: Clone repository from GitHub
   git:
-    repo: "{{ git_repo_info.repo_url }}"
-    dest: "{{ git_repo_info.dest_path }}/{{ git_repo_info.project_name }}"
-    version: "{{ git_repo_info.branch_version }}"
+    repo: "{{ repo.url }}"
+    dest: "{{ repo.dest_path }}/{{ repo.name }}"
+    version: "{{ repo.version }}"
     update: yes
