@@ -1,11 +1,11 @@
 ---
-- name: DOWNLOADING GIT REPOSITORY DATA {{ git_repo_name }} - {{ git_version }}
+- name: Clone {{ repo_name }} (version {{ tag }})
   ansible.builtin.git:
-    repo: "{{ git_repo_url }}"
-    dest: "/home/{{ git_user_name }}/{{ git_repo_name }}/"
-    key_file: "/home/{{ git_user_name }}/.ssh/{{ git_repo_key }}"
+    repo: "{{ repo_url }}"
+    dest: "/home/{{ git_user }}/{{ repo_name }}/"
+    key_file: "/home/{{ git_user }}/.ssh/{{ repo_key }}"
     single_branch: yes
     force: yes
-    version: "{{ git_version }}"
+    version: "{{ tag }}"
     accept_hostkey: yes
-  become_user: "{{ git_user_name }}"
+  become_user: "{{ git_user }}"
