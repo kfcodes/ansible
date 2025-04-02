@@ -1,2 +1,2 @@
 # ansible
-This is the scripts I use to automate setup of my local linux system
+Script to help automating deploying applications to docker containers
