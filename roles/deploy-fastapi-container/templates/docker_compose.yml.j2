@@ -1,11 +1,19 @@
-# docker-compose.yml
 services:
-  "{{ user_name }}":
-    build: .
-    container_name: "{{ item.repo_name }}"
+  "{{ item.name }}":
+    build:
+      context: .
+    container_name: "{{ item.name }}"
     volumes:
       - ./app:/app
-    ports: 
+      - "/var/log/{{ item.name }}:/app/logs"
+    ports:
       - "{{ item.port }}:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:{{ item.port }}/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - {{ item.network | default('bridge') }}
     restart: unless-stopped
-

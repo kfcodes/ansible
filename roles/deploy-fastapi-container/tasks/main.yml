@@ -1,68 +1,59 @@
 ---
-- name: Copyting env file to {{ item.repo_name }}
-  ansible.builtin.copy:
+- name: Clone FastAPI repo
+  git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.path }}"
+    version: "{{ item.branch }}"
+    update: yes
+  loop: "{{ fastapi_apps }}"
+
+- name: Copy .env file (optional)
+  copy:
+    src: "{{ item.env_file }}"
+    dest: "{{ item.path }}/app/.env"
     remote_src: yes
-    src: "/home/{{ user_name }}/.application/app_control/env_vars/fastAPI.env"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/.env"
-  with_items:
-    - "{{ fastapi_repo }}"
-    - "{{ fastapi_update_repo }}"
+  when: item.env_file is defined
+  loop: "{{ fastapi_apps }}"
 
-- name: Copying Models Data Files to {{ item.repo_name }}
-  ansible.builtin.copy:
+- name: Copy model files (optional)
+  copy:
+    src: "{{ item.models_src }}"
+    dest: "{{ item.path }}/{{ item.models_dest }}"
     remote_src: yes
-    src: "/home/{{ user_name }}/.application/app_files/data_models_layer/"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/physical_layer/data_models_layer/"
-  with_items:
-    - "{{ fastapi_repo }}"
-    - "{{ fastapi_update_repo }}"
+  when: item.models_src is defined and item.models_dest is defined
+  loop: "{{ fastapi_apps }}"
 
-# - name: COPYING LABEL DATA FILES TO FASTAPI DIRECTORIES
-#   ansible.builtin.copy:
-#     remote_src: yes
-    # src: "/home/{{ user_name }}/.application/app_files/labels/"
-#     dest: "/home/{{ user_name }}/{{ item.repo_name }}/app/physical_layer/labels/"
-#   with_items:
-#     - "{{ fastapi_repo }}"
-#     - "{{ fastapi_update_repo }}"
-
-- name: Generating Docker Compose File for {{ item.repo_name }}
+- name: Template Docker Compose file
   template:
-    src: "templates/fastapi_docker_compose.yml.j2"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml"
-  with_items:
-    - "{{ fastapi_repo }}"
-    - "{{ fastapi_update_repo }}"
+    src: docker-compose.yaml.j2
+    dest: "{{ item.path }}/docker-compose.yml"
+  loop: "{{ fastapi_apps }}"
 
-- name: Generating Start up Bash Script for {{ item.repo_name }}
-  template:
-    src: "templates/fastapi_update.sh.j2"
-    dest: "/home/{{ user_name }}/{{ item.repo_name }}/update.sh"
-  with_items:
-    - "{{ fastapi_repo }}"
-    - "{{ fastapi_update_repo }}"
+- name: Ensure Docker network exists (nginx reverse proxy or app)
+  docker_network:
+    name: "{{ item.network }}"
+    state: present
+  when: item.network is defined
+  loop: "{{ fastapi_apps }}"
 
-# - name: Build the FastAPI Docker image
-#   command: docker-compose up --build -d
-#   args:
-#     chdir: "/home/{{ user_name }}/{{ item.repo_name }}/"
-#   with_items:
-#     - "{{ fastapi_repo }}"
-#     - "{{ fastapi_update_repo }}"
-#
-# - name: Start the FastAPI container
-#   command: docker-compose -f /home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml up -d
-#   args:
-#     chdir: "/home/{{ user_name }}/{{ item.repo_name }}/"
-#   with_items:
-#     - "{{ fastapi_repo }}"
-#     - "{{ fastapi_update_repo }}"
+- name: Stop existing container
+  shell: docker container stop {{ item.name }}
+  ignore_errors: true
+  loop: "{{ fastapi_apps }}"
 
-# - name: Verify the FastAPI container is running
-#   command: docker-compose -f /home/{{ user_name }}/{{ item.repo_name }}/docker-compose.yml ps
-#   args:
-#     chdir: "/home/{{ user_name }}/{{ item.repo_name }}/"
-#   with_items:
-#     - "{{ fastapi_repo }}"
-#     - "{{ fastapi_update_repo }}"
+- name: Remove existing container
+  shell: docker container rm {{ item.name }}
+  ignore_errors: true
+  loop: "{{ fastapi_apps }}"
 
+- name: Build and start container with Docker Compose
+  shell: docker compose up --build --detach
+  args:
+    chdir: "{{ item.path }}"
+  loop: "{{ fastapi_apps }}"
+
+- name: Connect container to Docker network (if defined)
+  shell: docker network connect {{ item.network }} {{ item.name }}
+  when: item.network is defined
+  ignore_errors: true
+  loop: "{{ fastapi_apps }}"
