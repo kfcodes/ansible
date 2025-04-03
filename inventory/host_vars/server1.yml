@@ -6,10 +6,13 @@ fastapi_apps:
     path: /opt/labelapi
     branch: stable
     port: "8001:8000"
+    network: application_network
     env_file: "/home/ubuntu/.application/app_control/env_vars/fastAPI.env"
     models_src: "/home/ubuntu/.application/app_files/data_models_layer/"
     models_dest: "app/physical_layer/data_models_layer/"
-    network: application_network
+    environment:
+      - DEBUG=True
+      - APP_ENV=production
 
   - name: palletapi
     repo: https://github.com/yourorg/palletapi.git
@@ -17,3 +20,6 @@ fastapi_apps:
     branch: update
     port: "8002:8000"
     network: application_network
+    environment:
+      - DEBUG=True
+      - APP_ENV=staging
