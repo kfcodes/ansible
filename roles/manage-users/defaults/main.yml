@@ -1,0 +1,7 @@
+---
+default_user_options:
+  create_home: false
+  shell: /bin/bash
+  state: present
+  groups: ""
+

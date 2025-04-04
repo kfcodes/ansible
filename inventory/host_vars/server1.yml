@@ -37,3 +37,18 @@ react_apps:
       - NODE_ENV=staging
       - REACT_APP_API_URL=https://api.example.com
 
+users:
+  - name: devuser
+    create_home: true
+    groups: "docker,sudo"
+    ssh_public_key_path: "/home/ansible/.ssh/devuser_rsa.pub"
+    app_dirs:
+      - path: ".application"
+        attrs: "0750"
+      - path: "data"
+        attrs: "0755"
+
+  - name: readonly
+    shell: /usr/sbin/nologin
+    state: present
+
