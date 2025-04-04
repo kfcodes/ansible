@@ -11,6 +11,11 @@
         | list
       }}
 
+- name: Show merged app variables in debug
+  debug:
+    var: merged_react_apps
+  when: ansible_check_mode
+
 - name: Download env file for React apps
   copy:
     remote_src: yes
@@ -19,6 +24,7 @@
   loop: "{{ merged_react_apps }}"
   loop_control:
     loop_var: app
+  diff: true
 
 - name: Template Docker Compose file
   template:
@@ -27,15 +33,17 @@
   loop: "{{ merged_react_apps }}"
   loop_control:
     loop_var: app
+  diff: true
 
-- name: Ensure Docker network exists
+- name: Connect container to Docker network (if defined)
   docker_network:
     name: "{{ app.network }}"
     state: present
   loop: "{{ merged_react_apps }}"
   loop_control:
     loop_var: app
-  when: app.network is defined
+  when: app.network is defined and not ansible_check_mode
+  ignore_errors: true
 
 - name: Stop existing React container
   shell: docker container stop {{ app.name }}
@@ -43,6 +51,7 @@
   loop: "{{ merged_react_apps }}"
   loop_control:
     loop_var: app
+  when: not ansible_check_mode
 
 - name: Remove existing React container
   shell: docker container rm {{ app.name }}
@@ -50,6 +59,7 @@
   loop: "{{ merged_react_apps }}"
   loop_control:
     loop_var: app
+  when: not ansible_check_mode
 
 - name: Build and run React container
   shell: docker compose up -d --build
@@ -58,11 +68,5 @@
   loop: "{{ merged_react_apps }}"
   loop_control:
     loop_var: app
+  when: not ansible_check_mode
 
-- name: Connect container to Docker network (if defined)
-  shell: docker network connect {{ app.network }} {{ app.name }}
-  when: app.network is defined
-  ignore_errors: true
-  loop: "{{ merged_react_apps }}"
-  loop_control:
-    loop_var: app
