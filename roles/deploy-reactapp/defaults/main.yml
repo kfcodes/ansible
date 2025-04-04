@@ -1,0 +1,14 @@
+---
+# defaults file for reactapp-frontend
+react_app_defaults:
+  repo_base: "https://github.com/myorg/"
+  branch: "main"
+  port: "3000:3000"
+  base_path: "/opt"
+  network: "application_network"
+  environment:
+    - NODE_ENV=production
+  volumes:
+    - ./build:/usr/share/nginx/html
+  env_file: "/home/ubuntu/.application/app_control/env_vars/reactApp.env"
+

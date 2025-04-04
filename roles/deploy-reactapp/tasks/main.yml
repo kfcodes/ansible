@@ -1,0 +1,68 @@
+---
+- name: Merge app config with defaults
+  set_fact:
+    merged_react_apps: >-
+      {{
+        react_apps | map('combine', react_app_defaults, recursive=True)
+        | map('combine', {
+            'repo': (item.repo if item.repo is defined else react_app_defaults.repo_base ~ item.name ~ '.git'),
+            'path': (item.path if item.path is defined else react_app_defaults.base_path ~ '/' ~ item.name)
+        })
+        | list
+      }}
+
+- name: Download env file for React apps
+  copy:
+    remote_src: yes
+    src: "{{ app.env_file }}"
+    dest: "{{ app.path }}/.env"
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app
+
+- name: Template Docker Compose file
+  template:
+    src: "docker-compose.yaml.j2"
+    dest: "{{ app.path }}/docker-compose.yml"
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app
+
+- name: Ensure Docker network exists
+  docker_network:
+    name: "{{ app.network }}"
+    state: present
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app
+  when: app.network is defined
+
+- name: Stop existing React container
+  shell: docker container stop {{ app.name }}
+  ignore_errors: true
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app
+
+- name: Remove existing React container
+  shell: docker container rm {{ app.name }}
+  ignore_errors: true
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app
+
+- name: Build and run React container
+  shell: docker compose up -d --build
+  args:
+    chdir: "{{ app.path }}"
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app
+
+- name: Connect container to Docker network (if defined)
+  shell: docker network connect {{ app.network }} {{ app.name }}
+  when: app.network is defined
+  ignore_errors: true
+  loop: "{{ merged_react_apps }}"
+  loop_control:
+    loop_var: app

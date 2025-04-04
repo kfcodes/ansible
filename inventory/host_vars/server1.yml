@@ -23,3 +23,17 @@ fastapi_apps:
     environment:
       - DEBUG=True
       - APP_ENV=staging
+
+react_apps:
+  # Uses all defaults except `branch`
+  - name: react_dashboard
+    branch: dev
+
+  # Overrides repo, port, and env
+  - name: react_portal
+    repo: https://github.com/another-org/custom-portal.git
+    port: "3001:3000"
+    environment:
+      - NODE_ENV=staging
+      - REACT_APP_API_URL=https://api.example.com
+
