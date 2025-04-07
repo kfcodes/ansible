@@ -1,0 +1,43 @@
+---
+- name: Updating Installed Packages
+  ansible.builtin.package:
+    update_cache: yes
+    upgrade: dist
+  register: update_result
+
+- name: Upgrading Packages
+  ansible.builtin.package:
+    upgrade: dist
+    autoremove: yes
+    autoclean: yes
+
+- name: Combine default + specific packages
+  set_fact:
+    packages_to_install: "{{ default_packages + (group_packages | default([])) }}"
+
+- name: Install combined package list
+  apt:
+    name: "{{ packages_to_install }}"
+    state: latest
+    update_cache: yes
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository to apt
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Install Docker-CE
+  ansible.builtin.package:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: Install Docker Compose
+  ansible.builtin.package:
+    name: docker-compose
+    state: latest

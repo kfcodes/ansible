@@ -1,0 +1,4 @@
+group_packages:
+  - python3-venv
+  - code
+  - htop
