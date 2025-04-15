@@ -1,5 +1,4 @@
 ---
-# defaults file for reactapp-frontend
 react_app_defaults:
   repo_base: "https://github.com/myorg/"
   branch: "main"
