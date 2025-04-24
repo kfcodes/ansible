@@ -1,5 +1,0 @@
----
-- name: Updating installed packages
-  ansible.builtin.package:
-    update_cache: yes
-    upgrade: yes
