@@ -11,7 +11,7 @@ It is platform-aware and supports Debian, Ubuntu, RedHat, and Fedora systems.
 
 ---
 
-## ✅ Features
+## Features
 
 - OS-aware system upgrades using `apt` or `dnf`
 - Merges `default_packages` and `group_packages` for clean installs
@@ -21,7 +21,7 @@ It is platform-aware and supports Debian, Ubuntu, RedHat, and Fedora systems.
 
 ---
 
-## 🔧 Role Variables
+## Role Variables
 
 ### 🔹 General
 

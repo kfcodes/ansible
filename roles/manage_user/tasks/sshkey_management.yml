@@ -1,0 +1,32 @@
+- block:
+    - name: Add SSH public key inline (if provided)
+      authorized_key:
+        user: "{{ item.name }}"
+        key: "{{ item.ssh_public_key }}"
+        state: present
+      loop: "{{ all_users }}"
+      when: item.ssh_public_key is defined
+      become: true
+
+    - name: Add SSH key from file (if provided and exists)
+      authorized_key:
+        user: "{{ item.name }}"
+        key: "{{ lookup('file', item.ssh_public_key_path) }}"
+        state: present
+      loop: "{{ all_users }}"
+      when:
+        - item.ssh_public_key_path is defined
+        - lookup('file', item.ssh_public_key_path, errors='ignore') != ''
+      become: true
+
+    - name: Add multiple SSH keys from files (if defined)
+      authorized_key:
+        user: "{{ item.0.name }}"
+        key: "{{ lookup('file', item.1) }}"
+        state: present
+      with_subelements:
+        - "{{ all_users }}"
+        - ssh_key_files
+      when: item.0.ssh_key_files is defined
+      become: true
+  when: enable_ssh_key_management | default(false) | bool

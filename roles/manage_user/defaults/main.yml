@@ -1,7 +1,24 @@
----
+# Default options applied to each user unless overridden
 default_user_options:
-  create_home: false
-  shell: /bin/bash
   state: present
-  groups: ""
+  shell: /bin/bash
+  create_home: true
+  groups: users
+  generate_ssh_key: false
+  ssh_key_bits: 4096
 
+# External users (appended to internal_role_users)
+users: []
+
+# Generate a new SSH keypair for the ansible user on the control node
+generate_ansible_ssh_key: false
+
+# Controls whether SSH public keys are injected into users
+# Internal user required for Ansible access
+internal_role_users:
+  - name: ansible
+    groups: sudo
+    system: true
+    shell: /bin/bash
+    ssh_public_key_path: files/ssh_keys/ansible.pub
+enable_ssh_key_management: true

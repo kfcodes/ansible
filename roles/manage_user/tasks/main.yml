@@ -1,53 +1,10 @@
----
-- name: Ensure users exist with defaults
-  ansible.builtin.user:
-    name: "{{ item.name }}"
-    state: "{{ item.state | default(default_user_options.state) }}"
-    shell: "{{ item.shell | default(default_user_options.shell) }}"
-    create_home: "{{ item.create_home | default(default_user_options.create_home) }}"
-    groups: "{{ item.groups | default(default_user_options.groups) }}"
-    generate_ssh_key: "{{ item.generate_ssh_key | default(false) }}"
-    ssh_key_bits: "{{ item.ssh_key_bits | default(4096) }}"
-    ssh_key_file: "{{ item.ssh_key_file | default(omit) }}"
-  loop: "{{ users }}"
-  loop_control:
-    loop_var: item
+# Entry point for the manage_users role
 
-- name: Create application data directories (if defined)
-  ansible.builtin.file:
-    path: "/home/{{ item.name }}/{{ dir.path }}"
-    state: directory
-    owner: "{{ item.name }}"
-    group: "{{ item.name }}"
-    mode: "{{ dir.attrs | default('0755') }}"
-    recurse: true
-  when: item.app_dirs is defined
-  loop: "{{ users }}"
-  loop_control:
-    loop_var: item
-  with_nested:
-    - "{{ users }}"
-    - "{{ item.app_dirs }}"
-  loop_control:
-    loop_var: dir
+- name: Conditionally generate SSH key for ansible user (on control node)
+  import_tasks: generate_sshkey.yml
 
-- name: Add inline SSH key to user (if provided)
-  authorized_key:
-    user: "{{ item.name }}"
-    state: present
-    key: "{{ item.ssh_public_key }}"
-  loop: "{{ users }}"
-  when: item.ssh_public_key is defined
-  loop_control:
-    loop_var: item
+- name: Manage user creation and removal
+  import_tasks: user_accounts.yml
 
-- name: Add SSH key from file (if provided)
-  authorized_key:
-    user: "{{ item.name }}"
-    state: present
-    key: "{{ lookup('file', item.ssh_public_key_path) }}"
-  loop: "{{ users }}"
-  when: item.ssh_public_key_path is defined
-  loop_control:
-    loop_var: item
-
+- name: Manage SSH key installation
+  import_tasks: sshkey_management.yml

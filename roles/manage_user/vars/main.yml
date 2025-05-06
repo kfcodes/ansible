@@ -1,0 +1,7 @@
+# Internal user required for Ansible access
+internal_role_users:
+  - name: ansible
+    groups: sudo
+    system: true
+    shell: /bin/bash
+    ssh_public_key_path: files/ssh_keys/ansible.pub
