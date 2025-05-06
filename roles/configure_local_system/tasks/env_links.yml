@@ -1,0 +1,19 @@
+- name: Create .env file links for dev apps
+  file:
+    src: "/home/{{ local_usr }}/{{ item.src }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+  loop: "{{ env_links }}"
+  become_user: "{{ local_usr }}"
+
+- name: Link application directories
+  file:
+    src: "/home/{{ local_usr }}/{{ item.src }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    state: link
+    force: yes
+  loop: "{{ app_links }}"
+  become_user: "{{ local_usr }}"

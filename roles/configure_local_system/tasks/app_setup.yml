@@ -1,0 +1,33 @@
+- name: Create application directories
+  file:
+    path: "/home/{{ local_usr }}/{{ item.path }}"
+    mode: "{{ item.attrs }}"
+    state: directory
+    recurse: true
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+  loop: "{{ application_directories }}"
+  become_user: "{{ local_usr }}"
+
+- name: Install NPM packages for reactapp (if path exists)
+  community.general.npm:
+    path: "/home/{{ local_usr }}/.reactapp/"
+    state: latest
+  when: ansible_facts['user_dir'] is defined and ansible_facts['user_dir'] is directory
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Install Python requirements for fastAPI (if path exists)
+  pip:
+    requirements: /home/{{ local_usr }}/.fastapi/requirements.txt
+    virtualenv: /home/{{ local_usr }}/.fastapi/.venv
+  when: ansible_facts['user_dir'] is defined and ansible_facts['user_dir'] is directory
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Generate global .gitconfig from template
+  template:
+    src: "gitconfig.j2"
+    dest: "/home/{{ local_usr }}/.gitconfig"
+    owner: "{{ local_usr }}"
+  become_user: "{{ local_usr }}"

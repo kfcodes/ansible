@@ -1,0 +1,36 @@
+local_usr: "{{ ansible_user_id }}"
+
+dotfile_links:
+  - { src: ".dotfiles/.dircolors", dest: ".dircolors" }
+  - { src: ".dotfiles/.Xresources", dest: ".Xresources" }
+  - { src: ".dotfiles/.xsession", dest: ".xsession" }
+  - { src: ".dotfiles/.inputrc", dest: ".inputrc" }
+  - { src: ".dotfiles/mpv.conf", dest: ".config/mpv/mpv.conf" }
+  - { src: ".dotfiles/tmux.conf", dest: ".tmux.conf" }
+  - { src: ".nvim", dest: ".config/nvim" }
+
+env_links:
+  - { src: ".application/app_control/env_vars/reactApp.env", dest: ".reactapp/.env" }
+  - { src: ".application/app_control/env_vars/fastAPI.env", dest: ".fastapi/app/.env" }
+
+app_links:
+  - { src: ".application/app_files/data_models_layer", dest: ".fastapi/app/physical_layer/data_models_layer" }
+  - { src: ".application/app_files/label_structure_layer", dest: ".fastapi/app/physical_layer/label_structure_layer" }
+  - { src: ".application/app_files/production_images", dest: ".fastapi/app/physical_layer/production_images" }
+  - { src: ".application/app_files/report_images", dest: ".fastapi/app/physical_layer/report_images" }
+
+application_directories:
+  - { path: ".config/mpv", attrs: "0755" }
+  - { path: ".tmux/plugins", attrs: "0755" }
+
+dev_repositories:
+  - { repo: "git@github.com:kfcodes/neovim.git", dest: ".nvim" }
+  - { repo: "git@github.com:kfcodes/dotfiles.git", dest: ".dotfiles" }
+  - { repo: "git@github.com:kfcodes/bash_scripts.git", dest: ".local/bin" }
+  - { repo: "git@github.com:kfcodes/docker_scripts.git", dest: ".docker_scripts" }
+  - { repo: "git@github.com:kfcodes/ansible.git", dest: ".my_ansible" }
+  - { repo: "git@github.com:kfcodes/dmenu.git", dest: ".suckless/dmenu" }
+  - { repo: "git@github.com:kfcodes/dwm.git", dest: ".suckless/dwm" }
+  - { repo: "git@github.com:kfcodes/reactapp.git", dest: ".reactapp", version: "dev" }
+  - { repo: "git@github.com:kfcodes/fastapi.git", dest: ".fastapi", version: "dev" }
+  - { repo: "https://github.com/tmux-plugins/tpm", dest: ".tmux/plugins/tpm" }

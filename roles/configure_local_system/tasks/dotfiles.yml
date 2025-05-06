@@ -1,0 +1,10 @@
+- name: Create symbolic links for dotfiles
+  file:
+    src: "/home/{{ local_usr }}/{{ item.src }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+  loop: "{{ dotfile_links }}"
+  become_user: "{{ local_usr }}"

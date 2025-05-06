@@ -1,0 +1,8 @@
+- name: Pull development repositories
+  git:
+    repo: "{{ item.repo }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    version: "{{ item.version | default('HEAD') }}"
+    accept_hostkey: true
+  loop: "{{ dev_repositories }}"
+  become_user: "{{ local_usr }}"
