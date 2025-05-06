@@ -1,2 +1,15 @@
----
-# defaults file for sync_server_data
+# List of sync jobs to run.
+# Each item should define:
+# - name:         A label for the sync operation
+# - src:          The source directory
+# - dest:         The destination directory
+# - mode:         'push' (default) or 'pull'
+# - rsync_opts:   Optional list of rsync options (overrides defaults)
+
+sync_jobs: []
+
+# Default rsync options used if rsync_opts is not provided per job
+default_rsync_opts:
+  - "--archive"
+  - "--compress"
+  - "--delete"
