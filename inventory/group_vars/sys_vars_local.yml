@@ -3,6 +3,8 @@ group_packages:
   - code
   - htop
 
+local_usr: kfcodes
+
 db_backup_source_directory: /data/db/backups/
 db_backup_destination_directory: /mnt/devsync/db/
 
