@@ -1,0 +1,22 @@
+- name: Set interface facts
+  set_fact:
+    net_interface: "{{ interface_name }}"
+    net_type: "{{ interface_type | default('ethernet') }}"
+    has_static_ip: "{{ static_ip is defined and static_ip is not none }}"
+  when: interface_name is defined
+
+- name: Print planned network config
+  debug:
+    msg: |
+      Host: {{ inventory_hostname }}
+      Interface: {{ net_interface }}
+      Type: {{ net_type }}
+      Static IP: {{ static_ip | default('DHCP') }}
+
+- name: Generate Netplan config (if static_ip is set)
+  template:
+    src: netplan.yaml.j2
+    dest: /etc/netplan/01-netcfg.yaml
+    mode: '0644'
+  notify: Apply netplan
+  when: has_static_ip

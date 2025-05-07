@@ -1,0 +1,27 @@
+- name: Update packages (Debian)
+  apt:
+    update_cache: yes
+    upgrade: dist
+    autoremove: yes
+    autoclean: yes
+  register: update_result
+  when: ansible_os_family == "Debian"
+  notify: Reboot System
+
+- name: Upgrade packages (RedHat/Fedora)
+  dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+  register: update_result
+  when: ansible_os_family == "RedHat"
+  notify: Reboot System
+
+- name: Combine default + group-specific packages
+  set_fact:
+    packages_to_install: "{{ default_packages + (group_packages | default([])) }}"
+
+- name: Install combined packages
+  package:
+    name: "{{ packages_to_install }}"
+    state: latest

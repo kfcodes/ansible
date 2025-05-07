@@ -1,0 +1,48 @@
+install_docker: true
+allow_reboot: true
+docker_service_name: docker
+
+# Grouped packages
+default_cli_tools:
+  - curl
+  - git
+  - vim
+  - htop
+  - tmux
+  - neovim
+  - rsync
+  - ripgrep
+
+default_python_tools:
+  - python3-pip
+  - virtualenv
+  - python3-setuptools
+
+default_system_utils:
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+  - fuse
+
+default_gui_utils:
+  - remmina
+  - texlive-full
+
+default_db_tools:
+  - mariadb-server
+
+default_packages: >-
+  {{ default_cli_tools + default_python_tools + default_system_utils +
+     default_gui_utils + default_db_tools }}
+
+group_packages: []
+
+# Static IP config (only used if set in host_vars)
+static_ip: null
+netmask: 24
+gateway: 192.168.1.1
+dns_servers:
+  - 1.1.1.1
+  - 8.8.8.8
+
+interface_type: ethernet

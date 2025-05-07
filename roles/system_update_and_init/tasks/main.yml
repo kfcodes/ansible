@@ -1,0 +1,11 @@
+- import_tasks: update_and_install_packages.yml
+  tags: [packages]
+
+- import_tasks: set_hostname.yml
+  tags: [hostname]
+
+- import_tasks: set_static_ip.yml
+  tags: [ip]
+
+- import_tasks: install_docker.yml
+  tags: [docker]
