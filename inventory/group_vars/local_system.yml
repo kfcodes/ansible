@@ -1,0 +1,89 @@
+# === Local User Identity ===
+local_usr: m
+
+# === CLI Tool Packages ===
+default_cli_tools:
+  - python3-venv
+  - code
+  - htop
+  - tmux
+  - neovim
+  - ripgrep
+  - fd-find
+  - bat
+  - jq
+  - tree
+  - man-db
+
+# === Python Development Packages ===
+default_python_tools:
+  - python3-pip
+  - virtualenv
+  - python3-setuptools
+  - python3-dev
+  - python3-wheel
+  - pipx
+
+# === System Utilities ===
+default_system_utils:
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+  - fuse
+  - net-tools
+  - iproute2
+  - lsof
+  - iotop
+  - ncdu
+  - sysstat
+  - glances
+  - rsync
+  - acl
+
+# === Graphical Tools and Fonts ===
+default_gui_utils:
+  - remmina
+  - texlive-full
+  - gnome-system-monitor
+  - meld
+  - filezilla
+
+# === Local Database Tools ===
+default_db_tools:
+  - mariadb-server
+
+# === Combined Package Set for Installation ===
+group_packages: >-
+  {{ default_cli_tools + default_python_tools + default_system_utils +
+     default_gui_utils + default_db_tools }}
+
+# === Sync Directory Base Paths ===
+sync_source_base: "/opt"
+sync_dest_base: "/mnt/devsync"
+
+# === Source and Destination Paths for File Sync ===
+db_backup_source_directory: "{{ sync_source_base }}/db_backups/"
+db_backup_destination_directory: "{{ sync_dest_base }}/db/"
+
+app_control_source_directory: "{{ sync_source_base }}/scripts/"
+app_control_destination_directory: "{{ sync_dest_base }}/scripts/"
+
+app_files_source_directory: "{{ sync_source_base }}/webapp/"
+app_files_destination_directory: "{{ sync_dest_base }}/webapp/"
+
+# === File Sync Job Definitions ===
+sync_jobs:
+  - name: Sync DB backups
+    src: "{{ db_backup_source_directory }}"
+    dest: "{{ db_backup_destination_directory }}"
+    mode: pull
+
+  - name: Sync control scripts
+    src: "{{ app_control_source_directory }}"
+    dest: "{{ app_control_destination_directory }}"
+    mode: pull
+
+  - name: Sync application files
+    src: "{{ app_files_source_directory }}"
+    dest: "{{ app_files_destination_directory }}"
+    mode: pull

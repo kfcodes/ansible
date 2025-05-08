@@ -1,8 +1,0 @@
----
-  new_user: "appuser"
-  ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtAPPKEY..."
-  packages_to_install:
-    - apache2
-    - mysql-server
-    - libapache2-mod-wsgi-py3
-

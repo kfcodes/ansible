@@ -1,8 +1,11 @@
-system_hostname: devbox-host2
+# === Ansible Connection Settings (host-specific) ===
+ansible_host: 192.168.1.90
+ansible_ssh_private_key_file: "{{ lookup('env', 'HOME') }}/.ssh/application_key"
 
+# === Host-specific Networking Settings ===
 interface_name: enp3s0
-
 interface_type: ethernet
 
-# static_ip: 192.168.1.101   # Only include this if static IP is desired
-
+# === System Metadata ===
+# system_hostname: host-laptop
+static_ip: null
