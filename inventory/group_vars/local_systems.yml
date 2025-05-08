@@ -1,6 +1,9 @@
 # === Local User Identity ===
 local_usr: m
 
+install_docker: true
+force_docker_reinstall: false
+
 # === CLI Tool Packages ===
 default_cli_tools:
   - python3-venv
