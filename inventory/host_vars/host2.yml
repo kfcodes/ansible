@@ -1,4 +1,8 @@
 system_hostname: devbox-host2
+
 interface_name: enp3s0
+
 interface_type: ethernet
-static_ip: 192.168.1.101   # Only include this if static IP is desired
+
+# static_ip: 192.168.1.101   # Only include this if static IP is desired
+
