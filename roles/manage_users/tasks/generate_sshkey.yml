@@ -1,37 +1,42 @@
-- name: Ensure local SSH key directory exists
+- name: Ensure SSH key directory exists
   file:
-    path: files/ssh_keys
+    path: "{{ ssh_key_dir }}"
     state: directory
-    mode: '0755'
+    mode: '0700'
   delegate_to: localhost
   run_once: true
-  when: generate_ansible_ssh_key | default(false) | bool
+  when: ssh_key_generate | bool
 
-- name: Check if SSH key already exists
+- name: Check if SSH private key exists
   stat:
-    path: files/ssh_keys/ansible
-  register: ansible_ssh_key_stat
+    path: "{{ ssh_key_private_path }}"
+  register: ssh_private_key_stat
   delegate_to: localhost
   run_once: true
-  when: generate_ansible_ssh_key | default(false) | bool
+  when: ssh_key_generate | bool
 
-- name: Generate SSH key for ansible user (on control node)
-  command: ssh-keygen -t ed25519 -f files/ssh_keys/ansible -N ''
+- name: Generate SSH key pair
+  command: >
+    ssh-keygen -t {{ ssh_key_type }}
+    -b {{ ssh_key_bits }}
+    -f {{ ssh_key_private_path }}
+    -N ''
+    -C "{{ ssh_key_comment }}"
   args:
-    creates: files/ssh_keys/ansible
+    creates: "{{ ssh_key_private_path }}"
   delegate_to: localhost
   run_once: true
   when:
-    - generate_ansible_ssh_key | default(false) | bool
-    - not ansible_ssh_key_stat.stat.exists
+    - ssh_key_generate | bool
+    - not ssh_private_key_stat.stat.exists
 
 - name: Set permissions on generated SSH key files
   file:
     path: "{{ item.path }}"
     mode: "{{ item.mode }}"
   loop:
-    - { path: files/ssh_keys/ansible, mode: '0600' }
-    - { path: files/ssh_keys/ansible.pub, mode: '0644' }
+    - { path: "{{ ssh_key_private_path }}", mode: '0600' }
+    - { path: "{{ ssh_key_public_path }}", mode: '0644' }
   delegate_to: localhost
   run_once: true
-  when: generate_ansible_ssh_key | default(false) | bool
+  when: ssh_key_generate | bool

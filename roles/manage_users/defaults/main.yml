@@ -7,18 +7,15 @@ default_user_options:
   generate_ssh_key: false
   ssh_key_bits: 4096
 
-# External users (appended to internal_role_users)
-users: []
-
-# Generate a new SSH keypair for the ansible user on the control node
-generate_ansible_ssh_key: false
-
 # Controls whether SSH public keys are injected into users
-# Internal user required for Ansible access
-internal_role_users:
-  - name: ansible
-    groups: sudo
-    system: true
-    shell: /bin/bash
-    ssh_public_key_path: files/ssh_keys/ansible.pub
 enable_ssh_key_management: true
+
+# SSH key generation settings
+ssh_key_name: ansible
+ssh_key_type: ed25519
+ssh_key_bits: 4096
+ssh_key_comment: "Ansible managed key"
+ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
+ssh_key_private_path: "{{ ssh_key_dir }}/{{ ssh_key_name }}"
+ssh_key_public_path: "{{ ssh_key_private_path }}.pub"
+ssh_key_generate: false  # Set to true in host_vars or group_vars to enable key generation
