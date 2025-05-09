@@ -21,7 +21,7 @@
   set_fact:
     packages_to_install: "{{ default_packages + (group_packages | default([])) }}"
 
-- name: Install combined packages
-  package:
-    name: "{{ packages_to_install }}"
-    state: latest
+# - name: Install combined packages
+#   package:
+#     name: "{{ packages_to_install }}"
+#     state: latest

@@ -1,13 +1,3 @@
 install_docker: true
 allow_reboot: true
 docker_service_name: docker
-
-default_packages:
-  - curl
-  - git
-  - htop
-  - tmux
-  - neovim
-  - rsync
-  - ripgrep
-  - ranger

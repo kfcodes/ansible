@@ -1,0 +1,28 @@
+# ----------------------------------------
+# Configure a static IP using Netplan
+# Only runs if 'static_ip' and 'interface_name' are defined in host_vars
+# ----------------------------------------
+- name: Configure static IP with Netplan
+  block:
+
+    - name: Set interface configuration facts
+      set_fact:
+        net_interface: "{{ interface_name }}"
+        net_type: "{{ interface_type | default('ethernet') }}"
+
+    - name: Show planned static IP network configuration
+      debug:
+        msg: |
+          Host: {{ inventory_hostname }}
+          Interface: {{ net_interface }}
+          Type: {{ net_type }}
+          Static IP: {{ static_ip }}
+
+    - name: Generate Netplan config with static IP
+      template:
+        src: netplan.yaml.j2
+        dest: /etc/netplan/01-netcfg.yaml
+        mode: '0644'
+      notify: Apply netplan
+
+  when: interface_name is defined and static_ip is defined and static_ip is not none
