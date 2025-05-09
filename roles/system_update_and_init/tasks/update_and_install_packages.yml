@@ -17,11 +17,11 @@
   when: ansible_os_family == "RedHat"
   notify: Reboot System
 
-- name: Combine default + group-specific packages
+- name: Merge and deduplicate package lists
   set_fact:
-    packages_to_install: "{{ default_packages + (group_packages | default([])) }}"
+    packages_to_install: "{{ host_system_packages | default([]) + local_system_packages | default([]) | unique }}"
 
-# - name: Install combined packages
-#   package:
-#     name: "{{ packages_to_install }}"
-#     state: latest
+- name: Install combined packages
+  package:
+    name: "{{ packages_to_install }}"
+    state: latest

@@ -36,13 +36,15 @@ sync_jobs:
     mode: push
 
 # === Minimal Package Set for Application Hosting ===
-group_packages:
+host_system_packages:
+  - htop
+  - tmux
+  - neovim
+  - rsync
+  - ripgrep
+  - ranger
   - curl
   - git
   - python3
   - python3-pip
-  - docker.io
-  - rsync
-  - ufw
-  - fail2ban
-  - ca-certificates
+  - darktable

@@ -4,62 +4,6 @@ local_usr: m
 install_docker: true
 force_docker_reinstall: false
 
-# === CLI Tool Packages ===
-default_cli_tools:
-  - python3-venv
-  - code
-  - htop
-  - tmux
-  - neovim
-  - ripgrep
-  - fd-find
-  - bat
-  - jq
-  - tree
-  - man-db
-
-# === Python Development Packages ===
-default_python_tools:
-  - python3-pip
-  - virtualenv
-  - python3-setuptools
-  - python3-dev
-  - python3-wheel
-  - pipx
-
-# === System Utilities ===
-default_system_utils:
-  - apt-transport-https
-  - ca-certificates
-  - software-properties-common
-  - fuse
-  - net-tools
-  - iproute2
-  - lsof
-  - iotop
-  - ncdu
-  - sysstat
-  - glances
-  - rsync
-  - acl
-
-# === Graphical Tools and Fonts ===
-default_gui_utils:
-  - remmina
-  - texlive-full
-  - gnome-system-monitor
-  - meld
-  - filezilla
-
-# === Local Database Tools ===
-default_db_tools:
-  - mariadb-server
-
-# === Combined Package Set for Installation ===
-group_packages: >-
-  {{ default_cli_tools + default_python_tools + default_system_utils +
-     default_gui_utils + default_db_tools }}
-
 # === Sync Directory Base Paths ===
 sync_source_base: "/opt"
 sync_dest_base: "/mnt/devsync"
@@ -90,3 +34,53 @@ sync_jobs:
     src: "{{ app_files_source_directory }}"
     dest: "{{ app_files_destination_directory }}"
     mode: pull
+
+# === CLI Tool Packages ===
+cli_tools:
+  - python3-venv
+  - fd-find
+  - bat
+  - jq
+  - man-db
+
+# === Python Development Packages ===
+python_tools:
+  - python3-pip
+  - virtualenv
+  - python3-setuptools
+  - python3-dev
+  - python3-wheel
+  - pipx
+
+# === System Utilities ===
+system_utils:
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+  - fuse
+  - net-tools
+  - iproute2
+  - lsof
+  - iotop
+  - ncdu
+  - sysstat
+  - glances
+  - rsync
+  - acl
+
+# === Graphical Tools and Fonts ===
+gui_utils:
+  - remmina
+  - texlive-full
+  - gnome-system-monitor
+  - meld
+  - filezilla
+
+# === Local Database Tools ===
+db_tools:
+  - mariadb-server
+
+# === Combined Package Set for Installation ===
+# local_system_packages: >-
+#   {{ cli_tools + python_tools + system_utils +
+#      gui_utils + db_tools }}
