@@ -1,7 +1,7 @@
 ---
   - name: Initialize system configuration
     # hosts: all
-    hosts: local_system
+    hosts: local_systems
     become: true
     gather_facts: true
 
