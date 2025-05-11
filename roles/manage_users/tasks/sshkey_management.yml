@@ -1,7 +1,18 @@
-# === Inject SSH key for a single system user from a file ===
+# === Inject a single SSH public key per system user ===
+# Requires `system_user.name` and `system_user.ssh_public_key_path` to be defined.
+# Key is read from control node and installed on the remote host.
+
 - block:
 
-    - name: Add SSH public key for system user from file
+    # --- Debug info before adding key ---
+    - name: Debug SSH key setup intent
+      debug:
+        msg: >-
+          Installing SSH key for user '{{ system_user.name }}' on host '{{ inventory_hostname }}'
+          Using public key file: '{{ system_user.ssh_public_key_path }}'
+
+    # --- Add the key to the user's authorized_keys ---
+    - name: Add SSH public key from file
       authorized_key:
         user: "{{ system_user.name }}"
         key: "{{ lookup('file', system_user.ssh_public_key_path) }}"

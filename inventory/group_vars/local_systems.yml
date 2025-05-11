@@ -31,6 +31,16 @@ app_files_destination_directory: "{{ sync_dest_base }}/webapp/"
 
 # === File Sync Job Definitions ===
 sync_jobs:
+  - name: Sync static web assets
+    src: ./static/
+    dest: /var/www/static/
+
+  - name: Sync config templates
+    src: ./config/
+    dest: /etc/myapp/config/
+    rsync_opts:
+      - "--exclude=secrets.env"
+
   - name: Sync DB backups
     src: "{{ db_backup_source_directory }}"
     dest: "{{ db_backup_destination_directory }}"
