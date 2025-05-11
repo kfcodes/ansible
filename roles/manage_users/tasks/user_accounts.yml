@@ -11,8 +11,9 @@
     shell: "{{ final_user.shell }}"
     create_home: "{{ final_user.create_home }}"
     groups: "{{ final_user.groups }}"
+    append: yes
     system: "{{ final_user.system | default(false) }}"
-    password_lock: "{{ final_user.lock_password | default(false) }}"
+    password_lock: "{{ final_user.lock_password | default(omit) }}"
     uid: "{{ final_user.uid | default(omit) }}"
     group: "{{ final_user.primary_group | default(omit) }}"
   become: true

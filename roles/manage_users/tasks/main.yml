@@ -6,5 +6,5 @@
 - name: Conditionally generate SSH key for ansible user (on control node)
   import_tasks: generate_sshkey.yml
 
-# - name: Manage SSH key installation
-#   import_tasks: sshkey_management.yml
+- name: Manage SSH key installation
+  import_tasks: sshkey_management.yml

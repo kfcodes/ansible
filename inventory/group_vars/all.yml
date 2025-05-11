@@ -25,4 +25,3 @@ ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
 ssh_key_private_path: "{{ ssh_key_dir }}/{{ ssh_key_name }}"
 ssh_key_public_path: "{{ ssh_key_private_path }}.pub"
 ssh_key_generate: false  # Set to true per host if needed
-

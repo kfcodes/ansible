@@ -1,3 +1,4 @@
-install_docker: true
 allow_reboot: true
+install_docker: true
 docker_service_name: docker
+force_docker_reinstall: false
