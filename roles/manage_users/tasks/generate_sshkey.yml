@@ -17,11 +17,7 @@
 
 - name: Generate SSH key pair
   command: >
-    ssh-keygen -t {{ ssh_key_type }}
-    -b {{ ssh_key_bits }}
-    -f {{ ssh_key_private_path }}
-    -N ''
-    -C "{{ ssh_key_comment }}"
+    ssh-keygen -t {{ ssh_key_type }} -b {{ ssh_key_bits }} -f {{ ssh_key_private_path }} -N '' -C "{{ ssh_key_comment }}"
   args:
     creates: "{{ ssh_key_private_path }}"
   delegate_to: localhost

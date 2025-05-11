@@ -1,5 +1,9 @@
 # === Ansible SSH and User Settings ===
-ansible_user: m
+users:
+  - name: appuser
+    groups: [docker]
+
+create_internal_users: true
 
 # === System Behavior Flags ===
 allow_reboot: true
@@ -47,4 +51,3 @@ host_system_packages:
   - git
   - python3
   - python3-pip
-  - darktable

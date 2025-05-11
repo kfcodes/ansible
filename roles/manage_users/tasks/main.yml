@@ -1,10 +1,10 @@
 # Entry point for the manage_users role
 
-- name: Conditionally generate SSH key for ansible user (on control node)
-  import_tasks: generate_sshkey.yml
-
 - name: Manage user creation and removal
   import_tasks: user_accounts.yml
 
-- name: Manage SSH key installation
-  import_tasks: sshkey_management.yml
+- name: Conditionally generate SSH key for ansible user (on control node)
+  import_tasks: generate_sshkey.yml
+
+# - name: Manage SSH key installation
+#   import_tasks: sshkey_management.yml

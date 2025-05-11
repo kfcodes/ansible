@@ -1,12 +1,18 @@
-# === Local User Identity ===
-local_usr: m
+# === Ansible SSH and User Settings ===
+system_user:
+  name: devuser
+  shell: /bin/bash
+  create_home: true
+  ssh_public_key_path: files/ssh_keys/devuser.pub
+  groups:
+    - sudo
 
+create_internal_users: false
+ssh_key_generate: true
+
+# === System Behavior Flags ===
+allow_reboot: true
 install_docker: true
-force_docker_reinstall: false
-
-# === Sync Directory Base Paths ===
-sync_source_base: "/opt"
-sync_dest_base: "/mnt/devsync"
 
 # === Source and Destination Paths for File Sync ===
 db_backup_source_directory: "{{ sync_source_base }}/db_backups/"
@@ -75,6 +81,7 @@ gui_utils:
   - gnome-system-monitor
   - meld
   - filezilla
+  - darktable
 
 # === Local Database Tools ===
 db_tools:

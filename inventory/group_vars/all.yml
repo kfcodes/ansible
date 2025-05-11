@@ -1,3 +1,28 @@
+# Ansible connection user (must match the user created below if using key auth)
+ansible_user: "{{ system_user.name }}"
 ansible_python_interpreter: /usr/bin/python3
 
-ansible_user: ansible
+# === Default user config and SSH key settings ===
+default_user_options:
+  state: present
+  shell: /bin/bash
+  create_home: false
+  generate_ssh_key: false
+  ssh_key_bits: 4096
+  groups:
+    - sudo
+    - users
+
+# Whether to inject SSH keys
+enable_ssh_key_management: true
+
+# SSH key generation (used on control node)
+ssh_key_name: appuser
+ssh_key_type: ed25519
+ssh_key_bits: 4096
+ssh_key_comment: "Managed by Ansible"
+ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
+ssh_key_private_path: "{{ ssh_key_dir }}/{{ ssh_key_name }}"
+ssh_key_public_path: "{{ ssh_key_private_path }}.pub"
+ssh_key_generate: false  # Set to true per host if needed
+

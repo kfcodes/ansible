@@ -1,43 +1,18 @@
-- name: Fail if users is not a list
-  assert:
-    that: users is iterable
-    fail_msg: "'users' must be a list of user definitions."
-
-- name: Merge external users with internal role-defined users
+- name: Merge system_user with default options and apply additional groups
   set_fact:
-    all_users: "{{ users + internal_role_users }}"
-
-- name: Ensure user accounts exist or are removed
-  user:
-    name: "{{ merged_user.name }}"
-    state: "{{ 'absent' if merged_user.remove | default(false) else merged_user.state }}"
-    shell: "{{ merged_user.shell }}"
-    create_home: "{{ merged_user.create_home }}"
-    groups: "{{ merged_user.groups }}"
-    generate_ssh_key: "{{ merged_user.generate_ssh_key }}"
-    ssh_key_bits: "{{ merged_user.ssh_key_bits }}"
-    ssh_key_file: "{{ merged_user.ssh_key_file | default(omit) }}"
-    uid: "{{ merged_user.uid | default(omit) }}"
-    group: "{{ merged_user.primary_group | default(omit) }}"
-    system: "{{ merged_user.system | default(false) }}"
-    password_lock: "{{ merged_user.lock_password | default(false) }}"
-  loop: "{{ all_users }}"
-  loop_control:
-    loop_var: user
+    final_user: "{{ default_user_options | combine(system_user, recursive=True) | combine({'groups': merged_groups}) }}"
   vars:
-    merged_user: "{{ default_user_options | combine(user, recursive=True) }}"
-  become: true
+    merged_groups: "{{ (system_user.groups | default([])) + (additional_groups | default([])) | unique }}"
 
-- name: Create application directories for users
-  file:
-    path: "/home/{{ item.0.name }}/{{ item.1.path }}"
-    state: directory
-    owner: "{{ item.0.name }}"
-    group: "{{ item.0.name }}"
-    mode: "{{ item.1.attrs | default('0755') }}"
-    recurse: true
-  with_subelements:
-    - "{{ all_users }}"
-    - app_dirs
-  when: item.0.app_dirs is defined
+# === Ensure the system user account exists ===
+- name: Create the system user
+  user:
+    name: "{{ final_user.name }}"
+    shell: "{{ final_user.shell }}"
+    create_home: "{{ final_user.create_home }}"
+    groups: "{{ final_user.groups }}"
+    system: "{{ final_user.system | default(false) }}"
+    password_lock: "{{ final_user.lock_password | default(false) }}"
+    uid: "{{ final_user.uid | default(omit) }}"
+    group: "{{ final_user.primary_group | default(omit) }}"
   become: true

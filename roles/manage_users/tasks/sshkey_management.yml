@@ -29,4 +29,4 @@
         - ssh_key_files
       when: item.0.ssh_key_files is defined
       become: true
-  when: enable_ssh_key_management | default(false) | bool
+  when: enable_ssh_key_management | bool

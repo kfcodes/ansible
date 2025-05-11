@@ -6,4 +6,4 @@
 
     roles:
     - system_update_and_init
-    # - manage_users
+    - manage_users

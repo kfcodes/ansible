@@ -1,7 +1,7 @@
-# Internal user required for Ansible access
-internal_role_users:
-  - name: ansible
-    groups: sudo
+# === Internal automation/app user (used for syncing and control) ===
+app_user:
+  - name: appuser
+    groups: [sudo, docker]
     system: true
     shell: /bin/bash
-    ssh_public_key_path: files/ssh_keys/ansible.pub
+    ssh_public_key_path: files/ssh_keys/appuser.pub
