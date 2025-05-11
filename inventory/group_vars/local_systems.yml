@@ -3,12 +3,17 @@ system_user:
   name: devuser
   shell: /bin/bash
   create_home: true
-  ssh_public_key_path: files/ssh_keys/devuser.pub
+  ssh_public_key_path: "{{ ssh_key_dir }}/host_systems.pub"
   groups:
     - sudo
 
 create_internal_users: false
 ssh_key_generate: true
+
+ssh_keys_to_generate:
+  - github_4
+  - host_systems
+  - gitlab
 
 # === System Behavior Flags ===
 allow_reboot: true
