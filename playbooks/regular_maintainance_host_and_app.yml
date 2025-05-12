@@ -1,85 +1,71 @@
 ---
   - name: Playbook to pull and manage repositories
     hosts: host_servers
-    become: yes
-
-    vars_files:
-      - ../vars/main.yml
-
-    tasks:
-      - name: UPDATE HOST SYSTEM
-        include_role:
-          name: update_system
-
-      - name: PULL THE MOST RECENT FASTAPI REPOSITORY
-        include_role:
-          name: git_pull_repo
-        vars:
-          git_repo_name: "{{ fastapi_repo.repo_name }}"
-          git_repo_url: "{{ fastapi_repo.repo_url }}"
-          git_version: "{{ fastapi_repo.version }}"
-          git_user_name: "{{ fastapi_repo.user_name }}"
-          git_port: "{{ fastapi_repo.port }}"
-          git_repo_key: fastapi
-
-      - name: PULL THE MOST RECENT FASTAPI UPDATE REPOSITORY
-        include_role:
-          name: git_pull_repo
-        vars:
-          git_repo_name: "{{ fastapi_update_repo.repo_name }}"
-          git_repo_url: "{{ fastapi_update_repo.repo_url }}"
-          git_version: "{{ fastapi_update_repo.version }}"
-          git_user_name: "{{ fastapi_update_repo.user_name }}"
-          git_port: "{{ fastapi_update_repo.port }}"
-          git_repo_key: fastapi
-
-      - name: PULL THE MOST RECENT REACT REPOSITORY
-        include_role:
-          name: git_pull_repo
-        vars:
-          git_repo_name: "{{ react_repo.repo_name }}"
-          git_repo_url: "{{ react_repo.repo_url }}"
-          git_version: "{{ react_repo.version }}"
-          git_user_name: "{{ react_repo.user_name }}"
-          git_port: "{{ react_repo.port }}"
-          git_repo_key: reactapp
-
-      - name: PULL the most recent REACT UPDATE REPOSITORY
-        include_role:
-          name: git_pull_repo
-        vars:
-          git_repo_name: "{{ react_update_repo.repo_name }}"
-          git_repo_url: "{{ react_update_repo.repo_url }}"
-          git_version: "{{ react_update_repo.version }}"
-          git_user_name: "{{ react_update_repo.user_name }}"
-          git_port: "{{ react_update_repo.port }}"
-          git_repo_key: reactapp
-
-      - name: CONFIGURE FASTAPI CONTAINERS
-        include_role:
-          name: fastapi_docker_container_config
-
-      - name: CONFIGURE REACT CONTAINERS
-        include_role:
-          name: reactapp_docker_container_config
-
-  ---
-  - name: Playbook to manage application data and backups
-    hosts: host_servers
     become: true
 
     vars_files:
       - ../vars/main.yml
 
-    tasks:
-      - name: Update systems
-        include_role:
-          name: update_system
+    roles:
+    - system_update_and_init
 
-      - name: Update host cron jobs
-        include_role:
-          name: host_cron_jobs
+    - name: Update host cron jobs
+      include_role:
+        name: host_cron_jobs
 
-      - name: Sync application data
-        include_role:
-          name: manage_app_data
+    - name: Sync application data
+      include_role:
+        name: manage_app_data
+
+    - name: PULL THE MOST RECENT FASTAPI REPOSITORY
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ fastapi_repo.repo_name }}"
+        git_repo_url: "{{ fastapi_repo.repo_url }}"
+        git_version: "{{ fastapi_repo.version }}"
+        git_user_name: "{{ fastapi_repo.user_name }}"
+        git_port: "{{ fastapi_repo.port }}"
+        git_repo_key: fastapi
+
+    - name: PULL THE MOST RECENT FASTAPI UPDATE REPOSITORY
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ fastapi_update_repo.repo_name }}"
+        git_repo_url: "{{ fastapi_update_repo.repo_url }}"
+        git_version: "{{ fastapi_update_repo.version }}"
+        git_user_name: "{{ fastapi_update_repo.user_name }}"
+        git_port: "{{ fastapi_update_repo.port }}"
+        git_repo_key: fastapi
+
+    - name: CONFIGURE FASTAPI CONTAINERS
+      include_role:
+        name: fastapi_docker_container_config
+
+
+    - name: PULL THE MOST RECENT REACT REPOSITORY
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ react_repo.repo_name }}"
+        git_repo_url: "{{ react_repo.repo_url }}"
+        git_version: "{{ react_repo.version }}"
+        git_user_name: "{{ react_repo.user_name }}"
+        git_port: "{{ react_repo.port }}"
+        git_repo_key: reactapp
+
+    - name: PULL the most recent REACT UPDATE REPOSITORY
+      include_role:
+        name: git_pull_repo
+      vars:
+        git_repo_name: "{{ react_update_repo.repo_name }}"
+        git_repo_url: "{{ react_update_repo.repo_url }}"
+        git_version: "{{ react_update_repo.version }}"
+        git_user_name: "{{ react_update_repo.user_name }}"
+        git_port: "{{ react_update_repo.port }}"
+        git_repo_key: reactapp
+
+    - name: CONFIGURE REACT CONTAINERS
+      include_role:
+        name: reactapp_docker_container_config
