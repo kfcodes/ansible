@@ -93,8 +93,6 @@ system_utils:
 gui_utils:
   - remmina
   - texlive-full
-  - gnome-system-monitor
-  - meld
   - filezilla
   - darktable
 
@@ -103,6 +101,7 @@ db_tools:
   - mariadb-server
 
 # === Combined Package Set for Installation ===
-# local_system_packages: >-
+local_system_packages: >-
+  {{ cli_tools + gui_utils + db_tools }}
 #   {{ cli_tools + python_tools + system_utils +
 #      gui_utils + db_tools }}

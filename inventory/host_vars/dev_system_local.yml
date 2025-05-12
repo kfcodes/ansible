@@ -1,7 +1,6 @@
 # === Ansible Connection Configuration ===
 ansible_host: localhost
 ansible_connection: local
-ansible_user: m
 
 # === System Identification ===
-hostname: dev1
+hostname: m

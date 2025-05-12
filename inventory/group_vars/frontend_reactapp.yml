@@ -1,25 +1,19 @@
-# GIT BRANCH DETAILS
-react_stable_tag: v0.02.01-router_hotfix
-react_update_tag: rc0.02.02
-default_branch: main
-
 # GITHUB URL PATH
-react_repo_url: "git@github.com:kfcodes/reactapp.git"
+git_repo_url: "git@github.com:kfcodes/reactapp.git"
 
-# USER INFO
-local_usr: "m"
-user_name: "new_application"
-web_app_usr: "application"
-pwd: "test"
+# GIT BRANCH DETAILS
+stable_branch_tag: v0.02.01-router_hotfix
+update_branch_tag: rc0.02.02
 
 # REPOSITORY DETAILS
-react_repo:
+stable_branch:
   repo_name: "react"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_stable_tag }}"
   user_name: "{{ user_name }}"
   port: "3000"
-react_update_repo:
+
+update_branch:
   repo_name: "react_update"
   repo_url: "{{ react_repo_url }}"
   version: "{{ react_update_tag }}"
