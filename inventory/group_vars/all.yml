@@ -1,10 +1,12 @@
-# Ansible connection user (must match the user created below if using key auth)
+# === Ansible connection settings ===
+# Ensures Ansible connects as the same user it manages
 ansible_user: "{{ system_user.name }}"
 ansible_python_interpreter: /usr/bin/python3
 
+# === SSH key path used for authentication and injection ===
 ssh_key_dir: "{{ lookup('env', 'HOME') }}/.ssh"
 
-# === Default user config and SSH key settings ===
+# === Default user configuration ===
 default_user_options:
   state: present
   shell: /bin/bash
@@ -15,15 +17,23 @@ default_user_options:
     - sudo
     - users
 
-# Whether to inject SSH keys
+# === The system user that will be created on all managed systems ===
+system_user:
+  name: appuser
+  create_home: false
+  ssh_public_key_path: "{{ ssh_key_dir }}/appuser.pub"
+  groups:
+    - docker
+
+# === Whether to inject SSH keys into managed user ===
 enable_ssh_key_management: true
 
-# SSH key generation (used on control node)
+# === SSH key generation configuration (for control node only) ===
 ssh_key_type: ed25519
 ssh_key_bits: 4096
 ssh_key_comment: "Managed by Ansible"
-ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
 
+# === Default rsync options used by sync roles ===
 default_rsync_opts:
   - "--archive"
   - "--compress"

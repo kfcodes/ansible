@@ -1,19 +1,17 @@
 # === Merge system_user with default options and apply additional groups ===
 # This builds the final_user object by combining base settings with host-specific overrides.
-- name: Merge user variables into final_user
+- name: Merge system_user with defaults and append groups without duplication
   set_fact:
     final_user: >-
       {{
         default_user_options
         | combine(system_user, recursive=True)
-        | combine({'groups': merged_groups})
-      }}
-  vars:
-    merged_groups: >-
-      {{
-        (system_user.groups | default([])) +
-        (additional_groups | default([]))
-        | unique
+        | combine({
+            'groups': (
+              default_user_options.groups
+              + (system_user.groups | default([]))
+            ) | unique
+          })
       }}
 
 # === Ensure the system user account exists ===
