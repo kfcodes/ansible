@@ -1,0 +1,9 @@
+backup_cron_user: root
+backup_script_dir: /usr/local/bin
+
+backup_cron_jobs: []
+# Each item:
+# - name: "Daily DB Backup"
+#   script: run_daily_backup.sh
+#   schedule: daily
+#   enabled: true

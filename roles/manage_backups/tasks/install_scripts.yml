@@ -1,0 +1,16 @@
+# === Install backup scripts if they do not already exist ===
+# Each script is defined in the backup_cron_jobs list and must already exist in files/
+
+- name: Check for existing backup scripts
+  stat:
+    path: "{{ backup_script_dir }}/{{ item.script }}"
+  loop: "{{ backup_cron_jobs }}"
+  register: backup_script_stats
+
+- name: Copy backup scripts if missing
+  copy:
+    src: "{{ item.item.script }}"
+    dest: "{{ backup_script_dir }}/{{ item.item.script }}"
+    mode: '0755'
+  loop: "{{ backup_script_stats.results }}"
+  when: not item.stat.exists

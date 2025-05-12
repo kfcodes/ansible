@@ -39,6 +39,17 @@ sync_jobs:
     dest: /mnt/devsync/webapp
     mode: push
 
+backup_cron_jobs:
+  - name: "Hourly App Backup"
+    script: run_hourly_backup.sh
+    schedule: hourly
+    enabled: true
+
+  - name: "Daily DB Backup"
+    script: run_daily_backup.sh
+    schedule: daily
+    enabled: true
+
 # === Minimal Package Set for Application Hosting ===
 host_system_packages:
   - htop

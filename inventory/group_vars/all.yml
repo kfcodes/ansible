@@ -23,3 +23,7 @@ ssh_key_type: ed25519
 ssh_key_bits: 4096
 ssh_key_comment: "Managed by Ansible"
 ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
+
+default_rsync_opts:
+  - "--archive"
+  - "--compress"

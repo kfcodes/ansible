@@ -1,71 +1,71 @@
-# === Initialize the sync failure tracking list ===
-# This ensures that the `failed_syncs` list exists before looping, so we can append to it as needed.
-- name: Ensure failed_syncs list is initialized
-  set_fact:
-    failed_syncs: []
-  when: failed_syncs is not defined
+# === Only run sync tasks if sync_jobs are defined ===
+- block:
 
-# === Main synchronization block ===
-# This block handles syncing application resource directories defined in `sync_jobs`.
-# It uses ansible.posix.synchronize (rsync under the hood), and tracks failed jobs for reporting.
-
-- name: Synchronize resource directories with error tracking
-  block:
-
-    # --- Run each sync job defined in `sync_jobs` ---
-    - name: Run sync job '{{ item.name }}'
-      ansible.posix.synchronize:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-        mode: "{{ item.mode | default('push') }}"
-        rsync_opts: "{{ item.rsync_opts | default(default_rsync_opts) }}"
-        checksum: true     # Use checksums for change detection (more accurate than timestamp)
-        delete: true       # Delete files not present in source
-        links: false
-        recursive: true
-        owner: false
-        group: false
-        perms: false
-        times: false
-      register: sync_result
-      failed_when: sync_result.rc != 0   # Mark as failed if rsync exits non-zero
-      ignore_errors: true                # Prevent playbook from stopping; let rescue handle it
-
-    # --- Confirm successful sync (optional) ---
-    - name: ✅ Sync job '{{ item.name }}' succeeded
-      debug:
-        msg: "✅ Sync succeeded: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
-      when: sync_result is defined and sync_result.rc == 0
-
-  rescue:
-
-    # --- Record the name of the failed job for summary ---
-    - name: Record failed sync for '{{ item.name }}'
+    # === Initialize the sync failure tracking list ===
+    # This list stores the names of any sync jobs that fail
+    - name: Ensure failed_syncs list is initialized
       set_fact:
-        failed_syncs: "{{ failed_syncs + [item.name] }}"
+        failed_syncs: []
+      when: failed_syncs is not defined
 
-    # --- Log the failure in playbook output ---
-    - name: ❌ Log sync failure for '{{ item.name }}'
+    # === Perform all defined sync jobs ===
+    - name: Synchronize resource directories with error tracking
+      block:
+
+        # --- Execute the sync job ---
+        - name: Run sync job '{{ item.name }}'
+          ansible.posix.synchronize:
+            src: "{{ item.src }}"
+            dest: "{{ item.dest }}"
+            mode: "{{ item.mode | default('pull') }}"
+            rsync_opts: "{{ item.rsync_opts | default(default_rsync_opts) }}"
+            checksum: true
+            delete: false
+            links: false
+            recursive: true
+            owner: false
+            group: false
+            perms: false
+            times: false
+          register: sync_result
+          failed_when: sync_result.rc != 0
+          ignore_errors: true
+
+        # --- Report success if applicable ---
+        - name: ✅ Sync job '{{ item.name }}' succeeded
+          debug:
+            msg: "✅ Sync succeeded: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
+          when: sync_result is defined and sync_result.rc == 0
+
+      rescue:
+
+        # --- Record failed job for summary report ---
+        - name: Record failed sync for '{{ item.name }}'
+          set_fact:
+            failed_syncs: "{{ failed_syncs + [item.name] }}"
+
+        # --- Log failure details ---
+        - name: ❌ Log sync failure for '{{ item.name }}'
+          debug:
+            msg: "❌ Sync failed: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
+
+      loop: "{{ sync_jobs }}"
+      loop_control:
+        label: "{{ item.name }}"
+      become: false
+
+    # === Summary of failures (if any) ===
+    - name: Display summary of failed sync jobs
       debug:
-        msg: "❌ Sync failed: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
+        msg: |
+          ❗ The following sync jobs failed:
+          {{ failed_syncs | join(', ') }}
+      when: failed_syncs | length > 0
 
-  loop: "{{ sync_jobs }}"
-  loop_control:
-    label: "{{ item.name }}"
-  become: false
+    # === Summary of success (if all succeeded) ===
+    - name: ✅ All sync jobs completed successfully
+      debug:
+        msg: "✅ All sync jobs completed without errors."
+      when: failed_syncs | length == 0
 
-# === Failure summary output ===
-# This task lists any sync jobs that failed at the end of execution.
-- name: Display summary of failed sync jobs (if any)
-  debug:
-    msg: |
-      ❗ The following sync jobs failed:
-      {{ failed_syncs | join(', ') }}
-  when: failed_syncs is defined and failed_syncs | length > 0
-
-# === Success summary output ===
-# This is shown only if all sync jobs completed successfully.
-- name: ✅ All sync jobs completed successfully
-  debug:
-    msg: "✅ All sync jobs completed without errors."
-  when: failed_syncs is defined and failed_syncs | length == 0
+  when: sync_jobs is defined and sync_jobs | length > 0

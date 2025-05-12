@@ -1,0 +1,10 @@
+# === Create cron jobs for each enabled backup job ===
+
+- name: Ensure backup cron jobs are configured
+  cron:
+    name: "{{ item.name }}"
+    special_time: "{{ item.schedule }}"
+    job: "{{ backup_script_dir }}/{{ item.script }} >> /var/log/{{ item.script | splitext | first }}.log 2>&1"
+    user: "{{ backup_cron_user }}"
+    state: "{{ item.enabled | default(true) | bool | ternary('present', 'absent') }}"
+  loop: "{{ backup_cron_jobs }}"

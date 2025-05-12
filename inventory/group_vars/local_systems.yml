@@ -19,6 +19,23 @@ ssh_keys_to_generate:
 allow_reboot: true
 install_docker: true
 
+sync_jobs:
+  # === Pull app resources from remote systems to control node ===
+  - name: Pull app resources
+    src: "/opt/app/resources/"
+    dest: "./backups/app_resources/{{ inventory_hostname }}/"
+
+  # === Pull database backups from remote systems to control node ===
+  - name: Pull DB backups
+    src: "/var/backups/db/"
+    dest: "./backups/db/{{ inventory_hostname }}/"
+
+  # === Push application files from control node to remote systems ===
+  - name: Push app configuration
+    src: "./deploy/app_config/"
+    dest: "/etc/myapp/config/"
+    mode: push  # explicitly override default
+
 # === Source and Destination Paths for File Sync ===
 db_backup_source_directory: "{{ sync_source_base }}/db_backups/"
 db_backup_destination_directory: "{{ sync_dest_base }}/db/"
@@ -28,33 +45,6 @@ app_control_destination_directory: "{{ sync_dest_base }}/scripts/"
 
 app_files_source_directory: "{{ sync_source_base }}/webapp/"
 app_files_destination_directory: "{{ sync_dest_base }}/webapp/"
-
-# === File Sync Job Definitions ===
-sync_jobs:
-  - name: Sync static web assets
-    src: ./static/
-    dest: /var/www/static/
-
-  - name: Sync config templates
-    src: ./config/
-    dest: /etc/myapp/config/
-    rsync_opts:
-      - "--exclude=secrets.env"
-
-  - name: Sync DB backups
-    src: "{{ db_backup_source_directory }}"
-    dest: "{{ db_backup_destination_directory }}"
-    mode: pull
-
-  - name: Sync control scripts
-    src: "{{ app_control_source_directory }}"
-    dest: "{{ app_control_destination_directory }}"
-    mode: pull
-
-  - name: Sync application files
-    src: "{{ app_files_source_directory }}"
-    dest: "{{ app_files_destination_directory }}"
-    mode: pull
 
 # === CLI Tool Packages ===
 cli_tools:
