@@ -1,10 +1,3 @@
-# === Ansible SSH and User Settings ===
-users:
-  - name: appuser
-    groups: [docker]
-
-create_internal_users: true
-
 # === System Behavior Flags ===
 allow_reboot: true
 install_docker: true
@@ -12,7 +5,6 @@ install_docker: true
 # === Network Configuration Defaults ===
 netmask: 24
 gateway: 192.168.1.1
-
 dns_servers:
   - 1.1.1.1
   - 8.8.8.8
@@ -22,24 +14,8 @@ db_backup_dir: /var/backups/db
 app_control_dir: /opt/scripts
 app_files_dir: /opt/webapp
 
-# === File Sync Job Definitions (Push to Dev System) ===
-sync_jobs:
-  - name: Push DB backups
-    src: "{{ db_backup_dir }}"
-    dest: /mnt/devsync/db
-    mode: push
-
-  - name: Push control scripts
-    src: "{{ app_control_dir }}"
-    dest: /mnt/devsync/scripts
-    mode: push
-
-  - name: Push application files
-    src: "{{ app_files_dir }}"
-    dest: /mnt/devsync/webapp
-    mode: push
-
 backup_cron_jobs:
+
   - name: "Hourly App Backup"
     script: run_hourly_backup.sh
     schedule: hourly
