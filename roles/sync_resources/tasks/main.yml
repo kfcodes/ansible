@@ -1,7 +1,5 @@
-# === Only run sync tasks if sync_jobs are defined ===
 - block:
 
-    # === Initialize the sync failure tracking list ===
     # This list stores the names of any sync jobs that fail
     - name: Ensure failed_syncs list is initialized
       set_fact:
@@ -31,41 +29,41 @@
           failed_when: sync_result.rc != 0
           ignore_errors: true
 
-        # --- Report success if applicable ---
-        - name: ✅ Sync job '{{ item.name }}' succeeded
+        # --- Report success ---
+        - name: Sync job '{{ item.name }}' succeeded
           debug:
-            msg: "✅ Sync succeeded: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
+            msg: "Sync succeeded: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
           when: sync_result is defined and sync_result.rc == 0
 
       rescue:
 
-        # --- Record failed job for summary report ---
+        # --- Record failed job summary ---
         - name: Record failed sync for '{{ item.name }}'
           set_fact:
             failed_syncs: "{{ failed_syncs + [item.name] }}"
 
         # --- Log failure details ---
-        - name: ❌ Log sync failure for '{{ item.name }}'
+        - name: Log sync failure for '{{ item.name }}'
           debug:
-            msg: "❌ Sync failed: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
+            msg: "Sync failed: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
 
       loop: "{{ sync_jobs }}"
       loop_control:
         label: "{{ item.name }}"
       become: false
 
-    # === Summary of failures (if any) ===
+    # === Summary of failures ===
     - name: Display summary of failed sync jobs
       debug:
         msg: |
-          ❗ The following sync jobs failed:
+          The following sync jobs failed:
           {{ failed_syncs | join(', ') }}
       when: failed_syncs | length > 0
 
     # === Summary of success (if all succeeded) ===
-    - name: ✅ All sync jobs completed successfully
+    - name: All sync jobs completed successfully
       debug:
-        msg: "✅ All sync jobs completed without errors."
+        msg: "All sync jobs completed without errors."
       when: failed_syncs | length == 0
 
   when: sync_jobs is defined and sync_jobs | length > 0

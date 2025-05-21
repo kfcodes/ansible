@@ -5,6 +5,7 @@
 
     roles:
     - system_update_and_init
+    - manage_users
     - manage_backups
     - sync_resources
     # - deploy_reactapp_container

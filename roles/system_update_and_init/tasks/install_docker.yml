@@ -62,10 +62,11 @@
         name:
           - docker-ce
           - docker-ce-cli
+          - docker-compose
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
-        state: present
+        state: latest
 
     - name: Ensure 'docker' group exists
       group:

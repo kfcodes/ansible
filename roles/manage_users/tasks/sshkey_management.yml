@@ -23,3 +23,52 @@
       become: true
 
   when: enable_ssh_key_management | default(false) | bool
+
+
+- name: Generate Ansible ssh-keypair
+  community.crypto.openssh_keypair:
+    path: "/home/{{ user }}/.ssh/application"
+    type: ed25519
+    state: present
+    size: 4096
+  become_user: "{{ user }}"
+
+- name: Generate GitHub ssh-keypair
+  community.crypto.openssh_keypair:
+    path: "/home/{{ user }}/.ssh/github"
+    type: ed25519
+    state: present
+    size: 4096
+  become_user: "{{ user }}"
+
+- name: GENERATE ANSIBLE SSH KEYPAIR
+  community.crypto.openssh_keypair:
+    path: "/home/{{ user_name }}/.ssh/reactapp"
+    type: ed25519
+    state: present
+    size: 4096
+  become_user: "{{ user }}"
+
+- name: GENERATE GITHUB OPENSSH KEYPAIR
+  community.crypto.openssh_keypair:
+    path: "/home/{{ user_name }}/.ssh/fastapi"
+    type: ed25519
+    state: present
+    size: 4096
+  become_user: "{{ user }}"
+
+- name: Generate ssh Config File
+  template:
+    src: "templates/ssh_config.j2"
+    dest: "/home/{{ user }}/.ssh/config"
+    owner: "{{ user }}"
+  become_user: "{{ user }}"
+
+- name: Evaluating the authentication agent & adding the key...
+  shell: |
+    eval "$(ssh-agent)"
+    ssh-add "/home/{{ user }}/.ssh/github_key"
+    ssh-add "/home/{{ user }}/.ssh/application_key"
+    ssh-add "/home/{{ user }}/.ssh/react"
+    ssh-add "/home/{{ user }}/.ssh/fastapi"
+  become_user: "{{ user }}"

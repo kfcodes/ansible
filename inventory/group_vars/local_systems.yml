@@ -52,6 +52,22 @@ cli_tools:
   - bat
   - jq
   - man-db
+  - htop
+  - tmux
+  - neovim
+  - rsync
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - software-properties-common
+  - python3-pip
+  - virtualenv
+  - python3-setuptools
+  - ripgrep
+  - remmina
+  - mariadb-server
+  - fuse
+  - texlive-full
 
 # === Python Development Packages ===
 python_tools:

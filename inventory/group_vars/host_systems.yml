@@ -38,3 +38,4 @@ host_system_packages:
   - git
   - python3
   - python3-pip
+  - ttf-mscorefonts-installer

@@ -8,3 +8,32 @@
     user: "{{ backup_cron_user }}"
     state: "{{ item.enabled | default(true) | bool | ternary('present', 'absent') }}"
   loop: "{{ backup_cron_jobs }}"
+
+- name: Sync application data
+  delegate_to: "{{ rsync_source_host }}"
+  synchronize:
+    src: "{{ rsync_source_path }}"
+    dest: "{{ rsync_dest_path }}"
+    rsync_opts:
+      - "--archive"
+      - "--delete"
+      - "--compress"
+    mode: push
+    ssh_args: "-o StrictHostKeyChecking=no"
+  when: rsync_enabled
+
+- name: Configure Cron job for regular DB backup
+  ansible.builtin.cron:
+    name: Backup DB every hour every hour
+    special_time: hourly
+    job: "/home/{{ scripts_directory }}/{{ regular_backup_script }}"
+    state: present
+  become: false
+
+- name: Configure Cron job for semi-regular DB backup
+  ansible.builtin.cron:
+    name: Backup DB every day
+    special_time: daily
+    job: "/home/{{ scripts_directory }}/{{ semi_regular_backup_script }}"
+    state: present
+  become: false
