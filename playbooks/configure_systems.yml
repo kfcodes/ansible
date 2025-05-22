@@ -1,9 +1,9 @@
 ---
-  - name: Initialize system configuration
-    hosts: all
-    gather_facts: true
-    become: true
+- name: Initialize system configuration
+  hosts: local_systems
+  gather_facts: true
+  become: true
 
-    roles:
+  roles:
     - system_update_and_init
     - manage_users

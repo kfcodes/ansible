@@ -15,7 +15,6 @@ app_control_dir: /opt/scripts
 app_files_dir: /opt/webapp
 
 backup_cron_jobs:
-
   - name: "Hourly App Backup"
     script: run_hourly_backup.sh
     schedule: hourly
@@ -30,7 +29,6 @@ backup_cron_jobs:
 host_system_packages:
   - htop
   - tmux
-  - neovim
   - rsync
   - ripgrep
   - ranger

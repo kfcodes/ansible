@@ -33,7 +33,7 @@ sync_jobs:
   - name: Push app configuration
     src: "./deploy/app_config/"
     dest: "/etc/myapp/config/"
-    mode: push  # explicitly override default
+    mode: push # explicitly override default
 
 # === Source and Destination Paths for File Sync ===
 db_backup_source_directory: "{{ sync_source_base }}/db_backups/"
@@ -54,20 +54,11 @@ cli_tools:
   - man-db
   - htop
   - tmux
-  - neovim
   - rsync
   - apt-transport-https
   - ca-certificates
   - curl
-  - software-properties-common
-  - python3-pip
-  - virtualenv
-  - python3-setuptools
   - ripgrep
-  - remmina
-  - mariadb-server
-  - fuse
-  - texlive-full
 
 # === Python Development Packages ===
 python_tools:
@@ -77,21 +68,21 @@ python_tools:
   - python3-dev
   - python3-wheel
   - pipx
+  - software-properties-common
+  - python3-pip
 
 # === System Utilities ===
 system_utils:
-  - apt-transport-https
   - ca-certificates
   - software-properties-common
-  - fuse
   - net-tools
   - iproute2
   - lsof
   - iotop
+  - rsync
   - ncdu
   - sysstat
   - glances
-  - rsync
   - acl
 
 # === Graphical Tools and Fonts ===
@@ -100,6 +91,7 @@ gui_utils:
   - texlive-full
   - filezilla
   - darktable
+  - remmina
 
 # === Local Database Tools ===
 db_tools:
@@ -107,6 +99,5 @@ db_tools:
 
 # === Combined Package Set for Installation ===
 local_system_packages: >-
-  {{ cli_tools + gui_utils + db_tools }}
-#   {{ cli_tools + python_tools + system_utils +
-#      gui_utils + db_tools }}
+  {{ cli_tools + python_tools + system_utils +
+     gui_utils + db_tools }}

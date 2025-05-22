@@ -1,0 +1,22 @@
+---
+# Install the latest stable Neovim via the official PPA
+
+- name: Ensure apt-transport-https is present for HTTPS repos
+  become: true
+  apt:
+    name: apt-transport-https
+    state: present
+    update_cache: true
+
+- name: Add the official Neovim 'stable' PPA
+  become: true
+  apt_repository:
+    repo: ppa:neovim-ppa/stable
+    state: present
+    update_cache: true
+
+- name: Install or upgrade Neovim to latest stable
+  become: true
+  apt:
+    name: neovim
+    state: latest

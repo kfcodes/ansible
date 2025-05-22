@@ -1,15 +1,18 @@
-- name: Apply dotfile links
-  import_tasks: dotfiles.yml
-  tags: [dotfiles]
-
-- name: Apply environment file links
-  import_tasks: env_links.yml
-  tags: [env]
-
-- name: Clone dev repositories
-  import_tasks: repositories.yml
-  tags: [repos]
-
-- name: Set up application and package dependencies
-  import_tasks: app_setup.yml
-  tags: [apps]
+- name: Install Neovim
+  import_tasks: install_neovim.yml
+  tags: [neovim]
+# - name: Apply dotfile links
+#   import_tasks: dotfiles.yml
+#   tags: [dotfiles]
+#
+# - name: Apply environment file links
+#   import_tasks: env_links.yml
+#   tags: [env]
+#
+# - name: Clone dev repositories
+#   import_tasks: repositories.yml
+#   tags: [repos]
+#
+# - name: Set up application and package dependencies
+#   import_tasks: app_setup.yml
+#   tags: [apps]
