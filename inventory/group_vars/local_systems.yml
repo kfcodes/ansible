@@ -1,4 +1,4 @@
-# === Ansible SSH and User Settings ===
+# === Ansible SSH and User Settings (for control node) ===
 system_user:
   name: devuser
   create_home: true
@@ -14,28 +14,29 @@ ssh_keys_to_generate:
   - github
   - gitlab
 
-# === System Behavior Flags ===
+# === System Behavior Flags (override for control node) ===
 allow_reboot: false
 install_docker: true
 
+# === Sync‐job definitions for control node (pull/push directories) ===
 sync_jobs:
-  # === Pull app resources from remote systems to control node ===
+  # Pull app resources from remote systems to control node
   - name: Pull app resources
     src: "/opt/app/resources/"
     dest: "./backups/app_resources/{{ inventory_hostname }}/"
 
-  # === Pull database backups from remote systems to control node ===
+  # Pull database backups from remote systems to control node
   - name: Pull DB backups
     src: "/var/backups/db/"
     dest: "./backups/db/{{ inventory_hostname }}/"
 
-  # === Push application files from control node to remote systems ===
+  # Push application files from control node to remote systems
   - name: Push app configuration
     src: "./deploy/app_config/"
     dest: "/etc/myapp/config/"
-    mode: push # explicitly override default
+    mode: push
 
-# === Source and Destination Paths for File Sync ===
+# === Source and Destination Paths for File Sync on control node ===
 db_backup_source_directory: "{{ sync_source_base }}/db_backups/"
 db_backup_destination_directory: "{{ sync_dest_base }}/db/"
 
@@ -45,7 +46,7 @@ app_control_destination_directory: "{{ sync_dest_base }}/scripts/"
 app_files_source_directory: "{{ sync_source_base }}/webapp/"
 app_files_destination_directory: "{{ sync_dest_base }}/webapp/"
 
-# === CLI Tool Packages ===
+# === CLI Tool Packages for control node ===
 cli_tools:
   - python3-venv
   - fd-find
@@ -60,7 +61,7 @@ cli_tools:
   - curl
   - ripgrep
 
-# === Python Development Packages ===
+# === Python Development Packages for control node ===
 python_tools:
   - python3-pip
   - virtualenv
@@ -71,7 +72,7 @@ python_tools:
   - software-properties-common
   - python3-pip
 
-# === System Utilities ===
+# === System Utilities for control node ===
 system_utils:
   - ca-certificates
   - software-properties-common
@@ -85,7 +86,7 @@ system_utils:
   - glances
   - acl
 
-# === Graphical Tools and Fonts ===
+# === Graphical Tools and Fonts for control node ===
 gui_utils:
   - remmina
   - texlive-full
@@ -93,11 +94,11 @@ gui_utils:
   - darktable
   - remmina
 
-# === Local Database Tools ===
+# === Local Database Tools for control node ===
 db_tools:
   - mariadb-server
 
-# === Combined Package Set for Installation ===
+# === Combined Package Set for Installation on control node ===
 local_system_packages: >-
   {{ cli_tools + python_tools + system_utils +
      gui_utils + db_tools }}
