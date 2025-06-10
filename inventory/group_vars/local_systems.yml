@@ -7,7 +7,6 @@ system_user:
     - video
 
 create_internal_users: false
-ssh_key_generate: true
 
 ssh_keys_to_generate:
   - host_systems
@@ -93,6 +92,7 @@ gui_utils:
   - filezilla
   - darktable
   - remmina
+  - ansible-lint
 
 # === Local Database Tools for control node ===
 db_tools:

@@ -4,36 +4,58 @@ ansible_user: "{{ system_user.name }}"
 ansible_python_interpreter: /usr/bin/python3
 
 # === SSH key path used for authentication and injection ===
+# Default location for control-node SSH keys and for injecting public keys into managed users
 ssh_key_dir: "{{ lookup('env', 'HOME') }}/.ssh"
 
-# === Default user configuration ===
+# === Default user configuration for all managed systems ===
 default_user_options:
+  # By default, ensure the user is present
+  # (the playbook’s user task already hard-codes state: present, so this is redundant
+  # and can be removed if desired—but included here for clarity)
   state: present
+
+  # Default login shell if not overridden per-host
   shell: /bin/bash
+
+  # By default, do not create a home directory unless overridden
   create_home: false
-  generate_ssh_key: false
-  ssh_key_bits: 4096
+
+  # Default list of supplementary groups; per-host overrides will be merged
   groups:
     - sudo
     - users
 
-# === The system user that will be created on all managed systems ===
+# === The system_user dict provides host‐specific overrides (merged with defaults) ===
 system_user:
+  # Default username to create on each host
   name: appuser
+
+  # By default, do not create a home directory (override per-host if needed)
   create_home: false
+
+  # Path to inject a public SSH key into the new user’s authorized_keys file
   ssh_public_key_path: "{{ ssh_key_dir }}/appuser.pub"
+
+  # Any extra groups this user should belong to (in addition to default_user_options.groups)
   groups:
     - docker
 
-# === Whether to inject SSH keys into managed user ===
+# === SSH key injection toggle ===
+# If true, a public key at system_user.ssh_public_key_path will be added to ~/.ssh/authorized_keys
+# for the managed user. If you don’t need key injection, set to false or remove.
 enable_ssh_key_management: true
 
-# === SSH key generation configuration (for control node only) ===
+# === SSH key generation settings (control node only) ===
+# If ssh_keys_to_generate is defined and non-empty, keys will be generated in ssh_key_dir.
+# Remove or leave empty to skip key generation.
+ssh_keys_to_generate: []
+
+# Default key algorithm (ed25519) and size (4096 bits for RSA, ignored for ed25519)
 ssh_key_type: ed25519
 ssh_key_bits: 4096
 ssh_key_comment: "Managed by Ansible"
 
-# === Default rsync options used by sync roles ===
+# === Default rsync options used by any sync roles/tasks ===
 default_rsync_opts:
   - "--archive"
   - "--compress"

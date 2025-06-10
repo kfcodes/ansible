@@ -2,9 +2,9 @@
 # Configure a static IP using Netplan
 # Only runs if 'static_ip' and 'interface_name' are defined in host_vars
 # ----------------------------------------
+
 - name: Configure static IP with Netplan
   block:
-
     - name: Set interface configuration facts
       set_fact:
         net_interface: "{{ interface_name }}"
@@ -22,7 +22,7 @@
       template:
         src: netplan.yaml.j2
         dest: /etc/netplan/01-netcfg.yaml
-        mode: '0644'
+        mode: "0644"
       notify: Apply netplan
 
   when: interface_name is defined and static_ip is defined and static_ip is not none

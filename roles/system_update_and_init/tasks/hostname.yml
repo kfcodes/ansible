@@ -2,9 +2,9 @@
 # Set system hostname and update /etc/hosts
 # Only runs if 'hostname' is defined in host_vars
 # ----------------------------------------
+
 - name: Configure system hostname if defined
   block:
-
     - name: Set system hostname
       hostname:
         name: "{{ host_hostname }}"
