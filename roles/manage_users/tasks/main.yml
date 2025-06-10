@@ -4,10 +4,10 @@
   import_tasks: user_account.yml
   tags: [user]
 
-- name: Conditionally generate SSH key for ansible user (on control node)
+- name: Conditionally generate SSH key for ansible user
   import_tasks: generate_sshkey.yml
   tags: [keygen]
 
-- name: Manage SSH key installation
+- name: Manage SSH keys
   import_tasks: sshkey_management.yml
   tags: [config_ssh_keys]

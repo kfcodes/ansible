@@ -1,74 +1,91 @@
-# === Inject a single SSH public key per system user ===
-# Requires `system_user.name` and `system_user.ssh_public_key_path` to be defined.
-# Key is read from control node and installed on the remote host.
+# ================================================================
+# TASK: Deploy SSH public keys to managed user accounts on all hosts.
+#
+# This file assumes the following variables are defined (in group_vars):
+#   • system_user.name                   → username on remote host
+#   • system_user.ssh_public_key_path    → path to a single public key (optional)
+#   • ssh_keys_to_generate               → list of key-names generated on control node (optional)
+#   • ssh_key_dir                        → directory on control node where keys live
+#
+# Only runs if at least one of:
+#   • system_user.ssh_public_key_path is defined and points to a valid file, OR
+#   • ssh_keys_to_generate is defined and non-empty
+# ================================================================
 
 - block:
+    # ------------------------------------------------------------
+    # 1) Ensure the managed user’s ~/.ssh directory exists
+    # ------------------------------------------------------------
+    - name: Ensure user’s .ssh directory exists
+      file:
+        path: "/home/{{ system_user.name }}/.ssh"
+        state: directory
+        owner: "{{ system_user.name }}"
+        group: "{{ system_user.name }}"
+        mode: "0700"
 
-    # --- Debug info before adding key ---
-    - name: Debug SSH key setup intent
+    # ------------------------------------------------------------
+    # 2a) If a single public key path is defined, inject it
+    # ------------------------------------------------------------
+    - name: Debug intent to install single public key
       debug:
         msg: >-
-          Installing SSH key for user '{{ system_user.name }}' on host '{{ inventory_hostname }}'
-          Using public key file: '{{ system_user.ssh_public_key_path }}'
-
-    # --- Add the key to the user's authorized_keys ---
-    - name: Add SSH public key from file
-      authorized_key:
-        user: "{{ system_user.name }}"
-        key: "{{ lookup('file', system_user.ssh_public_key_path) }}"
-        state: present
+          Installing single SSH public key for user '{{ system_user.name }}'
+          from '{{ system_user.ssh_public_key_path }}'
       when:
         - system_user.ssh_public_key_path is defined
         - lookup('file', system_user.ssh_public_key_path, errors='ignore') != ''
-      become: true
 
-  when: enable_ssh_key_management | default(false) | bool
+    - name: Inject single SSH public key into authorized_keys
+      authorized_key:
+        user: "{{ system_user.name }}"
+        state: present
+        key: "{{ lookup('file', system_user.ssh_public_key_path) }}"
+      when:
+        - system_user.ssh_public_key_path is defined
+        - lookup('file', system_user.ssh_public_key_path, errors='ignore') != ''
 
+    # ------------------------------------------------------------
+    # 2b) If multiple keys were generated on control node, inject each
+    # ------------------------------------------------------------
+    - name: Debug intent to install generated public keys
+      debug:
+        msg: >-
+          Installing generated SSH keys for user '{{ system_user.name }}'
+          from control node directory '{{ ssh_key_dir }}'
+      when:
+        - ssh_keys_to_generate is defined
+        - ssh_keys_to_generate | length > 0
 
-- name: Generate Ansible ssh-keypair
-  community.crypto.openssh_keypair:
-    path: "/home/{{ user }}/.ssh/application"
-    type: ed25519
-    state: present
-    size: 4096
-  become_user: "{{ user }}"
+    - name: Inject generated SSH public keys into authorized_keys
+      authorized_key:
+        user: "{{ system_user.name }}"
+        state: present
+        key: "{{ lookup('file', ssh_key_dir + '/' + item + '.pub') }}"
+      loop: "{{ ssh_keys_to_generate }}"
+      when:
+        - ssh_keys_to_generate is defined
+        - ssh_keys_to_generate | length > 0
 
-- name: Generate GitHub ssh-keypair
-  community.crypto.openssh_keypair:
-    path: "/home/{{ user }}/.ssh/github"
-    type: ed25519
-    state: present
-    size: 4096
-  become_user: "{{ user }}"
+    # ------------------------------------------------------------
+    # 3) Ensure authorized_keys file has secure permissions (0600)
+    # ------------------------------------------------------------
+    - name: Ensure authorized_keys mode is 0600 and owned by user
+      file:
+        path: "/home/{{ system_user.name }}/.ssh/authorized_keys"
+        owner: "{{ system_user.name }}"
+        group: "{{ system_user.name }}"
+        mode: "0600"
+      when:
+        - >
+          (system_user.ssh_public_key_path is defined
+           and lookup('file', system_user.ssh_public_key_path, errors='ignore') != '')
+          or
+          (ssh_keys_to_generate is defined and ssh_keys_to_generate | length > 0)
 
-- name: GENERATE ANSIBLE SSH KEYPAIR
-  community.crypto.openssh_keypair:
-    path: "/home/{{ user_name }}/.ssh/reactapp"
-    type: ed25519
-    state: present
-    size: 4096
-  become_user: "{{ user }}"
-
-- name: GENERATE GITHUB OPENSSH KEYPAIR
-  community.crypto.openssh_keypair:
-    path: "/home/{{ user_name }}/.ssh/fastapi"
-    type: ed25519
-    state: present
-    size: 4096
-  become_user: "{{ user }}"
-
-- name: Generate ssh Config File
-  template:
-    src: "templates/ssh_config.j2"
-    dest: "/home/{{ user }}/.ssh/config"
-    owner: "{{ user }}"
-  become_user: "{{ user }}"
-
-- name: Evaluating the authentication agent & adding the key...
-  shell: |
-    eval "$(ssh-agent)"
-    ssh-add "/home/{{ user }}/.ssh/github_key"
-    ssh-add "/home/{{ user }}/.ssh/application_key"
-    ssh-add "/home/{{ user }}/.ssh/react"
-    ssh-add "/home/{{ user }}/.ssh/fastapi"
-  become_user: "{{ user }}"
+  when:
+    - >
+      (system_user.ssh_public_key_path is defined
+       and lookup('file', system_user.ssh_public_key_path, errors='ignore') != '')
+      or
+      (ssh_keys_to_generate is defined and ssh_keys_to_generate | length > 0)
