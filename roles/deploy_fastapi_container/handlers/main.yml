@@ -1,0 +1,4 @@
+- name: Restart FastAPI container
+  community.docker.docker_compose:
+    project_src: "{{ app.path }}"
+    restarted: true

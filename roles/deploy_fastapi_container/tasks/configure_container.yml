@@ -1,0 +1,10 @@
+- name: Configure container-specific files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ app.path }}/{{ item.dest }}"
+    remote_src: yes
+  loop: "{{ app.config_files | default([]) }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  notify: Restart FastAPI container
+  when: app.config_files is defined and app.config_files | length > 0

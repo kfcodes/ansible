@@ -1,0 +1,32 @@
+- name: Ensure Docker network exists (if defined)
+  community.docker.docker_network:
+    name: "{{ app.network }}"
+    state: present
+  when: app.network is defined
+
+- name: Stop existing container
+  community.docker.docker_container:
+    name: "{{ app.name }}"
+    state: stopped
+  ignore_errors: true
+
+- name: Remove existing container
+  community.docker.docker_container:
+    name: "{{ app.name }}"
+    state: absent
+  ignore_errors: true
+
+- name: Build and start container with Docker Compose
+  community.docker.docker_compose:
+    project_src: "{{ app.path }}"
+    build: true
+    restarted: true
+    pull: true
+
+- name: Connect container to Docker network (if defined)
+  community.docker.docker_network:
+    name: "{{ app.network }}"
+    connected:
+      - name: "{{ app.name }}"
+  when: app.network is defined
+  ignore_errors: true

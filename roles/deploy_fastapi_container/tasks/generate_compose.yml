@@ -1,0 +1,5 @@
+- name: Template Docker Compose file
+  template:
+    src: docker-compose.yaml.j2
+    dest: "{{ app.path }}/docker-compose.yml"
+  notify: Restart FastAPI container

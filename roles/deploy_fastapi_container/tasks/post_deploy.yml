@@ -1,0 +1,17 @@
+- name: Wait for container to be healthy
+  community.docker.docker_container_info:
+    name: "{{ app.name }}"
+  register: container_info
+  retries: 10
+  delay: 3
+  until: container_info.container.State.Status == "running"
+
+- name: Wait for HTTP healthcheck (optional)
+  uri:
+    url: "http://localhost:{{ app.health_port | default(8000) }}/health"
+    status_code: 200
+  register: healthcheck_result
+  until: healthcheck_result.status == 200
+  retries: 10
+  delay: 3
+  when: app.healthcheck | default(true)

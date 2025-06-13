@@ -1,0 +1,7 @@
+- name: Clone Git repo
+  git:
+    repo: "{{ app.repo }}"
+    dest: "{{ app.path }}"
+    version: "{{ app.branch }}"
+    update: yes
+  notify: Restart FastAPI container
