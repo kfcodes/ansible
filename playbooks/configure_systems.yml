@@ -1,9 +1,10 @@
 ---
 - name: Initialize system configuration
-  hosts: local_systems
+  hosts: system_dev
   gather_facts: true
   become: true
 
   roles:
-    - system_update_and_init
-    - manage_users
+    - system_base_config
+    - user_management
+    # - system_dev_config
