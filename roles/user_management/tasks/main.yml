@@ -1,6 +1,4 @@
-# Entry point for the manage_users role
-
-- name: Manage user creation and removal
+- name: Manage user creation
   import_tasks: user_account.yml
   tags: [user]
 
