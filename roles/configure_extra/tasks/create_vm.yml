@@ -1,0 +1,38 @@
+- name: Attempt to unbind GPU and start Windows VM
+  block:
+    - name: Unbind GPU from host before VM creation
+      command: /usr/local/bin/unbind_gpu.sh
+
+    - name: Create Windows VM with local ISO
+      command: >
+        virt-install
+        --name win10
+        --ram 8192
+        --vcpus 4
+        --os-type windows
+        --os-variant win10
+        --disk size=60,path=/var/lib/libvirt/images/win10.qcow2
+        --cdrom /var/lib/libvirt/boot/windows.iso
+        --network network=default
+        --graphics spice
+        --video qxl
+        --boot cdrom
+      args:
+        creates: /etc/libvirt/qemu/win10.xml
+
+    - name: Shut down the VM after installation
+      command: virsh shutdown win10
+      ignore_errors: yes
+
+  rescue:
+    - name: VM creation failed — rebind GPU to host
+      command: /usr/local/bin/rebind_gpu.sh
+
+    - name: Log failure in VM creation
+      debug:
+        msg: "Failed to create/start VM. GPU rebind attempted."
+
+  always:
+    - name: Log VM creation attempt complete
+      debug:
+        msg: "Create VM task completed (success or failure)."

@@ -1,0 +1,9 @@
+#!/bin/bash
+{% for device in gpu_bdf %}
+echo "Unbinding {{ device }} from host driver..."
+echo {{ device }} > /sys/bus/pci/devices/{{ device }}/driver/unbind
+{% endfor %}
+
+{% for id in gpu_pci_ids %}
+echo {{ id }} > /sys/bus/pci/drivers/vfio-pci/new_id
+{% endfor %}

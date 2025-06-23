@@ -1,2 +1,19 @@
 ---
-# defaults file for local-system
+# # Example (after detection):
+# gpu_bdf:
+#   - "0000:01:00.0"
+#   - "0000:01:00.1"
+# gpu_pci_ids:
+#   - "1002 67ef"
+#   - "1002 aaf0"
+
+gpu_bdf: []
+gpu_pci_ids: []
+
+virtualization_packages:
+  - qemu-kvm
+  - libvirt-daemon-system
+  - libvirt-clients
+  - virt-manager
+  - virtinst
+  - ovmf

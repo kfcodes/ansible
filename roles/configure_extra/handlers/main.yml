@@ -1,0 +1,4 @@
+- name: Reboot system to apply VFIO/IOMMU configuration
+  reboot:
+    msg: "Rebooting to apply VFIO/IOMMU configuration"
+    reboot_timeout: 120

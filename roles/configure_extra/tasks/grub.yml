@@ -1,0 +1,22 @@
+- name: Enable IOMMU in GRUB and update configuration
+  block:
+    - name: Add IOMMU settings to GRUB config
+      lineinfile:
+        path: /etc/default/grub
+        regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on iommu=pt"'
+        backrefs: yes
+
+    - name: Update GRUB configuration
+      command: update-grub
+      notify: Reboot system to apply VFIO/IOMMU configuration
+
+  rescue:
+    - name: GRUB configuration failed
+      debug:
+        msg: "Failed to modify GRUB. Please check your bootloader settings manually."
+
+  always:
+    - name: GRUB configuration attempt complete
+      debug:
+        msg: "GRUB configuration block completed."

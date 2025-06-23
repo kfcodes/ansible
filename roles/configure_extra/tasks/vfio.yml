@@ -1,0 +1,28 @@
+- name: Load VFIO kernel modules and configure PCI ID override
+  block:
+
+    - name: Create VFIO module load config
+      copy:
+        dest: /etc/modules-load.d/vfio.conf
+        content: |
+          vfio
+          vfio_iommu_type1
+          vfio_pci
+          vfio_virqfd
+
+    - name: Create VFIO PCI ID override config
+      template:
+        src: vfio.conf.j2
+        dest: /etc/modprobe.d/vfio.conf
+
+  rescue:
+
+    - name: VFIO configuration failed
+      debug:
+        msg: "Failed to write VFIO configs. You may need to revert manually."
+
+  always:
+
+    - name: VFIO configuration block completed
+      debug:
+        msg: "VFIO module and PCI ID setup finished (success or fail)."

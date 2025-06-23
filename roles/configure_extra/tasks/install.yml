@@ -1,0 +1,11 @@
+- name: Install virtualization packages
+  apt:
+    name: "{{ virtualization_packages }}"
+    state: present
+    update_cache: yes
+
+- name: Add current user to libvirt group
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: libvirt
+    append: yes

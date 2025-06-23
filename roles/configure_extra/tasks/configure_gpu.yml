@@ -1,0 +1,23 @@
+- name: Installing virtualization and KVM-related packages
+  include_tasks: install.yml
+  tags: [install]
+
+- name: Configuring GRUB for IOMMU support
+  include_tasks: grub.yml
+  tags: [grub]
+
+- name: Preparing VFIO PCI ID mapping and kernel modules
+  include_tasks: vfio.yml
+  tags: [vfio]
+
+- name: Deploying dynamic GPU bind/unbind scripts
+  include_tasks: vfio_scripts.yml
+  tags: [scripts]
+
+- name: Creating Windows VM and binding GPU
+  include_tasks: create_vm.yml
+  tags: [vm_create]
+
+- name: Attaching GPU to the Windows VM and re-enabling host access
+  include_tasks: attach_gpu.yml
+  tags: [vm_attach]

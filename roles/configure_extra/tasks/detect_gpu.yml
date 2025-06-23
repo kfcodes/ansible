@@ -1,0 +1,24 @@
+- name: Detect installed VGA and audio devices using lspci
+  shell: lspci -nn | grep -iE 'vga|audio'
+  register: detected_gpu
+  changed_when: false
+
+- name: Display detected GPU devices (VGA & HDMI Audio)
+  debug:
+    var: detected_gpu.stdout_lines
+
+- name: Suggest values to paste into defaults/main.yml
+  debug:
+    msg: |
+      GPU passthrough setup skipped because variables are unset.
+      Please copy the following into roles/vfio_passthrough/defaults/main.yml:
+
+      gpu_bdf:
+      {% for line in detected_gpu.stdout_lines %}
+        - "0000:{{ line.split(' ')[0] }}"
+      {% endfor %}
+
+      gpu_pci_ids:
+      {% for line in detected_gpu.stdout_lines %}
+        - "{{ line | regex_search('\\[([0-9a-fA-F]{4} [0-9a-fA-F]{4})\\]', '\\1') }}"
+      {% endfor %}

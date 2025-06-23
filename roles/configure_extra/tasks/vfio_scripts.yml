@@ -1,0 +1,11 @@
+- name: Install unbind GPU script
+  template:
+    src: unbind_gpu.sh.j2
+    dest: /usr/local/bin/unbind_gpu.sh
+    mode: "0755"
+
+- name: Install rebind GPU script
+  template:
+    src: rebind_gpu.sh.j2
+    dest: /usr/local/bin/rebind_gpu.sh
+    mode: "0755"
