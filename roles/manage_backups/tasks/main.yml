@@ -1,6 +1,0 @@
-# Entry point: only do anything if backup_cron_jobs is defined and not empty
-- name: Run backup script install and cron setup if jobs are defined
-  block:
-    - import_tasks: install_scripts.yml
-    - import_tasks: cron_jobs.yml
-  when: backup_cron_jobs is defined and backup_cron_jobs | length > 0

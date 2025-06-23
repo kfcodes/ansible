@@ -1,5 +1,4 @@
 - block:
-
     # This list stores the names of any sync jobs that fail
     - name: Ensure failed_syncs list is initialized
       set_fact:
@@ -9,7 +8,6 @@
     # === Perform all defined sync jobs ===
     - name: Synchronize resource directories with error tracking
       block:
-
         # --- Execute the sync job ---
         - name: Run sync job '{{ item.name }}'
           ansible.posix.synchronize:
@@ -36,7 +34,6 @@
           when: sync_result is defined and sync_result.rc == 0
 
       rescue:
-
         # --- Record failed job summary ---
         - name: Record failed sync for '{{ item.name }}'
           set_fact:
@@ -67,3 +64,10 @@
       when: failed_syncs | length == 0
 
   when: sync_jobs is defined and sync_jobs | length > 0
+
+# Entry point: only do anything if backup_cron_jobs is defined and not empty
+- name: Run backup script install and cron setup if jobs are defined
+  block:
+    - import_tasks: install_scripts.yml
+    - import_tasks: cron_jobs.yml
+  when: backup_cron_jobs is defined and backup_cron_jobs | length > 0
