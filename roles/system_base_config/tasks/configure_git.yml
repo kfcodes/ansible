@@ -1,0 +1,55 @@
+- name: Ensure Git is installed
+  apt:
+    name: git
+    state: present
+    update_cache: true
+
+- name: Set global Git username
+  git_config:
+    name: user.name
+    value: "{{ github_username }}"
+    scope: global
+
+- name: Set global Git email
+  git_config:
+    name: user.email
+    value: "{{ github_email }}"
+    scope: global
+
+- name: Ensure .ssh directory exists
+  file:
+    path: "{{ ssh_key_path | dirname }}"
+    state: directory
+    mode: "0700"
+
+- name: Generate SSH key if it does not exist
+  command: >
+    ssh-keygen -t ed25519 -C "{{ ssh_key_comment }}"
+    -f "{{ ssh_key_path }}"
+    -N ''
+  args:
+    creates: "{{ ssh_key_path }}"
+
+- name: Ensure ssh-agent is running and key is added
+  shell: |
+    eval "$(ssh-agent -s)"
+    ssh-add "{{ ssh_key_path }}"
+  environment:
+    SSH_AUTH_SOCK: "{{ lookup('env','SSH_AUTH_SOCK') | default('', true) }}"
+  when: ansible_env.SSH_AUTH_SOCK is defined
+
+- name: Template SSH config for GitHub (optional, improves usability)
+  template:
+    src: ssh_config.j2
+    dest: "{{ ansible_env.HOME }}/.ssh/config"
+    mode: "0600"
+
+- name: Display public key for GitHub registration
+  shell: cat "{{ ssh_key_path }}.pub"
+  register: ssh_pubkey
+
+- name: Show SSH public key
+  debug:
+    msg: |
+      Add the following public key to your GitHub account (https://github.com/settings/ssh):
+      {{ ssh_pubkey.stdout }}
