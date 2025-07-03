@@ -1,6 +1,3 @@
-# === Ansible Connection Configuration ===
 ansible_host: localhost
 ansible_connection: local
-
-# === System Identification ===
 hostname: m

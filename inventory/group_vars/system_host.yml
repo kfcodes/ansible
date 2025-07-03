@@ -1,6 +1,4 @@
-# group_vars/hosts.yml
 ---
-# === Default user‐creation parameters for “all hosts” ===
 default_user_options:
   name: myuser # Fallback username if not overridden per-host
   shell: /bin/bash # Default login shell
