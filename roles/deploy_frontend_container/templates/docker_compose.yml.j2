@@ -1,0 +1,25 @@
+services:
+  {{ react_app_container_name }}:
+    container_name: {{ react_app_container_name }}
+    image: {{ react_app_image_name }}:{{ react_app_image_tag }}
+    ports:
+      - "{{ react_app_host_port }}:{{ react_app_container_port }}"
+    restart: always
+    env_file:
+      - {{ react_app_env_file }}
+    networks:
+      - {{ react_app_network }}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "{{ react_app_log_max_size }}"
+        max-file: "{{ react_app_log_max_file }}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:{{ react_app_container_port }}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  {{ react_app_network }}:
+    external: true

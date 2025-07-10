@@ -1,0 +1,28 @@
+- name: Build React app Docker image
+  community.docker.docker_image:
+    name: "{{ react_app_image_name }}"
+    tag: "{{ react_app_image_tag }}"
+    build:
+      path: "{{ react_app_src_path }}"
+    source: build
+    state: present
+
+- name: Ensure Docker network exists
+  community.docker.docker_network:
+    name: "{{ react_app_network }}"
+    state: present
+
+- name: Deploy React app container using Compose
+  community.docker.docker_compose:
+    project_src: "{{ react_app_compose_path }}"
+    state: present
+    restarted: yes
+    remove_orphans: yes
+
+- name: Prune unused Docker resources
+  community.docker.docker_prune:
+    containers: yes
+    images: yes
+    networks: yes
+    volumes: no
+  when: cleanup
