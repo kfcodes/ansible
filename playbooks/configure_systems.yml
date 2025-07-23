@@ -5,9 +5,9 @@
   become: true
 
   roles:
-    - role: system_base_config
+    - role: sys_base_config
       vars:
         github_username: johndoe
         github_email: johndoe@example.com
-    - user_management
+    - usr_mgmt
     # - system_dev_config
