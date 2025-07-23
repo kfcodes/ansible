@@ -1,22 +1,3 @@
-- import_tasks: update_and_install_packages.yml
-  tags: [packages]
-
-- name: Install Neovim via AppImage
-  import_tasks: install_neovim_appimage.yml
-  tags: [neovim]
-
-- import_tasks: install_docker.yml
-  tags: [docker]
-
-- import_tasks: hostname.yml
-  tags: [hostname]
-
-- import_tasks: static_ip.yml
-  tags: [ip]
-
-- import_tasks: configure_git.yml
-  tags: [git]
-
 - name: Ensure required system packages are installed
   ansible.builtin.package:
     name:

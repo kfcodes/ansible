@@ -1,10 +1,16 @@
-# ----------------------------------------
-# Configure a static IP using Netplan
-# Only runs if 'static_ip' and 'interface_name' are defined in host_vars
-# ----------------------------------------
-
 - name: Configure static IP with Netplan
   block:
+    - name: Backup original Netplan config
+      copy:
+        src: /etc/netplan/01-netcfg.yaml
+        dest: /etc/netplan/01-netcfg.yaml.bak
+        remote_src: yes
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Validate netplan config
+      command: netplan try
+      ignore_errors: true
+
     - name: Set interface configuration facts
       set_fact:
         net_interface: "{{ interface_name }}"

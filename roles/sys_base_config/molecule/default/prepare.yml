@@ -1,0 +1,10 @@
+---
+- name: Prepare container environment
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure /tmp/ansible exists
+      file:
+        path: /tmp/ansible
+        state: directory
+        mode: "1777"

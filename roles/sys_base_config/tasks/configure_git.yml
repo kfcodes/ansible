@@ -44,6 +44,13 @@
     dest: "{{ ansible_env.HOME }}/.ssh/config"
     mode: "0600"
 
+- name: Enable AddKeysToAgent in ssh_config
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.ssh/config"
+    regexp: "^  AddKeysToAgent "
+    line: "  AddKeysToAgent yes"
+    insertafter: "^Host github.com"
+
 - name: Display public key for GitHub registration
   shell: cat "{{ ssh_key_path }}.pub"
   register: ssh_pubkey
