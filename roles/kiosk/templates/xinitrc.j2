@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+# Window manager (Matchbox)
+matchbox-window-manager -use_titlebar no -use_dialogs no &
+
+# On-screen keyboard
+onboard &
+
+# Optional: hide mouse when idle
+{% if enable_unclutter %}
+command -v unclutter >/dev/null 2>&1 && unclutter &
+{% endif %}
+
+# Let WM/keyboard settle
+sleep 1
+
+# Chromium in kiosk
+exec chromium-browser {% for f in browser_flags_chromium %} {{ f }}{% endfor %}

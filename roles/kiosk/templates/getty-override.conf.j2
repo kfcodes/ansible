@@ -1,0 +1,4 @@
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin {{ kiosk_user }} --noclear %I $TERM
+Type=idle

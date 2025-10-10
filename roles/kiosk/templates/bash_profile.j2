@@ -1,0 +1,4 @@
+# Auto-start X only on {{ autologin_tty }} (avoid SSH/other TTYs)
+if [[ -z "$DISPLAY" ]] && [[ "$(tty)" == "/dev/{{ autologin_tty }}" ]]; then
+  exec startx
+fi

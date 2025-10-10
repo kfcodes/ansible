@@ -1,0 +1,44 @@
+---
+# User that auto-logs in and runs the kiosk
+kiosk_user: "ubuntu"
+
+# TTY to auto-login
+autologin_tty: "tty1"
+
+# Window manager fixed per request
+window_manager: "matchbox"
+
+# Browser choice fixed per request
+browser_choice: "chromium-browser"
+
+# Kiosk URL
+kiosk_url: "https://example.com"
+
+# Extra browser flags
+browser_flags_chromium:
+  - "--kiosk"
+  - "--start-fullscreen"
+  - "--app={{ kiosk_url }}"
+  - "--incognito"
+  - "--no-first-run"
+  - "--disable-session-crashed-bubble"
+  - "--disable-infobars"
+  - "--noerrdialogs"
+  - "--autoplay-policy=no-user-gesture-required"
+
+# On-screen keyboard + helpers
+enable_unclutter: true
+
+# Keep minimal installs
+apt_install_recommends: false
+
+# Packages
+base_packages:
+  - xorg
+  - onboard
+  - onboard-data
+  - at-spi2-core # helps auto-popup
+  - "{{ browser_choice }}" # chromium-browser (snap wrapper on recent Ubuntu)
+wm_packages:
+  - matchbox-window-manager
+extra_packages: [] # append if needed
