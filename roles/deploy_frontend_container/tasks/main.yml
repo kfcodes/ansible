@@ -1,8 +1,0 @@
-- name: Git repository setup
-  ansible.builtin.include_tasks: git_setup.yml
-
-- name: Docker directory and compose setup
-  ansible.builtin.include_tasks: docker_setup.yml
-
-- name: Docker build and deploy
-  ansible.builtin.include_tasks: docker_build_and_deploy.yml
