@@ -1,4 +1,8 @@
-# === Ansible SSH and User Settings (for control node) ===
+---
+is_control_node: true
+allow_reboot: false
+install_docker: true
+
 system_user:
   name: devuser
   create_home: true
@@ -13,39 +17,32 @@ ssh_keys_to_generate:
   - github
   - gitlab
 
-# === System Behavior Flags (override for control node) ===
-allow_reboot: false
-install_docker: true
+control_node_root: "/srv/control"
+control_backups_root: "{{ control_node_root }}/backups"
+control_artifacts_root: "{{ control_node_root }}/artifacts"
 
-# === Sync‐job definitions for control node (pull/push directories) ===
-sync_jobs:
-  # Pull app resources from remote systems to control node
-  - name: Pull app resources
+default_rsync_opts:
+  - "--archive"
+  - "--compress"
+
+# === Pull jobs (remote → control) ===
+pull_jobs:
+  - name: "Pull app resources"
     src: "/opt/app/resources/"
-    dest: "./backups/app_resources/{{ inventory_hostname }}/"
-
-  # Pull database backups from remote systems to control node
-  - name: Pull DB backups
+    dest: "{{ control_backups_root }}/app_resources/{{ inventory_hostname }}/"
+    rsync_opts: "{{ default_rsync_opts }}"
+  - name: "Pull DB backups"
     src: "/var/backups/db/"
-    dest: "./backups/db/{{ inventory_hostname }}/"
+    dest: "{{ control_backups_root }}/db/{{ inventory_hostname }}/"
+    rsync_opts: "{{ default_rsync_opts }}"
 
-  # Push application files from control node to remote systems
-  - name: Push app configuration
-    src: "./deploy/app_config/"
+# === Push jobs (control → remote) ===
+push_jobs:
+  - name: "Push app configuration"
+    src: "{{ control_artifacts_root }}/app_config/"
     dest: "/etc/myapp/config/"
-    mode: push
+    rsync_opts: "{{ default_rsync_opts }}"
 
-# === Source and Destination Paths for File Sync on control node ===
-db_backup_source_directory: "{{ sync_source_base }}/db_backups/"
-db_backup_destination_directory: "{{ sync_dest_base }}/db/"
-
-app_control_source_directory: "{{ sync_source_base }}/scripts/"
-app_control_destination_directory: "{{ sync_dest_base }}/scripts/"
-
-app_files_source_directory: "{{ sync_source_base }}/webapp/"
-app_files_destination_directory: "{{ sync_dest_base }}/webapp/"
-
-# === CLI Tool Packages for control node ===
 cli_tools:
   - python3-venv
   - fd-find
@@ -60,7 +57,6 @@ cli_tools:
   - curl
   - ripgrep
 
-# === Python Development Packages for control node ===
 python_tools:
   - python3-pip
   - virtualenv
@@ -69,9 +65,7 @@ python_tools:
   - python3-wheel
   - pipx
   - software-properties-common
-  - python3-pip
 
-# === System Utilities for control node ===
 system_utils:
   - ca-certificates
   - software-properties-common
@@ -85,16 +79,13 @@ system_utils:
   - glances
   - acl
 
-# === Graphical Tools and Fonts for control node ===
 gui_utils:
   - remmina
   - texlive-full
   - filezilla
   - darktable
-  - remmina
   - ansible-lint
   - python3
-  - python3-pip
   - python3-venv
   - python3-setuptools
   - build-essential
@@ -106,11 +97,9 @@ gui_utils:
   - openssh-server
   - yamllint
 
-# === Local Database Tools for control node ===
 db_tools:
   - mariadb-server
 
-# === Combined Package Set for Installation on control node ===
+# Final combined list (apt will dedupe if repeats occur)
 local_system_packages: >-
-  {{ cli_tools + python_tools + system_utils +
-     gui_utils + db_tools }}
+  {{ cli_tools + python_tools + system_utils + gui_utils + db_tools }}
