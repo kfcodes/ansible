@@ -19,3 +19,14 @@ update_branch:
   version: "{{ react_update_tag }}"
   user_name: "{{ user_name }}"
   port: "3001"
+
+backup_cron_jobs:
+  - name: "Frontend static export backup"
+    script: run_daily_backup.sh # script deployed by the app/role
+    enabled: true
+    schedule: daily # or use minute/hour if your role supports explicit fields
+
+  - name: "Label API hourly DB backup"
+    script: run_hourly_backup.sh
+    enabled: true
+    schedule: hourly
