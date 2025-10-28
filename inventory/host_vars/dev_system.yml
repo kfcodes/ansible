@@ -1,3 +1,13 @@
-ansible_host: localhost
+---
+# Control node runs tasks locally
+is_control_node: true
 ansible_connection: local
-hostname: m
+ansible_host: 127.0.0.1
+
+# Host identity
+system_hostname: "m"
+system_domain: "local"
+
+# Host-specific feature flags
+features:
+  gpu_passthrough: false
