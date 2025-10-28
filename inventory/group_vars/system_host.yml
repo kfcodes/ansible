@@ -1,40 +1,7 @@
 ---
-default_user_options:
-  name: myuser # Fallback username if not overridden per-host
-  shell: /bin/bash # Default login shell
-  create_home: false # Whether to create a home directory
-  groups: [wheel] # Baseline supplemental groups
-  system: false # Whether this should be a “system” account
-  lock_password: false # Default: don’t lock the password
-
-# === System Behavior Flags ===
 allow_reboot: true
 install_docker: true
 
-# === Network Configuration Defaults ===
-netmask: 24
-gateway: 192.168.1.1
-dns_servers:
-  - 1.1.1.1
-  - 8.8.8.8
-
-# === File Source Directories on Host System ===
-db_backup_dir: /var/backups/db
-app_control_dir: /opt/scripts
-app_files_dir: /opt/webapp
-
-backup_cron_jobs:
-  - name: "Hourly App Backup"
-    script: run_hourly_backup.sh
-    schedule: hourly
-    enabled: true
-
-  - name: "Daily DB Backup"
-    script: run_daily_backup.sh
-    schedule: daily
-    enabled: true
-
-# === Minimal Package Set for Application Hosting ===
 host_system_packages:
   - htop
   - tmux
