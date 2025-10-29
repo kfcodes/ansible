@@ -1,3 +1,17 @@
-Host github.com
-  HostName github.com
-  IdentityFile ~/.ssh/github_key
+# Managed by Ansible
+{% for h in user_accounts_ssh_config_hosts %}
+Host {{ h.host }}
+  HostName {{ h.hostname | default(h.host) }}
+{% if h.user is defined %}
+  User {{ h.user }}
+{% endif %}
+{% if h.identity_file is defined %}
+  IdentityFile {{ h.identity_file }}
+{% endif %}
+{% if h.extra_options is defined %}
+{%   for line in h.extra_options %}
+  {{ line }}
+{%   endfor %}
+{% endif %}
+
+{% endfor %}

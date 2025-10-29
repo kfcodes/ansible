@@ -1,0 +1,17 @@
+---
+# Primary user to manage (comes from group_vars/all.yml → system_user)
+user_accounts_primary: "{{ system_user | default({}) }}"
+
+# Key management toggles
+user_accounts_enable_key_mgmt: "{{ enable_ssh_key_management | default(true) }}"
+user_accounts_manage_ssh_config: false
+
+# ~/.ssh/config entries (only used if ^ is true)
+user_accounts_ssh_config_hosts: [] # e.g. [{host: github.com, identity_file: "{{ ssh_key_dir }}/github"}]
+
+# Control-node key generation (optional)
+user_accounts_generate_keys: "{{ ssh_keys_to_generate | default([]) }}"
+user_accounts_ssh_key_dir: "{{ ssh_key_dir | default(lookup('env','HOME') ~ '/.ssh') }}"
+user_accounts_key_type: "{{ ssh_key_type | default('ed25519') }}"
+user_accounts_key_bits: "{{ ssh_key_bits | default(4096) }}"
+user_accounts_key_comment: "{{ ssh_key_comment | default('Managed by Ansible') }}"

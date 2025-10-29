@@ -1,0 +1,14 @@
+---
+- name: Validate primary user structure
+  ansible.builtin.assert:
+    that:
+      - user_accounts_primary is mapping
+      - (user_accounts_primary.name | default('')) | length > 0
+    fail_msg: "system_user.name (user_accounts_primary.name) must be set."
+
+- name: Validate ssh_public_key_path when key mgmt enabled
+  ansible.builtin.assert:
+    that:
+      - user_accounts_primary.ssh_public_key_path is defined
+    fail_msg: "system_user.ssh_public_key_path missing while key management is enabled."
+  when: user_accounts_enable_key_mgmt | bool

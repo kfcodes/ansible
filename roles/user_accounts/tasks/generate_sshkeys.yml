@@ -1,0 +1,20 @@
+---
+- name: Ensure control-node SSH key directory exists
+  ansible.builtin.file:
+    path: "{{ user_accounts_ssh_key_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  run_once: true
+
+- name: Generate SSH keys on control node
+  community.crypto.openssh_keypair:
+    path: "{{ user_accounts_ssh_key_dir }}/{{ item }}"
+    type: "{{ user_accounts_key_type }}"
+    size: "{{ (user_accounts_key_type == 'rsa') | ternary(user_accounts_key_bits, omit) }}"
+    comment: "{{ user_accounts_key_comment }}"
+    mode: "0600"
+    force: false
+  loop: "{{ user_accounts_generate_keys }}"
+  delegate_to: localhost
+  run_once: true

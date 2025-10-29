@@ -1,11 +1,13 @@
-- name: Manage user creation
-  import_tasks: user_account.yml
-  tags: [user]
+---
+- name: Validate inputs
+  ansible.builtin.import_tasks: validate.yml
 
-- name: Conditionally generate SSH key for ansible user
-  import_tasks: generate_sshkey.yml
-  tags: [keygen]
+- name: Create/ensure primary user
+  ansible.builtin.import_tasks: user_account.yml
 
-- name: Manage SSH keys
-  import_tasks: sshkey_management.yml
-  tags: [config_ssh_keys]
+- name: Manage SSH keys for the user
+  ansible.builtin.import_tasks: sshkey_management.yml
+
+- name: Generate control-node keys (optional)
+  ansible.builtin.import_tasks: generate_sshkeys.yml
+  when: user_accounts_generate_keys | length > 0

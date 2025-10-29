@@ -1,91 +1,44 @@
-# ================================================================
-# TASK: Deploy SSH public keys to managed user accounts on all hosts.
-#
-# This file assumes the following variables are defined (in group_vars):
-#   • system_user.name                   → username on remote host
-#   • system_user.ssh_public_key_path    → path to a single public key (optional)
-#   • ssh_keys_to_generate               → list of key-names generated on control node (optional)
-#   • ssh_key_dir                        → directory on control node where keys live
-#
-# Only runs if at least one of:
-#   • system_user.ssh_public_key_path is defined and points to a valid file, OR
-#   • ssh_keys_to_generate is defined and non-empty
-# ================================================================
-
-- block:
-    # ------------------------------------------------------------
-    # 1) Ensure the managed user’s ~/.ssh directory exists
-    # ------------------------------------------------------------
-    - name: Ensure user’s .ssh directory exists
-      file:
-        path: "/home/{{ system_user.name }}/.ssh"
-        state: directory
-        owner: "{{ system_user.name }}"
-        group: "{{ system_user.name }}"
-        mode: "0700"
-
-    # ------------------------------------------------------------
-    # 2a) If a single public key path is defined, inject it
-    # ------------------------------------------------------------
-    - name: Debug intent to install single public key
-      debug:
-        msg: >-
-          Installing single SSH public key for user '{{ system_user.name }}'
-          from '{{ system_user.ssh_public_key_path }}'
-      when:
-        - system_user.ssh_public_key_path is defined
-        - lookup('file', system_user.ssh_public_key_path, errors='ignore') != ''
-
-    - name: Inject single SSH public key into authorized_keys
-      authorized_key:
-        user: "{{ system_user.name }}"
-        state: present
-        key: "{{ lookup('file', system_user.ssh_public_key_path) }}"
-      when:
-        - system_user.ssh_public_key_path is defined
-        - lookup('file', system_user.ssh_public_key_path, errors='ignore') != ''
-
-    # ------------------------------------------------------------
-    # 2b) If multiple keys were generated on control node, inject each
-    # ------------------------------------------------------------
-    - name: Debug intent to install generated public keys
-      debug:
-        msg: >-
-          Installing generated SSH keys for user '{{ system_user.name }}'
-          from control node directory '{{ ssh_key_dir }}'
-      when:
-        - ssh_keys_to_generate is defined
-        - ssh_keys_to_generate | length > 0
-
-    - name: Inject generated SSH public keys into authorized_keys
-      authorized_key:
-        user: "{{ system_user.name }}"
-        state: present
-        key: "{{ lookup('file', ssh_key_dir + '/' + item + '.pub') }}"
-      loop: "{{ ssh_keys_to_generate }}"
-      when:
-        - ssh_keys_to_generate is defined
-        - ssh_keys_to_generate | length > 0
-
-    # ------------------------------------------------------------
-    # 3) Ensure authorized_keys file has secure permissions (0600)
-    # ------------------------------------------------------------
-    - name: Ensure authorized_keys mode is 0600 and owned by user
-      file:
-        path: "/home/{{ system_user.name }}/.ssh/authorized_keys"
-        owner: "{{ system_user.name }}"
-        group: "{{ system_user.name }}"
-        mode: "0600"
-      when:
-        - >
-          (system_user.ssh_public_key_path is defined
-           and lookup('file', system_user.ssh_public_key_path, errors='ignore') != '')
-          or
-          (ssh_keys_to_generate is defined and ssh_keys_to_generate | length > 0)
-
+---
+- name: Ensure user's .ssh directory exists when needed
+  ansible.builtin.file:
+    path: "/home/{{ ua_merged_user.name }}/.ssh"
+    state: directory
+    owner: "{{ ua_merged_user.name }}"
+    group: "{{ ua_merged_user.name }}"
+    mode: "0700"
   when:
-    - >
-      (system_user.ssh_public_key_path is defined
-       and lookup('file', system_user.ssh_public_key_path, errors='ignore') != '')
-      or
-      (ssh_keys_to_generate is defined and ssh_keys_to_generate | length > 0)
+    - user_accounts_enable_key_mgmt | bool
+      or (user_accounts_manage_ssh_config | bool and ua_merged_user.create_home | bool)
+
+# Single designated public key
+- name: Install authorized_keys from system_user.ssh_public_key_path
+  ansible.posix.authorized_key:
+    user: "{{ ua_merged_user.name }}"
+    state: present
+    key: "{{ lookup('file', ua_merged_user.ssh_public_key_path) }}"
+  when:
+    - user_accounts_enable_key_mgmt | bool
+    - lookup('file', ua_merged_user.ssh_public_key_path, errors='ignore') != ''
+
+# Any extra generated keys
+- name: Install additional generated public keys
+  ansible.posix.authorized_key:
+    user: "{{ ua_merged_user.name }}"
+    state: present
+    key: "{{ lookup('file', user_accounts_ssh_key_dir ~ '/' ~ item ~ '.pub') }}"
+  loop: "{{ user_accounts_generate_keys }}"
+  when:
+    - user_accounts_enable_key_mgmt | bool
+    - user_accounts_generate_keys | length > 0
+
+# Optional ~/.ssh/config
+- name: Render ~/.ssh/config (optional)
+  ansible.builtin.template:
+    src: ssh_config.j2
+    dest: "/home/{{ ua_merged_user.name }}/.ssh/config"
+    owner: "{{ ua_merged_user.name }}"
+    group: "{{ ua_merged_user.name }}"
+    mode: "0600"
+  when:
+    - user_accounts_manage_ssh_config | bool
+    - ua_merged_user.create_home | bool

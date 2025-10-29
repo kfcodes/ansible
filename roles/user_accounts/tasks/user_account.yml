@@ -1,66 +1,22 @@
-# === Merge system_user with default options and append groups without duplication ===
-- name: Merge system_user with defaults and build final_user dict
-  # 1. Start from the baseline defaults defined in group_vars (default_user_options)
-  # 2. Overlay any host‐specific overrides from system_user (recursive merge)
-  # 3. Rebuild the “groups” list so it’s the union of default_user_options.groups and system_user.groups (if present), then remove duplicates
-  set_fact:
-    final_user: >-
-      {{
-        default_user_options
-        | combine(system_user, recursive=True)
-        | combine({
-            'groups': (
-              default_user_options.groups
-              + (system_user.groups | default([]))
-            ) | unique
-          })
-      }}
+---
+- name: Merge user options
+  ansible.builtin.set_fact:
+    ua_merged_user:
+      name: "{{ user_accounts_primary.name }}"
+      shell: "{{ user_accounts_primary.shell | default(default_user_options.shell) }}"
+      create_home: "{{ user_accounts_primary.create_home | default(default_user_options.create_home) }}"
+      groups: >-
+        {{ (default_user_options.groups | default([]))
+           + (user_accounts_primary.groups | default([])) | unique }}
+      system: "{{ default_user_options.system | default(false) }}"
+      lock_password: "{{ default_user_options.lock_password | default(false) }}"
+      ssh_public_key_path: "{{ user_accounts_primary.ssh_public_key_path }}"
 
-# At this point, “final_user” contains:
-#   All keys from default_user_options
-#   Any values overridden or added by system_user
-#   A “groups” list that merges both defaults and overrides without duplicates
-
-# === Ensure the system user account exists (create or update) ===
-- name: Create or update the system user account
-  user:
-    # Mandatory: username to create/update
-    name: "{{ final_user.name }}"
-
-    # Explicitly state that the user should be present (default for the user module)
+- name: Ensure user exists
+  ansible.builtin.user:
+    name: "{{ ua_merged_user.name }}"
+    shell: "{{ ua_merged_user.shell }}"
+    create_home: "{{ ua_merged_user.create_home }}"
+    groups: "{{ ua_merged_user.groups }}"
+    system: "{{ ua_merged_user.system }}"
     state: present
-
-    # Login shell: either from host override or default
-    shell: "{{ final_user.shell }}"
-
-    # Whether to create a home directory (true/false)
-    create_home: "{{ final_user.create_home }}"
-
-    # Supplementary groups—because append: true, any existing groups not listed here will be preserved
-    groups: "{{ final_user.groups }}"
-    append: true
-
-    # Treat as a “system” account if final_user.system is true; otherwise false
-    system: "{{ final_user.system | default(false) }}"
-
-    # The following parameters are only sent if defined; otherwise “omit” skips them entirely:
-    password_lock: "{{ final_user.lock_password | default(omit) }}"
-    uid: "{{ final_user.uid           | default(omit) }}"
-    group: "{{ final_user.primary_group | default(omit) }}"
-    comment: "{{ final_user.comment       | default(omit) }}"
-    home: "{{ final_user.home          | default(omit) }}"
-
-  become: true
-  register: user_create_result
-
-# === Display a summary if the user was created or modified ===
-- name: Show details of the configured user (when a change occurred)
-  debug:
-    msg: >-
-      User '{{ final_user.name }}' was configured:
-      - Groups: {{ final_user.groups | join(', ') }}
-      - Home: {{ final_user.home | default('/home/' + final_user.name) }}
-      - UID: {{ final_user.uid | default('auto-assigned') }}
-      - System account: {{ final_user.system | default(false) }}
-  # Only run this debug if the user module reported a change
-  when: user_create_result is defined and user_create_result.changed
