@@ -1,11 +1,19 @@
-- name: Install virtualization packages
+---
+- name: Install KVM/libvirt packages
   apt:
     name: "{{ virtualization_packages }}"
     state: present
     update_cache: yes
 
-- name: Add current user to libvirt group
+- name: Enable and start libvirtd
+  service:
+    name: libvirtd
+    state: started
+    enabled: true
+
+- name: Add current user to libvirt group (optional convenience)
   user:
     name: "{{ ansible_user_id }}"
-    groups: libvirt
+    groups: libvirt,kvm
     append: yes
+  when: ansible_user_id is defined

@@ -1,9 +1,24 @@
-- name: Check if GPU PCI IDs are already configured
-  include_tasks: detect_gpu.yml
-  when: gpu_bdf | length == 0 or gpu_pci_ids | length == 0
-  tags: [detect]
+---
+- name: Sanity check required vars
+  include_tasks: sanity.yml
 
-- name: Proceed with full VFIO and passthrough configuration
-  include_tasks: configure_gpu.yml
-  when: gpu_bdf | length > 0 and gpu_pci_ids | length > 0
-  tags: [setup]
+- name: Install virtualization packages
+  include_tasks: install.yml
+  tags: [install]
+
+- name: Configure VFIO modules and modprobe config
+  include_tasks: vfio.yml
+  tags: [vfio]
+
+- name: Configure GRUB for IOMMU + mode-specific VFIO binding
+  include_tasks: grub.yml
+  tags: [grub]
+
+- name: Install VFIO mode toggle scripts
+  include_tasks: mode_scripts.yml
+  tags: [scripts]
+
+- name: Optionally create VM (headless-friendly)
+  include_tasks: create_vm.yml
+  when: create_vm | bool
+  tags: [vm]

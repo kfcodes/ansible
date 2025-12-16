@@ -1,13 +1,10 @@
-#!/bin/bash
-{% for device in gpu_bdf %}
-echo "Rebinding {{ device }} to host driver..."
-echo {{ device }} > /sys/bus/pci/devices/{{ device }}/driver/unbind
-{% endfor %}
+#!/usr/bin/env bash
+set -euo pipefail
 
-{% for id in gpu_pci_ids %}
-{% if '67ef' in id %}
-echo {{ id }} > /sys/bus/pci/drivers/amdgpu/new_id
-{% elif 'aaf0' in id %}
-echo {{ id }} > /sys/bus/pci/drivers/snd_hda_intel/new_id
-{% endif %}
-{% endfor %}
+echo "This host is configured to keep the passthrough GPU bound to vfio-pci at boot."
+echo "Rebinding to host drivers is intentionally not automated here."
+echo
+echo "If you really need to rebind, do it manually by binding to the correct driver:"
+echo "  - amdgpu / radeon for VGA"
+echo "  - snd_hda_intel for HDMI audio"
+exit 0

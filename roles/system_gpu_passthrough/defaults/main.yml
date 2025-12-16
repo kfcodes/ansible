@@ -1,19 +1,63 @@
 ---
-# # Example (after detection):
+# Toggleable VFIO design:
+# - vfio_mode=host  => GPU used by Linux (amdgpu/snd_hda_intel)
+# - vfio_mode=vfio  => GPU bound to vfio-pci at boot (for passthrough)
+vfio_mode: "host" # "host" or "vfio"
+
+# PCI IDs for passthrough GPU + its HDMI audio function.
+# Format MUST be "dddd:dddd"
+gpu_pci_ids:
+  - "1002:67ef"
+  - "1002:aae0"
+
+# Optional BDFs, used for status output and (optional) emergency scripts.
+# Example:
 # gpu_bdf:
 #   - "0000:01:00.0"
 #   - "0000:01:00.1"
-# gpu_pci_ids:
-#   - "1002 67ef"
-#   - "1002 aaf0"
-
 gpu_bdf: []
-gpu_pci_ids: []
+
+# Platform IOMMU selection
+iommu_platform: "intel" # "intel" or "amd"
+
+# GRUB cmdline args that should ALWAYS be present (both host + vfio modes)
+grub_cmdline_always:
+  - "iommu=pt"
+  - "intel_iommu=on" # kept only if iommu_platform == intel
+  - "amd_iommu=on" # kept only if iommu_platform == amd
+
+# GRUB cmdline args that should ONLY be present in VFIO mode
+# NOTE: vfio-pci.ids is rendered from gpu_pci_ids
+grub_cmdline_vfio_only:
+  - "vfio-pci.ids={{ gpu_pci_ids | join(',') }}"
+  - "rd.driver.pre=vfio-pci"
+
+# Optional: reduce chance host grabs framebuffer early (useful in VFIO mode).
+disable_efi_framebuffer: true
+
+# Do NOT permanently blacklist drivers if you want to use GPU on Linux sometimes.
+# If you enable this, it will only apply in VFIO mode.
+blacklist_host_gpu_drivers: false
 
 virtualization_packages:
-  - qemu-kvm
+  - qemu-system-x86
+  - qemu-utils
+  - ovmf
   - libvirt-daemon-system
   - libvirt-clients
-  - virt-manager
   - virtinst
-  - ovmf
+  - bridge-utils
+  - cpu-checker
+
+# Optional VM creation (leave false if you already manage VM separately)
+create_vm: false
+vm_name: "win10"
+vm_ram_mb: 8192
+vm_vcpus: 4
+vm_disk_path: "/var/lib/libvirt/images/win10.qcow2"
+vm_disk_gb: 80
+vm_iso_path: "/var/lib/libvirt/boot/windows.iso"
+
+# Headless install access
+vm_graphics: "spice" # "spice" or "vnc" or "none"
+vm_graphics_listen: "127.0.0.1" # use SSH tunnel

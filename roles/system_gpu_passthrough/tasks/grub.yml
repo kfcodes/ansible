@@ -1,22 +1,67 @@
-- name: Enable IOMMU in GRUB and update configuration
-  block:
-    - name: Add IOMMU settings to GRUB config
-      lineinfile:
-        path: /etc/default/grub
-        regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash intel_iommu=on iommu=pt"'
-        backrefs: yes
+---
+- name: Read current GRUB cmdline (best-effort)
+  set_fact:
+    grub_cmdline_current: >-
+      {{
+        (lookup('file', '/etc/default/grub') | regex_search('GRUB_CMDLINE_LINUX_DEFAULT="([^"]*)"', '\\1'))
+        | default('')
+        | split(' ')
+        | reject('equalto','')
+        | list
+      }}
 
-    - name: Update GRUB configuration
-      command: update-grub
-      notify: Reboot system to apply VFIO/IOMMU configuration
+- name: Remove any existing vfio-only args from current cmdline (for clean host mode)
+  set_fact:
+    grub_cmdline_current: >-
+      {{
+        grub_cmdline_current
+        | reject('search','^vfio-pci\\.ids=')
+        | reject('equalto','rd.driver.pre=vfio-pci')
+        | reject('search','^video=efifb:off$')
+        | list
+      }}
 
-  rescue:
-    - name: GRUB configuration failed
-      debug:
-        msg: "Failed to modify GRUB. Please check your bootloader settings manually."
+- name: Build always-on args (filter intel/amd correctly)
+  set_fact:
+    _always_args: >-
+      {{
+        grub_cmdline_always
+        | reject('search','^intel_iommu=on$') | list
+        if iommu_platform != 'intel' else grub_cmdline_always
+      }}
 
-  always:
-    - name: GRUB configuration attempt complete
-      debug:
-        msg: "GRUB configuration block completed."
+- name: Filter AMD arg if not AMD platform
+  set_fact:
+    _always_args: >-
+      {{
+        _always_args
+        | reject('search','^amd_iommu=on$') | list
+        if iommu_platform != 'amd' else _always_args
+      }}
+
+- name: Start building desired args list
+  set_fact:
+    grub_cmdline_desired: "{{ (grub_cmdline_current + _always_args) | unique | list }}"
+
+- name: Add VFIO-only args if vfio_mode == vfio
+  set_fact:
+    grub_cmdline_desired: "{{ (grub_cmdline_desired + grub_cmdline_vfio_only) | unique | list }}"
+  when: vfio_mode == 'vfio'
+
+- name: Optionally disable EFI framebuffer (ONLY useful in vfio mode)
+  set_fact:
+    grub_cmdline_desired: "{{ (grub_cmdline_desired + ['video=efifb:off']) | unique | list }}"
+  when: disable_efi_framebuffer | bool and vfio_mode == 'vfio'
+
+- name: Write updated GRUB cmdline
+  lineinfile:
+    path: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_desired | join(" ") }}"'
+  notify:
+    - update-grub
+    - update-initramfs
+    - reboot-host
+
+- name: Flush handlers so update-grub/initramfs/reboot occurs now
+  meta: flush_handlers

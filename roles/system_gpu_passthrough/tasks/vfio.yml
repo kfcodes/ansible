@@ -1,28 +1,56 @@
-- name: Load VFIO kernel modules and configure PCI ID override
-  block:
+---
+- name: Ensure VFIO modules load at boot (late)
+  copy:
+    dest: /etc/modules-load.d/vfio.conf
+    mode: "0644"
+    content: |
+      vfio
+      vfio_pci
+      vfio_iommu_type1
+      vfio_virqfd
 
-    - name: Create VFIO module load config
-      copy:
-        dest: /etc/modules-load.d/vfio.conf
-        content: |
-          vfio
-          vfio_iommu_type1
-          vfio_pci
-          vfio_virqfd
+- name: Ensure VFIO modules are included in initramfs (early) - Ubuntu
+  blockinfile:
+    path: /etc/initramfs-tools/modules
+    create: true
+    marker: "# {mark} ANSIBLE VFIO MODULES"
+    block: |
+      vfio
+      vfio_pci
+      vfio_iommu_type1
+      vfio_virqfd
+  notify:
+    - update-initramfs
 
-    - name: Create VFIO PCI ID override config
-      template:
-        src: vfio.conf.j2
-        dest: /etc/modprobe.d/vfio.conf
+- name: Configure vfio-pci device IDs (modprobe)
+  template:
+    src: vfio.conf.j2
+    dest: /etc/modprobe.d/vfio.conf
+    mode: "0644"
+  notify:
+    - update-initramfs
 
-  rescue:
+# Toggleable setup: only blacklist host GPU drivers in VFIO mode, and only if enabled.
+- name: Optionally blacklist host GPU drivers (ONLY in vfio mode)
+  copy:
+    dest: /etc/modprobe.d/blacklist-host-gpu.conf
+    mode: "0644"
+    content: |
+      blacklist amdgpu
+      blacklist radeon
+      blacklist nouveau
+      blacklist nvidia
+  when: blacklist_host_gpu_drivers | bool and vfio_mode == 'vfio'
+  notify:
+    - update-initramfs
 
-    - name: VFIO configuration failed
-      debug:
-        msg: "Failed to write VFIO configs. You may need to revert manually."
+- name: Ensure blacklist file is absent in host mode (or if disabled)
+  file:
+    path: /etc/modprobe.d/blacklist-host-gpu.conf
+    state: absent
+  when: (not blacklist_host_gpu_drivers | bool) or (vfio_mode != 'vfio')
+  notify:
+    - update-initramfs
 
-  always:
-
-    - name: VFIO configuration block completed
-      debug:
-        msg: "VFIO module and PCI ID setup finished (success or fail)."
+- name: Flush handlers so initramfs is updated before reboot-triggering steps
+  meta: flush_handlers

@@ -1,11 +1,14 @@
-- name: Install unbind GPU script
+---
+- name: Install unbind GPU script (debug)
   template:
     src: unbind_gpu.sh.j2
     dest: /usr/local/bin/unbind_gpu.sh
     mode: "0755"
+  when: gpu_bdf | length > 0
 
-- name: Install rebind GPU script
+- name: Install rebind GPU script (debug)
   template:
     src: rebind_gpu.sh.j2
     dest: /usr/local/bin/rebind_gpu.sh
     mode: "0755"
+  when: gpu_bdf | length > 0

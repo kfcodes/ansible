@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== VFIO Status ==="
+echo
+echo "[1] Current kernel cmdline:"
+cat /proc/cmdline
+echo
+echo "[2] GRUB_CMDLINE_LINUX_DEFAULT:"
+grep '^GRUB_CMDLINE_LINUX_DEFAULT=' /etc/default/grub || true
+echo
+
+echo "[3] vfio-pci ids configured (modprobe):"
+grep -R "options vfio-pci" /etc/modprobe.d/vfio.conf 2>/dev/null || true
+echo
+
+echo "[4] lspci driver binding (VGA/Audio):"
+lspci -nnk | grep -A3 -iE 'vga|audio' || true
+echo
+
+{% if gpu_bdf | length > 0 %}
+echo "[5] Specific BDFs:"
+{% for dev in gpu_bdf %}
+echo "--- {{ dev }} ---"
+lspci -nnk -s {{ dev }} || true
+{% endfor %}
+echo
+{% endif %}
+
+echo "Done."

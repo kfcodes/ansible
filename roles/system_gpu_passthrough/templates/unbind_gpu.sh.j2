@@ -1,9 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+
 {% for device in gpu_bdf %}
-echo "Unbinding {{ device }} from host driver..."
-echo {{ device }} > /sys/bus/pci/devices/{{ device }}/driver/unbind
+if [ -e "/sys/bus/pci/devices/{{ device }}/driver/unbind" ]; then
+  echo "{{ device }}" > "/sys/bus/pci/devices/{{ device }}/driver/unbind" || true
+fi
 {% endfor %}
 
-{% for id in gpu_pci_ids %}
-echo {{ id }} > /sys/bus/pci/drivers/vfio-pci/new_id
-{% endfor %}
+for id in {{ gpu_pci_ids | to_json }}; do
+  echo "$id" > /sys/bus/pci/drivers/vfio-pci/new_id || true
+done
+
+echo "Done."

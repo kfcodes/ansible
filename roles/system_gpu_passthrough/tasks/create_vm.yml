@@ -1,38 +1,35 @@
-- name: Attempt to unbind GPU and start Windows VM
-  block:
-    - name: Unbind GPU from host before VM creation
-      command: /usr/local/bin/unbind_gpu.sh
+---
+- name: Check if VM already exists
+  command: "virsh dominfo {{ vm_name }}"
+  register: vm_exists
+  failed_when: false
+  changed_when: false
 
-    - name: Create Windows VM with local ISO
-      command: >
-        virt-install
-        --name win10
-        --ram 8192
-        --vcpus 4
-        --os-type windows
-        --os-variant win10
-        --disk size=60,path=/var/lib/libvirt/images/win10.qcow2
-        --cdrom /var/lib/libvirt/boot/windows.iso
-        --network network=default
-        --graphics spice
-        --video qxl
-        --boot cdrom
-      args:
-        creates: /etc/libvirt/qemu/win10.xml
+- name: Create VM (first-time)
+  command: >
+    virt-install
+    --name {{ vm_name }}
+    --ram {{ vm_ram_mb }}
+    --vcpus {{ vm_vcpus }}
+    --cpu host-passthrough
+    --machine q35
+    --boot uefi
+    --disk path={{ vm_disk_path }},size={{ vm_disk_gb }},bus=virtio,format=qcow2
+    --cdrom {{ vm_iso_path }}
+    --network network=default,model=virtio
+    {% if vm_graphics == 'spice' %}
+    --graphics spice,listen={{ vm_graphics_listen }}
+    {% elif vm_graphics == 'vnc' %}
+    --graphics vnc,listen={{ vm_graphics_listen }}
+    {% else %}
+    --graphics none
+    --console pty,target_type=serial
+    {% endif %}
+    --noautoconsole
+  when: vm_exists.rc != 0
 
-    - name: Shut down the VM after installation
-      command: virsh shutdown win10
-      ignore_errors: yes
-
-  rescue:
-    - name: VM creation failed — rebind GPU to host
-      command: /usr/local/bin/rebind_gpu.sh
-
-    - name: Log failure in VM creation
-      debug:
-        msg: "Failed to create/start VM. GPU rebind attempted."
-
-  always:
-    - name: Log VM creation attempt complete
-      debug:
-        msg: "Create VM task completed (success or failure)."
+- name: Reminder for headless access
+  debug:
+    msg: >
+      VM created. For headless install, SSH tunnel to {{ vm_graphics_listen }} and connect with virt-viewer.
+      After Windows installs, prefer RDP. GPU passthrough is already reserved via vfio-pci.ids at boot.

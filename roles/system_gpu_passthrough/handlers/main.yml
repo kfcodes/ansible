@@ -1,4 +1,18 @@
-- name: Reboot system to apply VFIO/IOMMU configuration
+---
+- name: update-initramfs
+  command: update-initramfs -u
+  changed_when: true
+
+- name: update-grub
+  command: update-grub
+  changed_when: true
+
+- name: restart-libvirtd
+  service:
+    name: libvirtd
+    state: restarted
+
+- name: reboot-host
   reboot:
     msg: "Rebooting to apply VFIO/IOMMU configuration"
-    reboot_timeout: 120
+    reboot_timeout: 600

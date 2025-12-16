@@ -1,0 +1,42 @@
+---
+# Connection targeting (switch between IP and hostname)
+connection_mode: "ip" # "ip" or "hostname"
+host_ip: "192.168.1.12"
+system_hostname: "m"
+
+# Use IP now; flip connection_mode to "hostname" later to connect by name
+ansible_host: "{{ host_ip if connection_mode == 'ip' else system_hostname }}"
+
+# SSH / privilege escalation
+ansible_user: "m" # <-- change if your SSH username differs
+ansible_become: true
+
+# ----------------------------
+# VFIO toggleable configuration
+# ----------------------------
+
+# Default boot mode after running the playbook:
+# - "host": Linux uses the GPU
+# - "vfio": GPU binds to vfio-pci for passthrough
+vfio_mode: "host"
+
+iommu_platform: "intel"
+
+# RX 460/560D (Baffin) GPU + HDMI/DP audio function
+gpu_pci_ids:
+  - "1002:67ef"
+  - "1002:aae0"
+
+gpu_bdf:
+  - "0000:01:00.0"
+  - "0000:01:00.1"
+
+# Toggle design: don't permanently blacklist host drivers
+blacklist_host_gpu_drivers: false
+
+# Helpful in VFIO mode to reduce early framebuffer grabs
+disable_efi_framebuffer: true
+
+# Optional: VM creation via role (off by default)
+create_vm: false
+vm_name: "win10"

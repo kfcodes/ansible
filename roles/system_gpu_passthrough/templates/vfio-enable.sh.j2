@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[vfio-enable] Enabling VFIO mode in GRUB and rebooting..."
+
+IDS="{{ gpu_pci_ids | join(',') }}"
+
+# Ensure IOMMU base is enabled (does not remove existing args, just adds if missing)
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="/GRUB_CMDLINE_LINUX_DEFAULT="{{ "intel_iommu=on" if iommu_platform=="intel" else "" }} {{ "amd_iommu=on" if iommu_platform=="amd" else "" }} iommu=pt /' /etc/default/grub || true
+
+# Remove any existing vfio bits first
+sudo sed -i 's/\<vfio-pci\.ids=[^ ]*\>//g' /etc/default/grub
+sudo sed -i 's/\<rd\.driver\.pre=vfio-pci\>//g' /etc/default/grub
+sudo sed -i 's/\<video=efifb:off\>//g' /etc/default/grub
+
+# Add vfio bits
+sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 vfio-pci.ids='"$IDS"' rd.driver.pre=vfio-pci{% if disable_efi_framebuffer %} video=efifb:off{% endif %}"/' /etc/default/grub
+
+sudo update-grub
+sudo update-initramfs -u
+
+echo "[vfio-enable] Rebooting now..."
+sudo reboot

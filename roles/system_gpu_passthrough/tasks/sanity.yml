@@ -1,0 +1,33 @@
+---
+- name: Fail if gpu_pci_ids not set
+  fail:
+    msg: >
+      gpu_pci_ids is empty. Set it in defaults/main.yml or inventory.
+      Example:
+        gpu_pci_ids:
+          - "1002:67ef"
+          - "1002:aae0"
+  when: gpu_pci_ids | length == 0
+
+- name: Validate gpu_pci_ids format
+  assert:
+    that:
+      - item is match("^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}$")
+    fail_msg: "Bad PCI ID format: {{ item }} (expected 'dddd:dddd', e.g. '1002:67ef')"
+  loop: "{{ gpu_pci_ids }}"
+
+- name: Validate vfio_mode
+  assert:
+    that:
+      - vfio_mode in ['host', 'vfio']
+    fail_msg: "vfio_mode must be 'host' or 'vfio' (got: {{ vfio_mode }})"
+
+- name: Show effective configuration
+  debug:
+    msg:
+      - "vfio_mode={{ vfio_mode }}"
+      - "iommu_platform={{ iommu_platform }}"
+      - "gpu_pci_ids={{ gpu_pci_ids }}"
+      - "gpu_bdf={{ gpu_bdf }}"
+      - "blacklist_host_gpu_drivers={{ blacklist_host_gpu_drivers }}"
+      - "disable_efi_framebuffer={{ disable_efi_framebuffer }}"
