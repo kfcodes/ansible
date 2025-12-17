@@ -1,23 +1,39 @@
 ---
-- name: Read current GRUB cmdline (best-effort)
+- name: Read /etc/default/grub (slurp)
+  slurp:
+    path: /etc/default/grub
+  register: grub_file
+
+- name: Decode grub file content
   set_fact:
-    grub_cmdline_current: >-
+    grub_file_text: "{{ grub_file.content | b64decode }}"
+
+- name: Extract current GRUB_CMDLINE_LINUX_DEFAULT (safe)
+  set_fact:
+    grub_cmdline_current_str: >-
       {{
-        (lookup('file', '/etc/default/grub') | regex_search('GRUB_CMDLINE_LINUX_DEFAULT="([^"]*)"', '\\1'))
-        | default('')
-        | split(' ')
-        | reject('equalto','')
-        | list
+        (grub_file_text
+          | regex_search('^GRUB_CMDLINE_LINUX_DEFAULT=(\"[^\"]*\"|\\x27[^\\x27]*\\x27|[^\\n]*)', multiline=True)
+          | default('GRUB_CMDLINE_LINUX_DEFAULT=\"\"'))
+        | regex_replace('^GRUB_CMDLINE_LINUX_DEFAULT=', '')
+        | trim
+        | regex_replace('^\"|\"$', '')
+        | regex_replace("^\\x27|\\x27$", '')
       }}
 
-- name: Remove any existing vfio-only args from current cmdline (for clean host mode)
+- name: Split current cmdline into list
+  set_fact:
+    grub_cmdline_current: "{{ grub_cmdline_current_str.split(' ') | reject('equalto','') | list }}"
+
+# Remove vfio-only args to keep host mode clean
+- name: Remove existing vfio-only args (always do this first)
   set_fact:
     grub_cmdline_current: >-
       {{
         grub_cmdline_current
         | reject('search','^vfio-pci\\.ids=')
         | reject('equalto','rd.driver.pre=vfio-pci')
-        | reject('search','^video=efifb:off$')
+        | reject('equalto','video=efifb:off')
         | list
       }}
 
@@ -48,20 +64,21 @@
     grub_cmdline_desired: "{{ (grub_cmdline_desired + grub_cmdline_vfio_only) | unique | list }}"
   when: vfio_mode == 'vfio'
 
-- name: Optionally disable EFI framebuffer (ONLY useful in vfio mode)
+- name: Optionally disable EFI framebuffer (ONLY in vfio mode)
   set_fact:
     grub_cmdline_desired: "{{ (grub_cmdline_desired + ['video=efifb:off']) | unique | list }}"
   when: disable_efi_framebuffer | bool and vfio_mode == 'vfio'
 
-- name: Write updated GRUB cmdline
+- name: Ensure GRUB_CMDLINE_LINUX_DEFAULT line exists (create if missing)
   lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
     line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_desired | join(" ") }}"'
+    create: true
   notify:
     - update-grub
     - update-initramfs
     - reboot-host
 
-- name: Flush handlers so update-grub/initramfs/reboot occurs now
+- name: Flush handlers (apply grub + reboot now)
   meta: flush_handlers
