@@ -5,7 +5,8 @@ host_ip: "192.168.1.12"
 system_hostname: "m"
 
 # Use IP now; flip connection_mode to "hostname" later to connect by name
-ansible_host: "{{ host_ip if connection_mode == 'ip' else system_hostname }}"
+# ansible_host: "{{ host_ip if connection_mode == 'ip' else system_hostname }}"
+ansible_host: "192.168.1.12"
 
 # SSH / privilege escalation
 ansible_user: "m" # <-- change if your SSH username differs

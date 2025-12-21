@@ -11,26 +11,21 @@ gpu_pci_ids:
   - "1002:aae0"
 
 # Optional BDFs, used for status output and (optional) emergency scripts.
-# Example:
-# gpu_bdf:
-#   - "0000:01:00.0"
-#   - "0000:01:00.1"
 gpu_bdf: []
 
 # Platform IOMMU selection
 iommu_platform: "intel" # "intel" or "amd"
 
 # GRUB cmdline args that should ALWAYS be present (both host + vfio modes)
+# IMPORTANT: keep this Intel-only for your system (prevents amd_iommu=on showing up).
 grub_cmdline_always:
   - "iommu=pt"
-  - "intel_iommu=on" # kept only if iommu_platform == intel
-  - "amd_iommu=on" # kept only if iommu_platform == amd
+  - "intel_iommu=on"
 
-# GRUB cmdline args that should ONLY be present in VFIO mode
-# NOTE: vfio-pci.ids is rendered from gpu_pci_ids
 grub_cmdline_vfio_only:
   - "vfio-pci.ids={{ gpu_pci_ids | join(',') }}"
   - "rd.driver.pre=vfio-pci"
+  - "modprobe.blacklist=amdgpu"
 
 # Optional: reduce chance host grabs framebuffer early (useful in VFIO mode).
 disable_efi_framebuffer: true
@@ -48,6 +43,7 @@ virtualization_packages:
   - virtinst
   - bridge-utils
   - cpu-checker
+  - linux-firmware
 
 # Optional VM creation (leave false if you already manage VM separately)
 create_vm: false

@@ -25,14 +25,14 @@
   set_fact:
     grub_cmdline_current: "{{ grub_cmdline_current_str.split(' ') | reject('equalto','') | list }}"
 
-# Remove vfio-only args to keep host mode clean
-- name: Remove existing vfio-only args (always do this first)
+- name: Remove existing vfio-only args
   set_fact:
     grub_cmdline_current: >-
       {{
         grub_cmdline_current
         | reject('search','^vfio-pci\\.ids=')
         | reject('equalto','rd.driver.pre=vfio-pci')
+        | reject('equalto','modprobe.blacklist=amdgpu')
         | reject('equalto','video=efifb:off')
         | list
       }}
@@ -69,7 +69,23 @@
     grub_cmdline_desired: "{{ (grub_cmdline_desired + ['video=efifb:off']) | unique | list }}"
   when: disable_efi_framebuffer | bool and vfio_mode == 'vfio'
 
-- name: Ensure GRUB_CMDLINE_LINUX_DEFAULT line exists (create if missing)
+- name: Compute expected vfio-pci.ids token
+  set_fact:
+    expected_vfio_ids_token: "vfio-pci.ids={{ gpu_pci_ids | join(',') }}"
+
+- name: Show resulting GRUB cmdline
+  debug:
+    msg: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_desired | join(" ") }}"'
+
+- name: Assert VFIO mode has required args
+  assert:
+    that:
+      - "{{ expected_vfio_ids_token in grub_cmdline_desired }}"
+      - "{{ 'modprobe.blacklist=amdgpu' in grub_cmdline_desired }}"
+    fail_msg: "VFIO mode requested but required vfio/blacklist args are missing from GRUB cmdline."
+  when: vfio_mode == 'vfio'
+
+- name: Write updated GRUB cmdline
   lineinfile:
     path: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
