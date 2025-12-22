@@ -57,3 +57,27 @@ vm_iso_path: "/var/lib/libvirt/boot/windows.iso"
 # Headless install access
 vm_graphics: "spice" # "spice" or "vnc" or "none"
 vm_graphics_listen: "127.0.0.1" # use SSH tunnel
+
+# ----------------------------
+# Demo VFIO VM (Alpine) - optional
+# ----------------------------
+create_demo_vm: true
+demo_vm_name: "alpine-vfio"
+
+# Alpine ISO
+demo_iso_url: "https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-standard-3.19.1-x86_64.iso"
+demo_iso_dir: "/var/lib/libvirt/boot"
+demo_iso_filename: "alpine-standard-3.19.1-x86_64.iso"
+demo_iso_path: "{{ demo_iso_dir }}/{{ demo_iso_filename }}"
+
+# VM resources
+demo_vm_ram_mb: 2048
+demo_vm_vcpus: 2
+
+# OVMF paths (Ubuntu)
+ovmf_code_path: "/usr/share/OVMF/OVMF_CODE.fd"
+ovmf_vars_template_path: "/usr/share/OVMF/OVMF_VARS.fd"
+demo_nvram_path: "/var/lib/libvirt/qemu/nvram/{{ demo_vm_name }}_VARS.fd"
+
+# Force passthrough GPU as primary VGA (often needed)
+demo_enable_x_vga: true

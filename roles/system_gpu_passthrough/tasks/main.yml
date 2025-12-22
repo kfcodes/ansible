@@ -22,3 +22,8 @@
   include_tasks: create_vm.yml
   when: create_vm | bool
   tags: [vm]
+
+- name: Optionally create Alpine demo VM for passthrough validation
+  include_tasks: demo_vm.yml
+  when: create_demo_vm | bool
+  tags: [demo_vm]

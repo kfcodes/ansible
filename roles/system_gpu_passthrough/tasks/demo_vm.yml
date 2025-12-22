@@ -1,0 +1,62 @@
+---
+- name: Ensure ISO directory exists
+  file:
+    path: "{{ demo_iso_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Download Alpine ISO (if missing)
+  get_url:
+    url: "{{ demo_iso_url }}"
+    dest: "{{ demo_iso_path }}"
+    mode: "0644"
+  register: demo_iso_dl
+
+- name: Ensure NVRAM directory exists
+  file:
+    path: "/var/lib/libvirt/qemu/nvram"
+    state: directory
+    mode: "0755"
+
+- name: Copy OVMF VARS template for this VM (if missing)
+  copy:
+    src: "{{ ovmf_vars_template_path }}"
+    dest: "{{ demo_nvram_path }}"
+    remote_src: true
+    force: false
+    mode: "0644"
+
+- name: Check if demo VM exists
+  command: "virsh dominfo {{ demo_vm_name }}"
+  register: demo_vm_exists
+  failed_when: false
+  changed_when: false
+
+- name: Stop demo VM if running (required before redefine)
+  command: "virsh destroy {{ demo_vm_name }}"
+  when: demo_vm_exists.rc == 0
+  failed_when: false
+  changed_when: true
+
+- name: Render demo VM XML
+  template:
+    src: "alpine-vfio.xml.j2"
+    dest: "/tmp/{{ demo_vm_name }}.xml"
+    mode: "0644"
+
+- name: Define (create/update) demo VM from XML
+  command: "virsh define /tmp/{{ demo_vm_name }}.xml"
+  changed_when: true
+
+- name: Ensure demo VM is started
+  command: "virsh start {{ demo_vm_name }}"
+  register: demo_vm_start
+  failed_when: false
+  changed_when: "'started' in demo_vm_start.stdout or demo_vm_start.rc == 0"
+
+- name: Demo VM status hint
+  debug:
+    msg:
+      - "Demo VM '{{ demo_vm_name }}' defined and started."
+      - "If you want physical GPU output, ensure VFIO mode is enabled (vfio-pci bound) before starting."
+      - "To view serial output: sudo virsh console {{ demo_vm_name }} (exit with Ctrl+])"
