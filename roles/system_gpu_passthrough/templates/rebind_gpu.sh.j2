@@ -1,10 +1,81 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "This host is configured to keep the passthrough GPU bound to vfio-pci at boot."
-echo "Rebinding to host drivers is intentionally not automated here."
-echo
-echo "If you really need to rebind, do it manually by binding to the correct driver:"
-echo "  - amdgpu / radeon for VGA"
-echo "  - snd_hda_intel for HDMI audio"
-exit 0
+log(){ echo "[vfio-rebind] $*"; }
+
+GPU_BDFS=(
+{% for d in gpu_bdf %}
+  "{{ d }}"
+{% endfor %}
+)
+
+HOST_GPU_DRIVER="{{ host_gpu_driver | default('amdgpu') }}"
+HOST_AUDIO_DRIVER="{{ host_audio_driver | default('snd_hda_intel') }}"
+
+need_root(){
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "Run as root: sudo $0" >&2
+    exit 1
+  fi
+}
+
+load_host(){
+  log "Loading host drivers"
+  modprobe "$HOST_GPU_DRIVER" || true
+  modprobe "$HOST_AUDIO_DRIVER" || true
+}
+
+unbind_current_driver(){
+  local bdf="$1"
+  local dev="/sys/bus/pci/devices/${bdf}"
+  if [[ -L "$dev/driver" ]]; then
+    local cur
+    cur="$(basename "$(readlink "$dev/driver")")"
+    log "$bdf bound to $cur -> unbind"
+    echo "$bdf" > "$dev/driver/unbind" || true
+  else
+    log "$bdf has no driver bound"
+  fi
+}
+
+bind_to_driver(){
+  local bdf="$1"
+  local drv="$2"
+  local dev="/sys/bus/pci/devices/${bdf}"
+
+  log "driver_override=$drv for $bdf"
+  echo "$drv" > "$dev/driver_override"
+
+  log "Binding $bdf to $drv"
+  echo "$bdf" > "/sys/bus/pci/drivers/${drv}/bind"
+
+  echo "" > "$dev/driver_override"
+}
+
+status(){
+  log "Status:"
+  for bdf in "${GPU_BDFS[@]}"; do
+    local dev="/sys/bus/pci/devices/${bdf}"
+    local drv="none"
+    [[ -L "$dev/driver" ]] && drv="$(basename "$(readlink "$dev/driver")")"
+    echo "  - $bdf -> $drv"
+  done
+}
+
+main(){
+  need_root
+  load_host
+
+  for bdf in "${GPU_BDFS[@]}"; do
+    unbind_current_driver "$bdf"
+  done
+
+  # VGA first, then audio
+  bind_to_driver "${GPU_BDFS[0]}" "$HOST_GPU_DRIVER"
+  bind_to_driver "${GPU_BDFS[1]}" "$HOST_AUDIO_DRIVER"
+
+  status
+  log "Done."
+}
+
+main "$@"

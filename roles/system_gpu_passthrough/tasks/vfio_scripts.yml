@@ -1,14 +1,22 @@
 ---
-- name: Install unbind GPU script (debug)
+- name: Fail if gpu_bdf not set (required for toggle scripts)
+  fail:
+    msg: >
+      gpu_bdf must be set for bind/unbind scripts.
+      Example:
+        gpu_bdf:
+          - "0000:01:00.0"
+          - "0000:01:00.1"
+  when: gpu_bdf | length < 2
+
+- name: Install unbind GPU script (bind GPU -> vfio-pci)
   template:
     src: unbind_gpu.sh.j2
     dest: /usr/local/bin/unbind_gpu.sh
     mode: "0755"
-  when: gpu_bdf | length > 0
 
-- name: Install rebind GPU script (debug)
+- name: Install rebind GPU script (bind GPU -> host drivers)
   template:
     src: rebind_gpu.sh.j2
     dest: /usr/local/bin/rebind_gpu.sh
     mode: "0755"
-  when: gpu_bdf | length > 0

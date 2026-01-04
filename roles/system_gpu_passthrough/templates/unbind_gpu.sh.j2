@@ -1,14 +1,119 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-{% for device in gpu_bdf %}
-if [ -e "/sys/bus/pci/devices/{{ device }}/driver/unbind" ]; then
-  echo "{{ device }}" > "/sys/bus/pci/devices/{{ device }}/driver/unbind" || true
-fi
+log(){ echo "[vfio-bind] $*"; }
+
+GPU_BDFS=(
+{% for d in gpu_bdf %}
+  "{{ d }}"
 {% endfor %}
+)
 
-for id in {{ gpu_pci_ids | to_json }}; do
-  echo "$id" > /sys/bus/pci/drivers/vfio-pci/new_id || true
-done
+GPU_IDS=(
+{% for i in gpu_pci_ids %}
+  "{{ i }}"
+{% endfor %}
+)
 
-echo "Done."
+need_root(){
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "Run as root: sudo $0" >&2
+    exit 1
+  fi
+}
+
+stop_display_manager(){
+  if systemctl is-active --quiet gdm; then log "Stopping gdm"; systemctl stop gdm || true; fi
+  if systemctl is-active --quiet sddm; then log "Stopping sddm"; systemctl stop sddm || true; fi
+  if systemctl is-active --quiet lightdm; then log "Stopping lightdm"; systemctl stop lightdm || true; fi
+}
+
+unbind_vtconsoles(){
+  for vt in /sys/class/vtconsole/vtcon*; do
+    [[ -e "$vt/name" ]] || continue
+    if grep -qi "frame buffer" "$vt/name"; then
+      log "Unbinding vtconsole: $(cat "$vt/name")"
+      echo 0 > "$vt/bind" || true
+    fi
+  done
+}
+
+unbind_efi_framebuffer(){
+  if [[ -d /sys/bus/platform/drivers/efi-framebuffer ]]; then
+    for dev in /sys/bus/platform/drivers/efi-framebuffer/*:*; do
+      [[ -e "$dev" ]] || continue
+      log "Unbinding efi-framebuffer: $(basename "$dev")"
+      echo "$(basename "$dev")" > /sys/bus/platform/drivers/efi-framebuffer/unbind || true
+    done
+  fi
+}
+
+load_vfio(){
+  log "Loading vfio modules"
+  modprobe vfio || true
+  modprobe vfio_pci || true
+  modprobe vfio_iommu_type1 || true
+  modprobe vfio_virqfd || true
+}
+
+unbind_current_driver(){
+  local bdf="$1"
+  local dev="/sys/bus/pci/devices/${bdf}"
+  if [[ -L "$dev/driver" ]]; then
+    local cur
+    cur="$(basename "$(readlink "$dev/driver")")"
+    log "$bdf bound to $cur -> unbind"
+    echo "$bdf" > "$dev/driver/unbind" || true
+  else
+    log "$bdf has no driver bound"
+  fi
+}
+
+bind_to_vfio(){
+  local bdf="$1"
+  local dev="/sys/bus/pci/devices/${bdf}"
+
+  log "driver_override=vfio-pci for $bdf"
+  echo vfio-pci > "$dev/driver_override"
+
+  log "Binding $bdf to vfio-pci"
+  echo "$bdf" > /sys/bus/pci/drivers/vfio-pci/bind
+
+  echo "" > "$dev/driver_override"
+}
+
+status(){
+  log "Status:"
+  for bdf in "${GPU_BDFS[@]}"; do
+    local dev="/sys/bus/pci/devices/${bdf}"
+    local drv="none"
+    [[ -L "$dev/driver" ]] && drv="$(basename "$(readlink "$dev/driver")")"
+    echo "  - $bdf -> $drv"
+  done
+}
+
+main(){
+  need_root
+  stop_display_manager
+  unbind_vtconsoles
+  unbind_efi_framebuffer
+  load_vfio
+
+  for id in "${GPU_IDS[@]}"; do
+    log "Registering ID with vfio-pci: $id"
+    echo "$id" > /sys/bus/pci/drivers/vfio-pci/new_id || true
+  done
+
+  for bdf in "${GPU_BDFS[@]}"; do
+    unbind_current_driver "$bdf"
+  done
+
+  # VGA first, then audio
+  bind_to_vfio "${GPU_BDFS[0]}"
+  bind_to_vfio "${GPU_BDFS[1]}"
+
+  status
+  log "Done."
+}
+
+main "$@"

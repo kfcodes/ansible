@@ -10,7 +10,6 @@
     url: "{{ demo_iso_url }}"
     dest: "{{ demo_iso_path }}"
     mode: "0644"
-  register: demo_iso_dl
 
 - name: Ensure NVRAM directory exists
   file:
@@ -26,37 +25,43 @@
     force: false
     mode: "0644"
 
-- name: Check if demo VM exists
+- name: Check if demo VM already exists
   command: "virsh dominfo {{ demo_vm_name }}"
   register: demo_vm_exists
   failed_when: false
   changed_when: false
 
-- name: Stop demo VM if running (required before redefine)
-  command: "virsh destroy {{ demo_vm_name }}"
-  when: demo_vm_exists.rc == 0
-  failed_when: false
-  changed_when: true
-
-- name: Render demo VM XML
+- name: Render demo VM XML (for first run define)
   template:
     src: "alpine-vfio.xml.j2"
     dest: "/tmp/{{ demo_vm_name }}.xml"
     mode: "0644"
+  when: demo_vm_exists.rc != 0
 
-- name: Define (create/update) demo VM from XML
+- name: Define demo VM (first run only)
   command: "virsh define /tmp/{{ demo_vm_name }}.xml"
+  when: demo_vm_exists.rc != 0
   changed_when: true
 
-- name: Ensure demo VM is started
+- name: Get current VM state
+  command: "virsh domstate {{ demo_vm_name }}"
+  register: demo_vm_state
+  failed_when: false
+  changed_when: false
+
+- name: Start demo VM if not running
   command: "virsh start {{ demo_vm_name }}"
+  when:
+    - demo_vm_exists.rc == 0 or demo_vm_exists.rc != 0 # VM should exist now
+    - demo_vm_state.stdout is not search("running")
   register: demo_vm_start
   failed_when: false
-  changed_when: "'started' in demo_vm_start.stdout or demo_vm_start.rc == 0"
+  changed_when: demo_vm_start.rc == 0
 
 - name: Demo VM status hint
   debug:
     msg:
-      - "Demo VM '{{ demo_vm_name }}' defined and started."
-      - "If you want physical GPU output, ensure VFIO mode is enabled (vfio-pci bound) before starting."
-      - "To view serial output: sudo virsh console {{ demo_vm_name }} (exit with Ctrl+])"
+      - "Demo VM '{{ demo_vm_name }}' exists: {{ demo_vm_exists.rc == 0 }}"
+      - "State: {{ demo_vm_state.stdout | default('unknown') }}"
+      - "Console: sudo virsh console {{ demo_vm_name }} (exit with Ctrl+])"
+      - "If you change GPU/ISO/OVMF settings later, you will need to manually edit/redefine the VM or switch to Option A."

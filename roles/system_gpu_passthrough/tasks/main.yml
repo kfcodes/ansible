@@ -27,3 +27,6 @@
   include_tasks: demo_vm.yml
   when: create_demo_vm | bool
   tags: [demo_vm]
+
+- name: Reboot now if required (flush handlers at end of role)
+  meta: flush_handlers

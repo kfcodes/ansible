@@ -2,10 +2,12 @@
 - name: update-initramfs
   command: update-initramfs -u
   changed_when: true
+  notify: reboot-host
 
 - name: update-grub
   command: update-grub
   changed_when: true
+  notify: reboot-host
 
 - name: restart-libvirtd
   service:
@@ -15,4 +17,6 @@
 - name: reboot-host
   reboot:
     msg: "Rebooting to apply VFIO/IOMMU configuration"
-    reboot_timeout: 600
+    reboot_timeout: 900
+    pre_reboot_delay: 3
+    post_reboot_delay: 10
