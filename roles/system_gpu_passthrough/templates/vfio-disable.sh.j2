@@ -1,24 +1,64 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[vfio-disable] Enabling HOST mode and rebooting..."
+if [[ "${EUID}" -ne 0 ]]; then
+  echo "Run as root: sudo $0" >&2
+  exit 1
+fi
 
-# Remove vfio-only bits + wrong amd flag
-sudo sed -i 's/\<vfio-pci\.ids=[^ ]*\>//g' /etc/default/grub
-sudo sed -i 's/\<rd\.driver\.pre=vfio-pci\>//g' /etc/default/grub
-sudo sed -i 's/\<modprobe\.blacklist=amdgpu\>//g' /etc/default/grub
-sudo sed -i 's/\<video=efifb:off\>//g' /etc/default/grub
-sudo sed -i 's/\<amd_iommu=on\>//g' /etc/default/grub
+echo "[vfio-disable] Switching to HOST mode..."
 
-# Keep Intel IOMMU base (fine in host mode too)
-sudo grep -q 'intel_iommu=on' /etc/default/grub || \
-  sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 intel_iommu=on"/' /etc/default/grub
+GRUB_FILE="/etc/default/grub"
 
-sudo grep -q 'iommu=pt' /etc/default/grub || \
-  sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 iommu=pt"/' /etc/default/grub
+get_cmdline() {
+  sed -n 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/\1/p' "$GRUB_FILE" | head -n1
+}
 
-sudo update-grub
-sudo update-initramfs -u
+set_cmdline() {
+  local new="$1"
+  new="$(echo "$new" | xargs)"
+  sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=\"[^\"]*\"/GRUB_CMDLINE_LINUX_DEFAULT=\"${new}\"/" "$GRUB_FILE"
+}
 
-echo "[vfio-disable] Rebooting now..."
-sudo reboot
+strip_tokens() {
+  echo "$1" \
+    | sed -E 's/\<vfio-pci\.ids=[^ ]+\>//g' \
+    | sed -E 's/\<rd\.driver\.pre=vfio-pci\>//g' \
+    | sed -E 's/\<modprobe\.blacklist=amdgpu\>//g' \
+    | sed -E 's/\<modprobe\.blacklist=snd_hda_intel\>//g' \
+    | sed -E 's/\<video=efifb:off\>//g' \
+    | sed -E 's/\<intel_iommu=on\>//g' \
+    | sed -E 's/\<amd_iommu=on\>//g' \
+    | sed -E 's/\<iommu=pt\>//g'
+}
+
+ensure_token() {
+  local cmd="$1"
+  local tok="$2"
+  if ! echo "$cmd" | grep -qw "$tok"; then
+    cmd="$cmd $tok"
+  fi
+  echo "$cmd"
+}
+
+cmd="$(get_cmdline)"
+cmd="$(strip_tokens "$cmd")"
+
+# Base tokens (keep IOMMU enabled in host mode too)
+cmd="$(ensure_token "$cmd" "iommu=pt")"
+{% if iommu_platform == "intel" %}
+cmd="$(ensure_token "$cmd" "intel_iommu=on")"
+{% else %}
+cmd="$(ensure_token "$cmd" "amd_iommu=on")"
+{% endif %}
+
+set_cmdline "$cmd"
+
+echo "[vfio-disable] GRUB cmdline now:"
+grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
+
+update-grub
+update-initramfs -u
+
+echo "[vfio-disable] Rebooting..."
+reboot

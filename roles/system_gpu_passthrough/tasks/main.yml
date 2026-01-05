@@ -14,8 +14,14 @@
   include_tasks: grub.yml
   tags: [grub]
 
+# Boot-mode scripts + wrapper command
 - name: Install VFIO mode toggle scripts
   include_tasks: mode_scripts.yml
+  tags: [scripts]
+
+# (Optional) runtime bind/unbind scripts
+- name: Install GPU bind/unbind scripts
+  include_tasks: vfio_scripts.yml
   tags: [scripts]
 
 - name: Optionally create VM (headless-friendly)

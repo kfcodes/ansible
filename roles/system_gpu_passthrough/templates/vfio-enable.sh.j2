@@ -1,29 +1,76 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[vfio-enable] Enabling VFIO mode and rebooting..."
+if [[ "${EUID}" -ne 0 ]]; then
+  echo "Run as root: sudo $0" >&2
+  exit 1
+fi
+
+echo "[vfio-enable] Switching to VFIO mode..."
 
 IDS="{{ gpu_pci_ids | join(',') }}"
 
-# Remove any existing vfio bits first (idempotent)
-sudo sed -i 's/\<vfio-pci\.ids=[^ ]*\>//g' /etc/default/grub
-sudo sed -i 's/\<rd\.driver\.pre=vfio-pci\>//g' /etc/default/grub
-sudo sed -i 's/\<modprobe\.blacklist=amdgpu\>//g' /etc/default/grub
-sudo sed -i 's/\<video=efifb:off\>//g' /etc/default/grub
-sudo sed -i 's/\<amd_iommu=on\>//g' /etc/default/grub
+GRUB_FILE="/etc/default/grub"
 
-# Ensure base Intel IOMMU args exist
-sudo grep -q 'intel_iommu=on' /etc/default/grub || \
-  sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 intel_iommu=on"/' /etc/default/grub
+get_cmdline() {
+  sed -n 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/\1/p' "$GRUB_FILE" | head -n1
+}
 
-sudo grep -q 'iommu=pt' /etc/default/grub || \
-  sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 iommu=pt"/' /etc/default/grub
+set_cmdline() {
+  local new="$1"
+  # normalize spaces
+  new="$(echo "$new" | xargs)"
+  sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=\"[^\"]*\"/GRUB_CMDLINE_LINUX_DEFAULT=\"${new}\"/" "$GRUB_FILE"
+}
 
-# Add VFIO-only args (including amdgpu blacklist)
-sudo sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 vfio-pci.ids='"$IDS"' rd.driver.pre=vfio-pci modprobe.blacklist=amdgpu{% if disable_efi_framebuffer %} video=efifb:off{% endif %}"/' /etc/default/grub
+strip_tokens() {
+  # remove vfio-only and other mode-specific bits
+  echo "$1" \
+    | sed -E 's/\<vfio-pci\.ids=[^ ]+\>//g' \
+    | sed -E 's/\<rd\.driver\.pre=vfio-pci\>//g' \
+    | sed -E 's/\<modprobe\.blacklist=amdgpu\>//g' \
+    | sed -E 's/\<modprobe\.blacklist=snd_hda_intel\>//g' \
+    | sed -E 's/\<video=efifb:off\>//g' \
+    | sed -E 's/\<intel_iommu=on\>//g' \
+    | sed -E 's/\<amd_iommu=on\>//g' \
+    | sed -E 's/\<iommu=pt\>//g'
+}
 
-sudo update-grub
-sudo update-initramfs -u
+ensure_token() {
+  local cmd="$1"
+  local tok="$2"
+  if ! echo "$cmd" | grep -qw "$tok"; then
+    cmd="$cmd $tok"
+  fi
+  echo "$cmd"
+}
 
-echo "[vfio-enable] Rebooting now..."
-sudo reboot
+cmd="$(get_cmdline)"
+cmd="$(strip_tokens "$cmd")"
+
+# Base tokens (always)
+cmd="$(ensure_token "$cmd" "iommu=pt")"
+{% if iommu_platform == "intel" %}
+cmd="$(ensure_token "$cmd" "intel_iommu=on")"
+{% else %}
+cmd="$(ensure_token "$cmd" "amd_iommu=on")"
+{% endif %}
+
+# VFIO-only tokens
+cmd="$(ensure_token "$cmd" "vfio-pci.ids=${IDS}")"
+cmd="$(ensure_token "$cmd" "rd.driver.pre=vfio-pci")"
+cmd="$(ensure_token "$cmd" "modprobe.blacklist=amdgpu")"
+{% if disable_efi_framebuffer | bool %}
+cmd="$(ensure_token "$cmd" "video=efifb:off")"
+{% endif %}
+
+set_cmdline "$cmd"
+
+echo "[vfio-enable] GRUB cmdline now:"
+grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
+
+update-grub
+update-initramfs -u
+
+echo "[vfio-enable] Rebooting..."
+reboot

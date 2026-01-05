@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+  status)  exec /usr/local/bin/vfio-status ;;
+  enable)  exec /usr/local/bin/vfio-enable ;;
+  disable) exec /usr/local/bin/vfio-disable ;;
+  bind)    exec /usr/local/bin/unbind_gpu.sh ;;
+  unbind)  exec /usr/local/bin/rebind_gpu.sh ;;
+  *)
+    cat <<EOF
+Usage:
+  sudo vfio status
+  sudo vfio enable    # switch to VFIO mode + reboot
+  sudo vfio disable   # switch to HOST mode + reboot
+
+Optional runtime (no reboot):
+  sudo vfio bind
+  sudo vfio unbind
+EOF
+    exit 1
+    ;;
+esac

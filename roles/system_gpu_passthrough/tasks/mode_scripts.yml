@@ -1,26 +1,24 @@
 ---
-- name: Install vfio-enable script
+- name: Install vfio-enable
   template:
     src: vfio-enable.sh.j2
-    dest: /usr/local/sbin/vfio-enable
+    dest: /usr/local/bin/vfio-enable
     mode: "0755"
 
-- name: Install vfio-disable script
+- name: Install vfio-disable
   template:
     src: vfio-disable.sh.j2
-    dest: /usr/local/sbin/vfio-disable
+    dest: /usr/local/bin/vfio-disable
     mode: "0755"
 
-- name: Install vfio-status script
+- name: Install vfio-status
   template:
     src: vfio-status.sh.j2
-    dest: /usr/local/sbin/vfio-status
+    dest: /usr/local/bin/vfio-status
     mode: "0755"
 
-# Optional: keep your emergency unbind script if you want it
-- name: Install emergency unbind GPU script (optional)
+- name: Install vfio wrapper command
   template:
-    src: unbind_gpu.sh.j2
-    dest: /usr/local/sbin/vfio-emergency-unbind
+    src: vfio.sh.j2
+    dest: /usr/local/bin/vfio
     mode: "0755"
-  when: gpu_bdf | length > 0
