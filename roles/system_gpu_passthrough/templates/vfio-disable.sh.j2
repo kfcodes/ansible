@@ -44,7 +44,6 @@ ensure_token() {
 cmd="$(get_cmdline)"
 cmd="$(strip_tokens "$cmd")"
 
-# Base tokens (keep IOMMU enabled in host mode too)
 cmd="$(ensure_token "$cmd" "iommu=pt")"
 {% if iommu_platform == "intel" %}
 cmd="$(ensure_token "$cmd" "intel_iommu=on")"
@@ -56,6 +55,13 @@ set_cmdline "$cmd"
 
 echo "[vfio-disable] GRUB cmdline now:"
 grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
+
+echo "[vfio-disable] Removing any vfio-pci ids modprobe files..."
+rm -f /etc/modprobe.d/vfio-pci-ids.conf
+rm -f /etc/modprobe.d/vfio.conf
+
+# Also remove any other leftovers created by older iterations (safe no-op if not present)
+rm -f /etc/modprobe.d/*vfio*ids*.conf 2>/dev/null || true
 
 update-grub
 update-initramfs -u
