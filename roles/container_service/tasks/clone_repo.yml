@@ -12,5 +12,5 @@
     version: "{{ app.version | default('main') }}"
     update: true
     force: false
+  register: repo_result
   when: service_state == 'present'
-  notify: "restart container service"

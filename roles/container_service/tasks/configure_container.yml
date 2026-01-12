@@ -7,8 +7,8 @@
   loop: "{{ app.config_files | default([]) }}"
   loop_control:
     label: "{{ item.dest }}"
+  register: config_copy_result
   when:
     - service_state == 'present'
     - app.config_files is defined
     - app.config_files | length > 0
-  notify: "restart container service"

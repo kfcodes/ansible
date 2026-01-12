@@ -4,5 +4,5 @@
     src: docker_compose.yml.j2
     dest: "{{ app.path }}/docker-compose.yml"
     mode: "0644"
+  register: compose_template_result
   when: service_state == 'present'
-  notify: "restart container service"

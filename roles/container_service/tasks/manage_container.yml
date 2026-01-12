@@ -9,14 +9,32 @@
     - app.networks is defined
     - app.networks | length > 0
 
-- name: Deploy service with Docker Compose v2
+- name: Compute whether we need to rebuild/recreate
+  ansible.builtin.set_fact:
+    container_service_needs_build: >-
+      {{
+        (repo_result is defined and repo_result.changed)
+        or (compose_template_result is defined and compose_template_result.changed)
+        or (config_copy_result is defined and config_copy_result.changed)
+      }}
+    container_service_recreate_mode: >-
+      {{
+        'auto' if not (
+          (repo_result is defined and repo_result.changed)
+          or (compose_template_result is defined and compose_template_result.changed)
+          or (config_copy_result is defined and config_copy_result.changed)
+        ) else 'auto'
+      }}
+  when: service_state == 'present'
+
+- name: Deploy service with Docker Compose v2 (build only if needed)
   community.docker.docker_compose_v2:
     project_src: "{{ app.path }}"
     state: present
     pull: "{{ compose_pull }}"
-    recreate: "{{ compose_recreate }}"
+    recreate: auto
     remove_orphans: "{{ compose_remove_orphans }}"
-    build: "{{ compose_build }}"
+    build: "{{ container_service_needs_build | default(false) }}"
   when: service_state == 'present'
 
 - name: Remove service with Docker Compose v2
