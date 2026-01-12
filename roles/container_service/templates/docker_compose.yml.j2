@@ -1,12 +1,63 @@
+version: "3.9"
+
 services:
   {{ app.name }}:
-    build: .
-    container_name: {{ app.name }}
+    {% if app.container_name | default('') | length > 0 %}
+    container_name: "{{ app.container_name }}"
+    {% else %}
+    container_name: "{{ app.name }}"
+    {% endif %}
+
+    {% if compose_build | bool %}
+    build:
+      context: .
+    {% endif %}
+
+    {% if app.ports is defined and app.ports | length > 0 %}
     ports:
-      - "8000:8000"
-    restart: unless-stopped
+    {% for p in app.ports %}
+      - "{{ p }}"
+    {% endfor %}
+    {% endif %}
+
+    {% if app.env_files is defined and app.env_files | length > 0 %}
     env_file:
-      - ./app/.env
+    {% for f in app.env_files %}
+      - "{{ f }}"
+    {% endfor %}
+    {% endif %}
+
+    {% if app.env is defined and app.env | length > 0 %}
+    environment:
+    {% for k, v in app.env.items() %}
+      {{ k }}: "{{ v }}"
+    {% endfor %}
+    {% endif %}
+
+    {% if app.volumes is defined and app.volumes | length > 0 %}
     volumes:
-      - .:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    {% for v in app.volumes %}
+      - "{{ v }}"
+    {% endfor %}
+    {% endif %}
+
+    restart: unless-stopped
+
+    {% if app.command is defined and app.command | length > 0 %}
+    command: {{ app.command }}
+    {% endif %}
+
+    {% if app.networks is defined and app.networks | length > 0 %}
+    networks:
+    {% for n in app.networks %}
+      - {{ n }}
+    {% endfor %}
+    {% endif %}
+
+networks:
+{% if app.networks is defined and app.networks | length > 0 %}
+{% for n in app.networks %}
+  {{ n }}:
+    external: true
+{% endfor %}
+{% endif %}

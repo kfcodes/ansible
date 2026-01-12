@@ -1,19 +1,20 @@
+---
 - name: Clone repository
-  include_tasks: clone_repo.yml
+  ansible.builtin.import_tasks: clone_repo.yml
   tags: [clone]
 
 - name: Configure container files and settings
-  include_tasks: configure_container.yml
+  ansible.builtin.import_tasks: configure_container.yml
   tags: [configure]
 
 - name: Generate Docker Compose file
-  include_tasks: generate_compose.yml
-  tags: [docker_compose]
+  ansible.builtin.import_tasks: generate_compose.yml
+  tags: [compose]
 
 - name: Manage container deployment and networking
-  include_tasks: manage_container.yml
+  ansible.builtin.import_tasks: manage_container.yml
   tags: [deploy]
 
 - name: Post-deployment verification
-  include_tasks: post_deploy.yml
+  ansible.builtin.import_tasks: post_deploy.yml
   tags: [healthcheck]

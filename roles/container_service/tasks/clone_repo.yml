@@ -1,7 +1,16 @@
-- name: Clone Git repo
-  git:
+---
+- name: Ensure service directory exists
+  ansible.builtin.file:
+    path: "{{ app.path }}"
+    state: directory
+    mode: "0755"
+
+- name: Clone/update git repository
+  ansible.builtin.git:
     repo: "{{ app.repo }}"
     dest: "{{ app.path }}"
-    version: "{{ app.branch }}"
-    update: yes
-  notify: Restart FastAPI container
+    version: "{{ app.version | default('main') }}"
+    update: true
+    force: false
+  when: service_state == 'present'
+  notify: "restart container service"

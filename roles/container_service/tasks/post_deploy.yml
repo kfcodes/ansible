@@ -1,17 +1,33 @@
-- name: Wait for container to be healthy
+---
+- name: Wait until container is running
   community.docker.docker_container_info:
-    name: "{{ app.name }}"
+    name: "{{ app.container_name | default(app.name) }}"
   register: container_info
-  retries: 10
-  delay: 3
-  until: container_info.container.State.Status == "running"
+  retries: "{{ app.healthcheck.retries | default(10) }}"
+  delay: "{{ app.healthcheck.delay | default(3) }}"
+  until:
+    - container_info.container is defined
+    - container_info.container.State is defined
+    - container_info.container.State.Status == "running"
+  when:
+    - service_state == 'present'
+    - app.healthcheck.enabled | default(true) | bool
 
-- name: Wait for HTTP healthcheck (optional)
-  uri:
-    url: "http://localhost:{{ app.health_port | default(8000) }}/health"
-    status_code: 200
+- name: HTTP healthcheck (optional)
+  ansible.builtin.uri:
+    url: >-
+      {{
+        app.healthcheck.url
+        if (app.healthcheck.url is defined and app.healthcheck.url | length > 0)
+        else omit
+      }}
+    status_code: "{{ app.healthcheck.status_code | default(200) }}"
   register: healthcheck_result
-  until: healthcheck_result.status == 200
-  retries: 10
-  delay: 3
-  when: app.healthcheck | default(true)
+  retries: "{{ app.healthcheck.retries | default(10) }}"
+  delay: "{{ app.healthcheck.delay | default(3) }}"
+  until: healthcheck_result.status == (app.healthcheck.status_code | default(200))
+  when:
+    - service_state == 'present'
+    - app.healthcheck.enabled | default(true) | bool
+    - app.healthcheck.url is defined
+    - app.healthcheck.url | length > 0

@@ -1,32 +1,27 @@
-- name: Ensure Docker network exists (if defined)
+---
+- name: Ensure external Docker networks exist (optional)
   community.docker.docker_network:
-    name: "{{ app.network }}"
+    name: "{{ item }}"
     state: present
-  when: app.network is defined
+  loop: "{{ app.networks | default([]) }}"
+  when:
+    - service_manage_networks | bool
+    - app.networks is defined
+    - app.networks | length > 0
 
-- name: Stop existing container
-  community.docker.docker_container:
-    name: "{{ app.name }}"
-    state: stopped
-  ignore_errors: true
-
-- name: Remove existing container
-  community.docker.docker_container:
-    name: "{{ app.name }}"
-    state: absent
-  ignore_errors: true
-
-- name: Build and start container with Docker Compose
-  community.docker.docker_compose:
+- name: Deploy service with Docker Compose v2
+  community.docker.docker_compose_v2:
     project_src: "{{ app.path }}"
-    build: true
-    restarted: true
-    pull: true
+    state: present
+    pull: "{{ compose_pull }}"
+    recreate: "{{ compose_recreate }}"
+    remove_orphans: "{{ compose_remove_orphans }}"
+    build: "{{ compose_build }}"
+  when: service_state == 'present'
 
-- name: Connect container to Docker network (if defined)
-  community.docker.docker_network:
-    name: "{{ app.network }}"
-    connected:
-      - name: "{{ app.name }}"
-  when: app.network is defined
-  ignore_errors: true
+- name: Remove service with Docker Compose v2
+  community.docker.docker_compose_v2:
+    project_src: "{{ app.path }}"
+    state: absent
+    remove_orphans: true
+  when: service_state == 'absent'

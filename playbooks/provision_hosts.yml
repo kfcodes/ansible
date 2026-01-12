@@ -3,7 +3,7 @@
   hosts: system_host
   become: true
   roles:
-    - role: user_accounts
+    - role: user_account
       tags: [users]
     - role: system_base
       tags: [base]
@@ -12,7 +12,7 @@
   hosts: system_dev
   become: true
   roles:
-    - role: user_accounts
+    - role: user_account
       tags: [users]
     - role: system_devtools
       tags: [devtools]

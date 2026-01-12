@@ -1,5 +1,8 @@
-- name: Template Docker Compose file
-  template:
-    src: docker-compose.yaml.j2
+---
+- name: Render docker-compose.yml
+  ansible.builtin.template:
+    src: docker_compose.yml.j2
     dest: "{{ app.path }}/docker-compose.yml"
-  notify: Restart FastAPI container
+    mode: "0644"
+  when: service_state == 'present'
+  notify: "restart container service"

@@ -1,10 +1,14 @@
-- name: Configure container-specific files
-  copy:
+---
+- name: Configure container-specific files (optional)
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ app.path }}/{{ item.dest }}"
-    remote_src: yes
+    mode: "{{ item.mode | default('0644') }}"
   loop: "{{ app.config_files | default([]) }}"
   loop_control:
     label: "{{ item.dest }}"
-  notify: Restart FastAPI container
-  when: app.config_files is defined and app.config_files | length > 0
+  when:
+    - service_state == 'present'
+    - app.config_files is defined
+    - app.config_files | length > 0
+  notify: "restart container service"

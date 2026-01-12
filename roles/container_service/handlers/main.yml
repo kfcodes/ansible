@@ -1,4 +1,8 @@
-- name: Restart FastAPI container
-  community.docker.docker_compose:
+---
+- name: Restart container service (compose v2)
+  community.docker.docker_compose_v2:
     project_src: "{{ app.path }}"
-    restarted: true
+    state: present
+    recreate: always
+  listen: "restart container service"
+  when: service_state == 'present'

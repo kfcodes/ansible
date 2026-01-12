@@ -12,5 +12,5 @@
   hosts: system_dev
   become: true
   roles:
-    - role: storage_backup_sync
+    - role: backup_sync
       tags: [backups]
