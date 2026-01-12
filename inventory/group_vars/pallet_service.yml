@@ -1,0 +1,32 @@
+# GITHUB URL PATH
+git_repo_url: "git@github.com:kfcodes/reactapp.git"
+
+# GIT BRANCH DETAILS
+stable_branch_tag: v0.02.01-router_hotfix
+update_branch_tag: rc0.02.02
+
+# REPOSITORY DETAILS
+stable_branch:
+  repo_name: "react"
+  repo_url: "{{ react_repo_url }}"
+  version: "{{ react_stable_tag }}"
+  user_name: "{{ user_name }}"
+  port: "3000"
+
+update_branch:
+  repo_name: "react_update"
+  repo_url: "{{ react_repo_url }}"
+  version: "{{ react_update_tag }}"
+  user_name: "{{ user_name }}"
+  port: "3001"
+
+backup_cron_jobs:
+  - name: "Frontend static export backup"
+    script: run_daily_backup.sh # script deployed by the app/role
+    enabled: true
+    schedule: daily # or use minute/hour if your role supports explicit fields
+
+  - name: "Label API hourly DB backup"
+    script: run_hourly_backup.sh
+    enabled: true
+    schedule: hourly

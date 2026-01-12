@@ -1,5 +1,4 @@
 ---
-# Connection targeting (switch between IP and hostname)
 connection_mode: "ip" # "ip" or "hostname"
 host_ip: "192.168.1.90"
 system_hostname: "host-laptop"
@@ -7,7 +6,6 @@ system_hostname: "host-laptop"
 # Use IP now; flip connection_mode to "hostname" later to connect by name
 ansible_host: "{{ host_ip if connection_mode == 'ip' else system_hostname }}"
 
-# Network configuration (static IP on enp3s0)
 network:
   configure: true
   interface: "enp3s0"
