@@ -24,3 +24,15 @@ ansible_host: >-
     else system_hostname if (system_hostname is defined and system_hostname|length > 0)
     else inventory_hostname
   }}
+
+# -----------------------
+# User management defaults
+# -----------------------
+user_defaults:
+  state: present
+  shell: /bin/bash
+  create_home: true
+  system: false
+  lock_password: false
+  groups: ["users"]
+  exclusive_keys: true
