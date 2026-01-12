@@ -1,37 +1,26 @@
 ---
-ansible_user: ubuntu
 ansible_python_interpreter: /usr/bin/python3
-ansible_ssh_private_key_file: "{{ lookup('env','HOME') }}/.ssh/application_key"
-ansible_become: true
-ansible_become_method: sudo
-
 system_timezone: "Europe/Dublin"
 
-ssh_key_dir: "{{ lookup('env', 'HOME') }}/.ssh"
-
-default_user_options:
-  state: present
-  shell: /bin/bash
-  create_home: false
-  groups:
-    - sudo
-    - users
-  system: false
-  lock_password: false
-
-system_user:
-  name: appuser
-  create_home: false
-  ssh_public_key_path: "{{ ssh_key_dir }}/appuser.pub"
-  groups:
-    - docker
-
-enable_ssh_key_management: true
-ssh_keys_to_generate: []
+ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
 ssh_key_type: ed25519
-ssh_key_bits: 4096 # ignored for ed25519; used for rsa
 ssh_key_comment: "Managed by Ansible"
 
-default_rsync_opts:
-  - "--archive"
-  - "--compress"
+# ----------------------------------------
+# Connection targeting (fleet-wide default)
+# ----------------------------------------
+# Choose how Ansible should reach hosts by default:
+# - "ip": use host_ip if present
+# - "hostname": use system_hostname if present
+connection_mode: "ip"
+
+# Safe fallback order:
+# 1) If connection_mode == "ip" and host_ip is set -> use host_ip
+# 2) Else if system_hostname is set -> use system_hostname
+# 3) Else -> fall back to inventory_hostname
+ansible_host: >-
+  {{
+    host_ip if (connection_mode == 'ip' and host_ip is defined and host_ip|length > 0)
+    else system_hostname if (system_hostname is defined and system_hostname|length > 0)
+    else inventory_hostname
+  }}

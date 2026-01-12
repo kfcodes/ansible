@@ -1,10 +1,6 @@
 ---
-connection_mode: "ip" # "ip" or "hostname"
-host_ip: "192.168.1.90"
+host_ip: "192.168.1.9"
 system_hostname: "host-laptop"
-
-# Use IP now; flip connection_mode to "hostname" later to connect by name
-ansible_host: "{{ host_ip if connection_mode == 'ip' else system_hostname }}"
 
 network:
   configure: true

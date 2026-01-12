@@ -1,22 +1,27 @@
 ---
+# system_dev = control node + dev workstation
 is_control_node: true
 allow_reboot: false
 install_docker: true
 
-system_user:
-  name: devuser
-  create_home: true
-  ssh_public_key_path: "{{ ssh_key_dir }}/host_systems.pub"
-  groups:
-    - video
+# Dev/control node login user config (if you create a local user via Ansible)
+managed_users:
+  - name: devuser
+    create_home: true
+    groups: ["video"]
+    authorized_keys:
+      - "{{ lookup('file', ssh_key_dir + '/host_systems.pub') }}"
+    exclusive_keys: true
 
 create_internal_users: false
 
+# Control-node key generation (local only)
 ssh_keys_to_generate:
   - host_systems
   - github
   - gitlab
 
+# Control node directories
 control_node_root: "/srv/control"
 control_backups_root: "{{ control_node_root }}/backups"
 control_artifacts_root: "{{ control_node_root }}/artifacts"
@@ -25,7 +30,6 @@ default_rsync_opts:
   - "--archive"
   - "--compress"
 
-# === Pull jobs (remote → control) ===
 pull_jobs:
   - name: "Pull app resources"
     src: "/opt/app/resources/"
@@ -36,13 +40,13 @@ pull_jobs:
     dest: "{{ control_backups_root }}/db/{{ inventory_hostname }}/"
     rsync_opts: "{{ default_rsync_opts }}"
 
-# === Push jobs (control → remote) ===
 push_jobs:
   - name: "Push app configuration"
     src: "{{ control_artifacts_root }}/app_config/"
     dest: "/etc/myapp/config/"
     rsync_opts: "{{ default_rsync_opts }}"
 
+# Dev workstation packages (local)
 cli_tools:
   - python3-venv
   - fd-find
@@ -100,6 +104,5 @@ gui_utils:
 db_tools:
   - mariadb-server
 
-# Final combined list (apt will dedupe if repeats occur)
 local_system_packages: >-
   {{ cli_tools + python_tools + system_utils + gui_utils + db_tools }}

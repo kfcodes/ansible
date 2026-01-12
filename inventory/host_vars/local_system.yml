@@ -2,9 +2,5 @@
 is_control_node: true
 ansible_connection: local
 ansible_host: 127.0.0.1
-
 system_hostname: "m"
 system_domain: "local"
-
-features:
-  gpu_passthrough: false

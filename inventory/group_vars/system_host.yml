@@ -2,6 +2,14 @@
 allow_reboot: true
 install_docker: true
 
+managed_users:
+  - name: appuser
+    create_home: true
+    groups: ["docker"] # add "sudo" if you want admin via appuser
+    authorized_keys:
+      - "{{ lookup('file', ssh_key_dir + '/appuser.pub') }}"
+    exclusive_keys: true
+
 host_system_packages:
   - htop
   - tmux
