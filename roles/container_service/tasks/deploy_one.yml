@@ -1,0 +1,36 @@
+---
+- name: Build per-container app definition
+  ansible.builtin.set_fact:
+    app: >-
+      {{
+        {
+          'name': (service_name | default(app.name)) ~ '-' ~ (svc.name_suffix | string),
+          'repo': fastapi_repo_url | default(app.repo),
+          'version': svc.version,
+          'ports': [ (svc.host_port | string) ~ ':8000' ],
+          'env_files': service_common.env_files | default([]),
+          'volumes': service_common.volumes | default([]),
+          'command': service_common.command | default('')
+        }
+      }}
+
+- name: Validate inputs
+  ansible.builtin.import_tasks: validate.yml
+
+- name: Precompute derived variables
+  ansible.builtin.import_tasks: precompute.yml
+
+- name: Clone repository
+  ansible.builtin.import_tasks: clone_repo.yml
+
+- name: Configure container files and settings
+  ansible.builtin.import_tasks: configure_container.yml
+
+- name: Generate Docker Compose file
+  ansible.builtin.import_tasks: generate_compose.yml
+
+- name: Manage container deployment and networking
+  ansible.builtin.import_tasks: manage_container.yml
+
+- name: Post-deployment verification
+  ansible.builtin.import_tasks: post_deploy.yml

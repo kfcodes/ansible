@@ -1,0 +1,21 @@
+---
+- name: Validate required app configuration
+  ansible.builtin.assert:
+    that:
+      - app is defined
+      - app is mapping
+      - app.name is defined
+      - (app.name | string | length) > 0
+      - app.repo is defined
+      - (app.repo | string | length) > 0
+      - app.version is defined
+      - (app.version | string | length) > 0
+    fail_msg: >-
+      container_service: missing required config.
+      Define app.name, app.repo and app.version in the service group_vars.
+
+- name: Disallow main/master deployments (stable/update tags only)
+  ansible.builtin.assert:
+    that:
+      - app.version not in ['main', 'master']
+    fail_msg: "container_service: app.version must be a stable/update tag, not main/master."

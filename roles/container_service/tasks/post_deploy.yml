@@ -31,3 +31,30 @@
     - app.healthcheck.enabled | default(true) | bool
     - app.healthcheck.url is defined
     - app.healthcheck.url | length > 0
+
+- name: Wait until container is running
+  community.docker.docker_container_info:
+    name: "{{ container_service_container_name }}"
+  register: container_info
+  retries: "{{ container_service_effective_healthcheck.retries }}"
+  delay: "{{ container_service_effective_healthcheck.delay }}"
+  until:
+    - container_info.container is defined
+    - container_info.container.State is defined
+    - container_info.container.State.Status == "running"
+  when:
+    - service_state == 'present'
+    - container_service_effective_healthcheck.enabled | bool
+
+- name: HTTP healthcheck (optional)
+  ansible.builtin.uri:
+    url: "{{ container_service_effective_healthcheck.url }}"
+    status_code: "{{ container_service_effective_healthcheck.status_code }}"
+  register: healthcheck_result
+  retries: "{{ container_service_effective_healthcheck.retries }}"
+  delay: "{{ container_service_effective_healthcheck.delay }}"
+  until: healthcheck_result.status == container_service_effective_healthcheck.status_code
+  when:
+    - service_state == 'present'
+    - container_service_effective_healthcheck.enabled | bool
+    - container_service_effective_healthcheck.url | length > 0

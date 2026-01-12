@@ -3,32 +3,22 @@
 service_state: present # present | absent
 service_manage_networks: true
 
+# Default docker network(s) for all services
+container_service_default_networks:
+  - app_net
+
+# Default root path for all services
+container_service_root_path: "/opt"
+
 # Compose behavior
 compose_pull: missing # missing | always | never
 compose_recreate: auto # auto | always | never
 compose_remove_orphans: true
 compose_build: true
 
-# Core app/service definition (override in group_vars/<service>.yml)
-app:
-  name: "service"
-  repo: ""
-  version: "main" # branch/tag/commit
-  path: "/opt/services/service" # clone + compose project dir
-
-  # Compose runtime
-  container_name: "" # default = app.name if empty
-  ports: [] # e.g. ["8000:8000"]
-  env: {} # dict -> environment
-  env_files: [] # list of env files relative to app.path e.g. ["./app/.env"]
-  volumes: [] # e.g. [".:/app"]
-  networks: [] # e.g. ["app_net"]
-  command: "" # override command string
-
-  # Optional health checks
-  healthcheck:
-    enabled: true
-    url: "" # e.g. "http://localhost:8000/health"
-    status_code: 200
-    retries: 10
-    delay: 3
+container_service_healthcheck:
+  enabled: true
+  url: "" # if empty, http healthcheck skipped
+  status_code: 200
+  retries: 10
+  delay: 3
