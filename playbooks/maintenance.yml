@@ -1,0 +1,16 @@
+---
+- name: System maintenance
+  hosts: systems
+  become: true
+  tags: [maintenance]
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+- name: Backup synchronization
+  hosts: system_dev
+  become: true
+  roles:
+    - role: storage_backup_sync
+      tags: [backups]

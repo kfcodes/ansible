@@ -1,0 +1,42 @@
+---
+- name: Deploy frontend service
+  hosts: frontend_service
+  become: true
+  roles:
+    - role: service_fastapi_container
+      tags: [frontend]
+
+- name: Deploy label API service
+  hosts: label_service
+  become: true
+  roles:
+    - role: service_fastapi_container
+      tags: [labelapi]
+
+- name: Deploy file service
+  hosts: file_service
+  become: true
+  roles:
+    - role: service_fastapi_container
+      tags: [file]
+
+- name: Deploy manufacturing service
+  hosts: manufacturing_service
+  become: true
+  roles:
+    - role: service_fastapi_container
+      tags: [manufacturing]
+
+- name: Deploy pallet service
+  hosts: pallet_service
+  become: true
+  roles:
+    - role: service_fastapi_container
+      tags: [pallet]
+
+- name: Deploy product service
+  hosts: product_service
+  become: true
+  roles:
+    - role: service_fastapi_container
+      tags: [product]

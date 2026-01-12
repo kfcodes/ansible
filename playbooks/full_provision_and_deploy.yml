@@ -1,0 +1,4 @@
+---
+- import_playbook: provision_hosts.yml
+- import_playbook: deploy_services.yml
+- import_playbook: maintenance.yml

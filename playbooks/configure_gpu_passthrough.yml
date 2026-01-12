@@ -1,6 +1,0 @@
-- name: Set GPU passthrough
-  hosts: vfio_hosts
-  become: true
-
-  roles:
-    - system_gpu_passthrough
