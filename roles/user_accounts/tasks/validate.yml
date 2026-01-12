@@ -1,14 +1,19 @@
 ---
-- name: Validate primary user structure
+- name: Validate managed_users
   ansible.builtin.assert:
     that:
-      - user_accounts_primary is mapping
-      - (user_accounts_primary.name | default('')) | length > 0
-    fail_msg: "system_user.name (user_accounts_primary.name) must be set."
+      - managed_users is iterable
+      - managed_users | length > 0
+      - (managed_users | map(attribute='name') | list | length) == (managed_users | length)
+      - (managed_users | map(attribute='name') | select('string') | list | length) == (managed_users | length)
+    fail_msg: "managed_users must be a non-empty list and each item must include a non-empty 'name'."
 
-- name: Validate ssh_public_key_path when key mgmt enabled
+- name: Validate authorized_keys (when key management enabled)
   ansible.builtin.assert:
     that:
-      - user_accounts_primary.ssh_public_key_path is defined
-    fail_msg: "system_user.ssh_public_key_path missing while key management is enabled."
+      - item.authorized_keys is not defined or item.authorized_keys is iterable
+    fail_msg: "managed_users[].authorized_keys must be a list of key strings when provided."
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
   when: user_accounts_enable_key_mgmt | bool

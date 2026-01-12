@@ -1,44 +1,50 @@
 ---
 - name: Ensure user's .ssh directory exists when needed
   ansible.builtin.file:
-    path: "/home/{{ ua_merged_user.name }}/.ssh"
+    path: "/home/{{ item.name }}/.ssh"
     state: directory
-    owner: "{{ ua_merged_user.name }}"
-    group: "{{ ua_merged_user.name }}"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
     mode: "0700"
   when:
-    - user_accounts_enable_key_mgmt | bool
-      or (user_accounts_manage_ssh_config | bool and ua_merged_user.create_home | bool)
+    - (user_accounts_enable_key_mgmt | bool) or (user_accounts_manage_ssh_config | bool)
+    - item.create_home | default(user_defaults.create_home) | bool
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
 
-# Single designated public key
-- name: Install authorized_keys from system_user.ssh_public_key_path
+- name: Install authorized_keys (from managed_users[].authorized_keys)
   ansible.posix.authorized_key:
-    user: "{{ ua_merged_user.name }}"
+    user: "{{ item.0.name }}"
     state: present
-    key: "{{ lookup('file', ua_merged_user.ssh_public_key_path) }}"
+    key: "{{ item.1 }}"
+    exclusive: "{{ item.0.exclusive_keys | default(user_defaults.exclusive_keys) }}"
+    manage_dir: false
+  loop: "{{ managed_users | subelements('authorized_keys', skip_missing=True) }}"
   when:
     - user_accounts_enable_key_mgmt | bool
-    - lookup('file', ua_merged_user.ssh_public_key_path, errors='ignore') != ''
 
-# Any extra generated keys
-- name: Install additional generated public keys
+- name: Install additional generated public keys (for each user)
   ansible.posix.authorized_key:
-    user: "{{ ua_merged_user.name }}"
+    user: "{{ item.0.name }}"
     state: present
-    key: "{{ lookup('file', user_accounts_ssh_key_dir ~ '/' ~ item ~ '.pub') }}"
-  loop: "{{ user_accounts_generate_keys }}"
+    key: "{{ lookup('file', user_accounts_ssh_key_dir ~ '/' ~ item.1 ~ '.pub') }}"
+    manage_dir: false
+  loop: "{{ managed_users | product(user_accounts_generate_keys) | list }}"
   when:
     - user_accounts_enable_key_mgmt | bool
     - user_accounts_generate_keys | length > 0
 
-# Optional ~/.ssh/config
 - name: Render ~/.ssh/config (optional)
   ansible.builtin.template:
     src: ssh_config.j2
-    dest: "/home/{{ ua_merged_user.name }}/.ssh/config"
-    owner: "{{ ua_merged_user.name }}"
-    group: "{{ ua_merged_user.name }}"
+    dest: "/home/{{ item.name }}/.ssh/config"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
     mode: "0600"
   when:
     - user_accounts_manage_ssh_config | bool
-    - ua_merged_user.create_home | bool
+    - item.create_home | default(user_defaults.create_home) | bool
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"

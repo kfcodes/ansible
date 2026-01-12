@@ -1,22 +1,20 @@
 ---
-- name: Merge user options
-  ansible.builtin.set_fact:
-    ua_merged_user:
-      name: "{{ user_accounts_primary.name }}"
-      shell: "{{ user_accounts_primary.shell | default(default_user_options.shell) }}"
-      create_home: "{{ user_accounts_primary.create_home | default(default_user_options.create_home) }}"
-      groups: >-
-        {{ (default_user_options.groups | default([]))
-           + (user_accounts_primary.groups | default([])) | unique }}
-      system: "{{ default_user_options.system | default(false) }}"
-      lock_password: "{{ default_user_options.lock_password | default(false) }}"
-      ssh_public_key_path: "{{ user_accounts_primary.ssh_public_key_path }}"
-
-- name: Ensure user exists
+- name: Ensure managed users exist
   ansible.builtin.user:
-    name: "{{ ua_merged_user.name }}"
-    shell: "{{ ua_merged_user.shell }}"
-    create_home: "{{ ua_merged_user.create_home }}"
-    groups: "{{ ua_merged_user.groups }}"
-    system: "{{ ua_merged_user.system }}"
-    state: present
+    name: "{{ item.name }}"
+    state: "{{ item.state | default(user_defaults.state) }}"
+    shell: "{{ item.shell | default(user_defaults.shell) }}"
+    create_home: "{{ item.create_home | default(user_defaults.create_home) }}"
+    system: "{{ item.system | default(user_defaults.system) }}"
+    lock_password: "{{ item.lock_password | default(user_defaults.lock_password) }}"
+    groups: >-
+      {{
+        (
+          (user_defaults.groups | default([]))
+          + (item.groups | default([]))
+        ) | unique
+      }}
+    append: true
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,6 +1,6 @@
-- name: Clone local config repos
-  import_tasks: local_repos.yml
-  tags: [local_repos]
+# - name: Clone local config repos
+#   import_tasks: local_repos.yml
+#   tags: [local_repos]
 
 - name: apply the dotfile configs
   import_tasks: dotfiles.yml
