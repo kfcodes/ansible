@@ -2,7 +2,7 @@
 - name: Configure container-specific files (optional)
   ansible.builtin.copy:
     src: "{{ item.src }}"
-    dest: "{{ app.path }}/{{ item.dest }}"
+    dest: "{{ container_service_app_path }}/{{ item.dest }}"
     mode: "{{ item.mode | default('0644') }}"
   loop: "{{ app.config_files | default([]) }}"
   loop_control:

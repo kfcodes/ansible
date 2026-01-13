@@ -1,16 +1,12 @@
 ---
-# Role behavior
-service_state: present # present | absent
+service_state: present
 service_manage_networks: true
 
-# Default docker network(s) for all services
 container_service_default_networks:
   - app_net
 
-# Default root path for all services
 container_service_root_path: "/opt"
 
-# Compose behavior
 compose_pull: missing # missing | always | never
 compose_recreate: auto # auto | always | never
 compose_remove_orphans: true

@@ -1,8 +1,8 @@
 ---
 - name: Restart container service (compose v2)
   community.docker.docker_compose_v2:
-    project_src: "{{ app.path }}"
+    project_src: "{{ container_service_app_path }}"
     state: present
-    recreate: always
+    recreate: auto
   listen: "restart container service"
   when: service_state == 'present'

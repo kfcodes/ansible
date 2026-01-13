@@ -1,15 +1,14 @@
----
 - name: Ensure service directory exists
   ansible.builtin.file:
-    path: "{{ app.path }}"
+    path: "{{ container_service_app_path }}"
     state: directory
     mode: "0755"
 
 - name: Clone/update git repository
   ansible.builtin.git:
     repo: "{{ app.repo }}"
-    dest: "{{ app.path }}"
-    version: "{{ app.version | default('main') }}"
+    dest: "{{ container_service_app_path }}"
+    version: "{{ app.version }}"
     update: true
     force: false
   register: repo_result

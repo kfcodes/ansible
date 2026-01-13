@@ -1,40 +1,14 @@
 ---
-- name: Validate inputs
-  ansible.builtin.import_tasks: validate.yml
-  tags: [always]
-
-- name: Precompute derived variables
-  ansible.builtin.import_tasks: precompute.yml
-  tags: [always]
-
-- name: Clone repository
-  ansible.builtin.import_tasks: clone_repo.yml
-  tags: [clone]
-
-- name: Configure container files and settings
-  ansible.builtin.import_tasks: configure_container.yml
-  tags: [configure]
-
-- name: Generate Docker Compose file
-  ansible.builtin.import_tasks: generate_compose.yml
-  tags: [compose]
-
-- name: Manage container deployment and networking
-  ansible.builtin.import_tasks: manage_container.yml
-  tags: [deploy]
-
-- name: Post-deployment verification
-  ansible.builtin.import_tasks: post_deploy.yml
-  tags: [healthcheck]
-
 - name: Deploy multiple containers for this service (stable/update)
   ansible.builtin.include_tasks: deploy_one.yml
   loop: "{{ container_services }}"
   loop_control:
     loop_var: svc
-    label: "{{ service_name | default(app.name | default('service')) }}-{{ svc.name_suffix }}"
-  when: container_services is defined and container_services | length > 0
+    label: "{{ service_name }}-{{ svc.name_suffix }}"
+  when:
+    - container_services is defined
+    - container_services | length > 0
 
 - name: Deploy single container (legacy mode)
-  ansible.builtin.import_tasks: deploy_one.yml
+  ansible.builtin.import_tasks: deploy_one_single.yml
   when: container_services is not defined or container_services | length == 0

@@ -47,16 +47,16 @@ services:
     command: {{ app.command }}
     {% endif %}
 
-    {% if app.networks is defined and app.networks | length > 0 %}
+    {% if container_service_networks is defined and container_service_networks | length > 0 %}
     networks:
-    {% for n in app.networks %}
+    {% for n in container_service_networks %}
       - {{ n }}
     {% endfor %}
     {% endif %}
 
+{% if container_service_networks is defined and container_service_networks | length > 0 %}
 networks:
-{% if app.networks is defined and app.networks | length > 0 %}
-{% for n in app.networks %}
+{% for n in container_service_networks %}
   {{ n }}:
     external: true
 {% endfor %}
