@@ -1,3 +1,4 @@
+service_name: "labelapi"
 fastapi_repo_url: "git@github.com:kfcodes/fastapi.git"
 
 fastapi_tags:
@@ -8,15 +9,6 @@ ports:
   stable: 8001
   update: 8002
 
-# Common runtime settings (defined once)
-service_common:
-  env_files:
-    - "./app/.env"
-  volumes:
-    - ".:/app"
-  command: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
-
-# Two containers defined concisely
 container_services:
   - name_suffix: "stable"
     version: "{{ fastapi_tags.stable }}"
