@@ -1,14 +1,42 @@
+---
 - name: Build per-container app definition
   ansible.builtin.set_fact:
     app:
       name: "{{ service_name }}-{{ svc.name_suffix }}"
+      container_name: "{{ service_name }}-{{ svc.name_suffix }}"
+      compose_service_name: "{{ service_name }}"
       repo: "{{ fastapi_repo_url }}"
       version: "{{ svc.version }}"
       ports:
         - "{{ svc.host_port }}:{{ container_internal_port }}"
-      env_files: "{{ service_common.env_files }}"
       volumes: "{{ service_common.volumes }}"
-      command: "{{ service_common.command }}"
       healthcheck:
-        # container running check uses defaults anyway; set URL per container
         url: "http://localhost:{{ svc.host_port }}/health"
+
+- name: Validate inputs
+  ansible.builtin.import_tasks: validate.yml
+
+- name: Precompute derived variables
+  ansible.builtin.import_tasks: precompute.yml
+
+- name: Compute local config source directory (controller)
+  ansible.builtin.set_fact:
+    container_service_local_src_dir: "{{ container_service_local_config_root }}/{{ container_service_local_config_dir }}"
+
+- name: Clone repository
+  ansible.builtin.import_tasks: clone_repo.yml
+
+- name: Sync config directory into project (controller -> host)
+  ansible.builtin.import_tasks: configure_container.yml
+
+- name: Generate Dockerfile
+  ansible.builtin.import_tasks: generate_dockerfile.yml
+
+- name: Generate docker-compose.yml
+  ansible.builtin.import_tasks: generate_compose.yml
+
+- name: Build/run container with Docker Compose v2
+  ansible.builtin.import_tasks: manage_container.yml
+
+- name: Post-deployment verification
+  ansible.builtin.import_tasks: post_deploy.yml

@@ -17,7 +17,5 @@
   ansible.builtin.set_fact:
     container_service_effective_healthcheck: >-
       {{
-        (app.healthcheck is defined)
-          | ternary(container_service_healthcheck | combine(app.healthcheck, recursive=True),
-                    container_service_healthcheck)
+        container_service_healthcheck | combine(app.healthcheck | default({}), recursive=True)
       }}

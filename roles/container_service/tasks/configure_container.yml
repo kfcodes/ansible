@@ -1,14 +1,34 @@
 ---
-- name: Configure container-specific files (optional)
-  ansible.builtin.copy:
-    src: "{{ item.src }}"
-    dest: "{{ container_service_app_path }}/{{ item.dest }}"
-    mode: "{{ item.mode | default('0644') }}"
-  loop: "{{ app.config_files | default([]) }}"
-  loop_control:
-    label: "{{ item.dest }}"
+- name: Ensure remote env directory exists
+  ansible.builtin.file:
+    path: "{{ container_service_app_path }}/{{ container_service_remote_env_dir }}"
+    state: directory
+    mode: "0755"
+  when: service_state == 'present'
+
+- name: Verify local source-of-truth directory exists
+  ansible.builtin.stat:
+    path: "{{ container_service_local_src_dir }}"
+  register: local_config_dir
+  delegate_to: localhost
+  when: service_state == 'present'
+
+- name: Fail if local config directory is missing
+  ansible.builtin.assert:
+    that:
+      - local_config_dir.stat.exists
+      - local_config_dir.stat.isdir
+    fail_msg: >-
+      Missing local config directory:
+      {{ container_service_local_src_dir }}
+  when: service_state == 'present'
+
+- name: Sync local config directory to remote container env dir
+  ansible.posix.synchronize:
+    src: "{{ container_service_local_src_dir }}/"
+    dest: "{{ container_service_app_path }}/{{ container_service_remote_env_dir }}/"
+    archive: true
+    compress: true
+    delete: false
   register: config_copy_result
-  when:
-    - service_state == 'present'
-    - app.config_files is defined
-    - app.config_files | length > 0
+  when: service_state == 'present'

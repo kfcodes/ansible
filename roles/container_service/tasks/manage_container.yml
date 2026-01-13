@@ -8,13 +8,13 @@
     - service_manage_networks | bool
     - container_service_networks | length > 0
 
-- name: Compute whether we need to rebuild
+- name: Compute whether we need to build
   ansible.builtin.set_fact:
     container_service_needs_build: >-
       {{
         (repo_result is defined and repo_result.changed)
         or (compose_template_result is defined and compose_template_result.changed)
-        or (config_copy_result is defined and config_copy_result.changed)
+        or (dockerfile_template_result is defined and dockerfile_template_result.changed)
       }}
   when: service_state == 'present'
 

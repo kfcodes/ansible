@@ -15,10 +15,9 @@ compose_build: true
 container_internal_port: 8000
 service_common:
   env_files:
-    - "./app/.env"
+    - "./app/env/config.env"
   volumes:
-    - ".:/app"
-  command: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    - "./app:/app"
 
 container_service_healthcheck:
   enabled: true
@@ -26,3 +25,13 @@ container_service_healthcheck:
   status_code: 200
   retries: 10
   delay: 3
+
+container_service_local_config_root: "{{ lookup('env','HOME') }}/.application"
+container_service_local_config_dir: "fastapi"
+container_service_remote_env_dir: "app/env"
+#
+# Dockerfile templating
+container_service_manage_dockerfile: true
+container_service_base_image: "python:3.11.1-slim"
+container_service_workdir: "/"
+container_service_uvicorn_app: "app:app"

@@ -9,6 +9,7 @@
     - container_services is defined
     - container_services | length > 0
 
-- name: Deploy single container (legacy mode)
-  ansible.builtin.import_tasks: deploy_one_single.yml
+- name: Fail if container_services not provided
+  ansible.builtin.fail:
+    msg: "container_service requires container_services (stable/update) for this service group."
   when: container_services is not defined or container_services | length == 0

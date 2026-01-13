@@ -1,16 +1,13 @@
-version: "3.9"
-
 services:
-  {{ app.name }}:
-    {% if app.container_name | default('') | length > 0 %}
-    container_name: "{{ app.container_name }}"
-    {% else %}
-    container_name: "{{ app.name }}"
-    {% endif %}
+  "{{ app.compose_service_name | default(app.name) }}":
+    build: .
+    container_name: "{{ app.container_name | default(app.name) }}"
 
-    {% if compose_build | bool %}
-    build:
-      context: .
+    {% if app.volumes is defined and app.volumes | length > 0 %}
+    volumes:
+    {% for v in app.volumes %}
+      - "{{ v }}"
+    {% endfor %}
     {% endif %}
 
     {% if app.ports is defined and app.ports | length > 0 %}
@@ -20,44 +17,19 @@ services:
     {% endfor %}
     {% endif %}
 
-    {% if app.env_files is defined and app.env_files | length > 0 %}
-    env_file:
-    {% for f in app.env_files %}
-      - "{{ f }}"
-    {% endfor %}
-    {% endif %}
-
-    {% if app.env is defined and app.env | length > 0 %}
-    environment:
-    {% for k, v in app.env.items() %}
-      {{ k }}: "{{ v }}"
-    {% endfor %}
-    {% endif %}
-
-    {% if app.volumes is defined and app.volumes | length > 0 %}
-    volumes:
-    {% for v in app.volumes %}
-      - "{{ v }}"
-    {% endfor %}
-    {% endif %}
-
     restart: unless-stopped
-
-    {% if app.command is defined and app.command | length > 0 %}
-    command: {{ app.command }}
-    {% endif %}
 
     {% if container_service_networks is defined and container_service_networks | length > 0 %}
     networks:
     {% for n in container_service_networks %}
-      - {{ n }}
+      - "{{ n }}"
     {% endfor %}
     {% endif %}
 
 {% if container_service_networks is defined and container_service_networks | length > 0 %}
 networks:
 {% for n in container_service_networks %}
-  {{ n }}:
+  "{{ n }}":
     external: true
 {% endfor %}
 {% endif %}

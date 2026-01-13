@@ -1,0 +1,10 @@
+---
+- name: Render Dockerfile (optional)
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: "{{ container_service_app_path }}/Dockerfile"
+    mode: "0644"
+  register: dockerfile_template_result
+  when:
+    - service_state == 'present'
+    - container_service_manage_dockerfile | bool

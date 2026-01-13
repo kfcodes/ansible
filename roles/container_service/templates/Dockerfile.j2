@@ -1,0 +1,15 @@
+FROM {{ app.base_image | default(container_service_base_image) }}
+
+WORKDIR {{ app.workdir | default(container_service_workdir) }}
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy project
+COPY . .
+
+CMD ["uvicorn", "{{ app.uvicorn_app | default(container_service_uvicorn_app) }}", "--host", "0.0.0.0", "--port", "{{ container_internal_port | string }}"]
