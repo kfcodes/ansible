@@ -1,42 +1,42 @@
 ---
-- name: Deploy frontend service
+- name: Deploy frontend service (stable + update)
   hosts: frontend_service
   become: true
+  tags: [frontend]
   roles:
-    - role: container_service
-      tags: [frontend]
+    - container_service
 
-- name: Deploy label API service
+- name: Deploy label API service (stable + update)
   hosts: label_service
   become: true
+  tags: [labelapi]
   roles:
-    - role: container_service
-      tags: [labelapi]
+    - container_service
 
-- name: Deploy file service
+- name: Deploy file service (stable + update)
   hosts: file_service
   become: true
+  tags: [file]
   roles:
-    - role: container_service
-      tags: [file]
+    - container_service
 
-- name: Deploy manufacturing service
+- name: Deploy manufacturing service (stable + update)
   hosts: manufacturing_service
   become: true
+  tags: [manufacturing]
   roles:
-    - role: container_service
-      tags: [manufacturing]
+    - container_service
 
-- name: Deploy pallet service
+- name: Deploy pallet service (stable + update)
   hosts: pallet_service
   become: true
+  tags: [pallet]
   roles:
-    - role: container_service
-      tags: [pallet]
+    - container_service
 
-- name: Deploy product service
+- name: Deploy product service (stable + update)
   hosts: product_service
   become: true
+  tags: [product]
   roles:
-    - role: container_service
-      tags: [product]
+    - container_service

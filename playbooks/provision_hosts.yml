@@ -2,24 +2,25 @@
 - name: Provision system hosts (base OS, users, docker prerequisites)
   hosts: system_host
   become: true
+  gather_facts: true
+  tags: [provision, system_host]
   roles:
-    - role: user_account
-      tags: [users]
-    - role: system_base
-      tags: [base]
+    # - user_account
+    - system_base
+# - name: Provision dev / control node
+#   hosts: system_dev
+#   become: true
+#   gather_facts: true
+#   tags: [provision, system_dev]
+#   roles:
+#     - user_account
+#     - system_devtools
 
-- name: Provision dev / control node
-  hosts: system_dev
-  become: true
-  roles:
-    - role: user_account
-      tags: [users]
-    - role: system_devtools
-      tags: [devtools]
+# - name: Provision GPU passthrough hosts
+#   hosts: vfio_hosts
+#   become: true
+#   gather_facts: true
+#   tags: [provision, vfio]
+#   roles:
+#     - system_gpu_passthrough
 
-- name: Provision GPU passthrough hosts
-  hosts: vfio_hosts
-  become: true
-  roles:
-    - role: system_gpu_passthrough
-      tags: [vfio]

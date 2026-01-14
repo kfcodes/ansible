@@ -7,10 +7,11 @@
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
+        cache_valid_time: 3600
 
 - name: Backup synchronization
   hosts: system_dev
   become: true
+  tags: [backups]
   roles:
-    - role: backup_sync
-      tags: [backups]
+    - backup_sync

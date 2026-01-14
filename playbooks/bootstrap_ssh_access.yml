@@ -1,0 +1,8 @@
+---
+- name: Bootstrap SSH key access on new hosts
+  hosts: system_host
+  become: true
+  gather_facts: true
+  tags: [bootstrap]
+  roles:
+    - user_account
