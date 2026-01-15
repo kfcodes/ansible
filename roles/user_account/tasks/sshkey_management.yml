@@ -1,18 +1,47 @@
 ---
-- name: Ensure user's .ssh directory exists when needed
+# Build a mapping of username -> home directory using getent
+- name: Lookup passwd entry for each managed user
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item.name }}"
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: passwd_entries
+  when:
+    - (user_accounts_enable_key_mgmt | bool) or (user_accounts_manage_ssh_config | bool)
+
+- name: Build user_home_map fact
+  ansible.builtin.set_fact:
+    user_account_home_map: >-
+      {{
+        user_account_home_map | default({}) |
+        combine({ item.item.name: (item.ansible_facts.getent_passwd[item.item.name][4]) })
+      }}
+  loop: "{{ passwd_entries.results | default([]) }}"
+  when:
+    - passwd_entries is defined
+    - item.ansible_facts is defined
+    - item.ansible_facts.getent_passwd is defined
+    - item.item.name in item.ansible_facts.getent_passwd
+
+- name: Ensure each user's .ssh directory exists when needed
   ansible.builtin.file:
-    path: "/home/{{ item.name }}/.ssh"
+    path: "{{ user_account_home_map[item.name] }}/.ssh"
     state: directory
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: "0700"
-  when:
-    - (user_accounts_enable_key_mgmt | bool) or (user_accounts_manage_ssh_config | bool)
-    - item.create_home | default(user_defaults.create_home) | bool
   loop: "{{ managed_users }}"
   loop_control:
     label: "{{ item.name }}"
+  when:
+    - (user_accounts_enable_key_mgmt | bool) or (user_accounts_manage_ssh_config | bool)
+    - user_account_home_map is defined
+    - user_account_home_map[item.name] is defined
+    - (item.create_home | default(user_defaults.create_home) | bool)
 
+# Install keys provided inline from group_vars (best for bootstrap)
 - name: Install authorized_keys (from managed_users[].authorized_keys)
   ansible.posix.authorized_key:
     user: "{{ item.0.name }}"
@@ -24,6 +53,7 @@
   when:
     - user_accounts_enable_key_mgmt | bool
 
+# Optional: add generated keys (controller-generated)
 - name: Install additional generated public keys (for each user)
   ansible.posix.authorized_key:
     user: "{{ item.0.name }}"
@@ -35,16 +65,19 @@
     - user_accounts_enable_key_mgmt | bool
     - user_accounts_generate_keys | length > 0
 
+# Optional ~/.ssh/config
 - name: Render ~/.ssh/config (optional)
   ansible.builtin.template:
     src: ssh_config.j2
-    dest: "/home/{{ item.name }}/.ssh/config"
+    dest: "{{ user_account_home_map[item.name] }}/.ssh/config"
     owner: "{{ item.name }}"
     group: "{{ item.name }}"
     mode: "0600"
-  when:
-    - user_accounts_manage_ssh_config | bool
-    - item.create_home | default(user_defaults.create_home) | bool
   loop: "{{ managed_users }}"
   loop_control:
     label: "{{ item.name }}"
+  when:
+    - user_accounts_manage_ssh_config | bool
+    - user_account_home_map is defined
+    - user_account_home_map[item.name] is defined
+    - (item.create_home | default(user_defaults.create_home) | bool)

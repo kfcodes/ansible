@@ -1,20 +1,70 @@
 ---
-- name: Ensure managed users exist
+- name: Gather current group list for each managed user
+  ansible.builtin.command: "id -nG {{ item.name }}"
+  register: ua_id_groups
+  changed_when: false
+  failed_when: false
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Gather passwd entry for each managed user
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item.name }}"
+    fail_key: false
+  register: ua_getent_passwd
+  changed_when: false
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Ensure managed users exist (idempotent)
   ansible.builtin.user:
     name: "{{ item.name }}"
     state: "{{ item.state | default(user_defaults.state) }}"
     shell: "{{ item.shell | default(user_defaults.shell) }}"
     create_home: "{{ item.create_home | default(user_defaults.create_home) }}"
     system: "{{ item.system | default(user_defaults.system) }}"
-    lock_password: "{{ item.lock_password | default(user_defaults.lock_password) }}"
     groups: >-
       {{
         (
           (user_defaults.groups | default([]))
           + (item.groups | default([]))
-        ) | unique
+        ) | unique | sort
       }}
-    append: true
+    append: false
   loop: "{{ managed_users }}"
   loop_control:
     label: "{{ item.name }}"
+  vars:
+    desired_groups: >-
+      {{
+        (
+          (user_defaults.groups | default([]))
+          + (item.groups | default([]))
+        ) | unique | sort
+      }}
+    current_groups: >-
+      {{
+        (
+          (ua_id_groups.results
+            | selectattr('item.name', 'equalto', item.name)
+            | map(attribute='stdout')
+            | first
+            | default('')
+          ).split()
+        ) | sort
+      }}
+    user_exists: >-
+      {{
+        (ua_getent_passwd.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='ansible_facts.getent_passwd')
+          | first
+          | default({})
+        ).get(item.name) is not none
+      }}
+  when: >-
+    (not user_exists)
+    or (current_groups != desired_groups)

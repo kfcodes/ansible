@@ -1,11 +1,12 @@
 ---
 managed_users: []
+
 user_defaults:
   state: present
   shell: /bin/bash
   create_home: true
   system: false
-  lock_password: false
+  password_lock: false # <-- rename
   groups: []
   exclusive_keys: true
 

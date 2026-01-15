@@ -9,21 +9,30 @@ ssh_key_comment: "Managed by Ansible"
 # ----------------------------------------
 # Connection targeting (fleet-wide default)
 # ----------------------------------------
-# Choose how Ansible should reach hosts by default:
-# - "ip": use host_ip if present
-# - "hostname": use system_hostname if present
 connection_mode: "ip"
 
-# Safe fallback order:
-# 1) If connection_mode == "ip" and host_ip is set -> use host_ip
-# 2) Else if system_hostname is set -> use system_hostname
-# 3) Else -> fall back to inventory_hostname
 ansible_host: >-
   {{
     host_ip if (connection_mode == 'ip' and host_ip is defined and host_ip|length > 0)
     else system_hostname if (system_hostname is defined and system_hostname|length > 0)
     else inventory_hostname
   }}
+
+# ----------------------------------------
+# Bootstrap vs normal automation user
+# ----------------------------------------
+# User that can password-login to a fresh host (first contact).
+bootstrap_user: "m"
+
+# Long-term automation user you create and use with SSH keys.
+deploy_user: "appuser"
+
+# Normal runs use deploy_user by default
+ansible_user: "{{ deploy_user }}"
+
+# Use deploy_user's private key on the controller for normal runs
+# (expects ~/.ssh/appuser and ~/.ssh/appuser.pub)
+ansible_ssh_private_key_file: "{{ ssh_key_dir }}/{{ deploy_user }}"
 
 # -----------------------
 # User management defaults

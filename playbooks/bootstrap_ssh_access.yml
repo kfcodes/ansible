@@ -1,8 +1,66 @@
 ---
+- name: Bootstrap prerequisite on controller (install sshpass + ensure SSH key exists)
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+  become: true
+  tags: [bootstrap]
+  tasks:
+    - name: Ensure sshpass is installed on controller
+      ansible.builtin.apt:
+        name: sshpass
+        state: present
+        update_cache: true
+
+    - name: Ensure SSH key directory exists on controller
+      ansible.builtin.file:
+        path: "{{ ssh_key_dir }}"
+        state: directory
+        mode: "0700"
+
+    - name: Check if deploy_user public key exists
+      ansible.builtin.stat:
+        path: "{{ ssh_key_dir }}/{{ deploy_user }}.pub"
+      register: pubkey_stat
+
+    - name: Generate deploy_user keypair on controller if missing
+      community.crypto.openssh_keypair:
+        path: "{{ ssh_key_dir }}/{{ deploy_user }}"
+        type: "{{ ssh_key_type }}"
+        comment: "{{ ssh_key_comment }}"
+        mode: "0600"
+        force: false
+      when: not pubkey_stat.stat.exists
+
+    - name: Assert deploy_user public key exists
+      ansible.builtin.stat:
+        path: "{{ ssh_key_dir }}/{{ deploy_user }}.pub"
+      register: pubkey_stat
+
+    - name: Fail if deploy_user public key is missing
+      ansible.builtin.assert:
+        that:
+          - pubkey_stat.stat.exists
+        fail_msg: "Missing public key: {{ ssh_key_dir }}/{{ deploy_user }}.pub"
+
 - name: Bootstrap SSH key access on new hosts
   hosts: system_host
   become: true
   gather_facts: true
   tags: [bootstrap]
+  vars:
+    ansible_user: "{{ bootstrap_user }}"
   roles:
     - user_account
+
+- name: Cleanup on controller (remove sshpass)
+  hosts: 127.0.0.1
+  connection: local
+  gather_facts: false
+  become: true
+  tags: [bootstrap]
+  tasks:
+    - name: Remove sshpass from controller
+      ansible.builtin.apt:
+        name: sshpass
+        state: absent

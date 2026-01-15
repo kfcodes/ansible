@@ -1,19 +1,34 @@
 ---
-- name: Validate managed_users
+- name: Validate managed_users is a list
   ansible.builtin.assert:
     that:
       - managed_users is iterable
-      - managed_users | length > 0
-      - (managed_users | map(attribute='name') | list | length) == (managed_users | length)
-      - (managed_users | map(attribute='name') | select('string') | list | length) == (managed_users | length)
-    fail_msg: "managed_users must be a non-empty list and each item must include a non-empty 'name'."
+    fail_msg: "managed_users must be a list (can be empty)."
 
-- name: Validate authorized_keys (when key management enabled)
+- name: Skip role if no users defined
+  ansible.builtin.debug:
+    msg: "user_account: managed_users is empty for {{ inventory_hostname }}; skipping user creation/key management."
+  when: managed_users | length == 0
+
+- name: Validate each managed user entry (when provided)
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - (item.name | string | length) > 0
+    fail_msg: "Each managed_users entry must include a non-empty 'name'."
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name | default('undefined') }}"
+  when: managed_users | length > 0
+
+- name: Validate authorized_keys field shape (when key management enabled)
   ansible.builtin.assert:
     that:
       - item.authorized_keys is not defined or item.authorized_keys is iterable
-    fail_msg: "managed_users[].authorized_keys must be a list of key strings when provided."
+    fail_msg: "managed_users[].authorized_keys must be a list of public key strings when provided."
   loop: "{{ managed_users }}"
   loop_control:
     label: "{{ item.name }}"
-  when: user_accounts_enable_key_mgmt | bool
+  when:
+    - managed_users | length > 0
+    - user_accounts_enable_key_mgmt | bool

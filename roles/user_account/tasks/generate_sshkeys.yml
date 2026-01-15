@@ -6,6 +6,7 @@
     mode: "0700"
   delegate_to: localhost
   run_once: true
+  become: false
 
 - name: Generate SSH keys on control node
   community.crypto.openssh_keypair:
@@ -18,3 +19,4 @@
   loop: "{{ user_accounts_generate_keys }}"
   delegate_to: localhost
   run_once: true
+  become: false
