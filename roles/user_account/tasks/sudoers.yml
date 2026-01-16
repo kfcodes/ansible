@@ -1,0 +1,22 @@
+---
+- name: Install sudo package (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: sudo
+    state: present
+    update_cache: false
+  when: ansible_facts.os_family == "Debian"
+
+- name: Configure passwordless sudo for users that request it
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/99-{{ item.name }}"
+    content: "{{ item.name }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.passwordless_sudo | default(false) | bool
+    - item.state | default(user_defaults.state) == "present"

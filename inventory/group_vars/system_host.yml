@@ -3,11 +3,12 @@ allow_reboot: true
 install_docker: true
 
 managed_users:
-  - name: appuser
+  - name: "{{ deploy_user }}"
     create_home: true
-    groups: ["docker"] # add "sudo" if you want admin via appuser
+    groups: ["docker", "sudo"]
+    passwordless_sudo: true
     authorized_keys:
-      - "{{ lookup('file', ssh_key_dir + '/appuser.pub') }}"
+      - "{{ lookup('file', ssh_key_dir + '/' + deploy_user + '.pub') }}"
     exclusive_keys: true
 
 host_system_packages:

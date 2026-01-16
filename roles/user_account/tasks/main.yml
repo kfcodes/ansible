@@ -8,6 +8,8 @@
   when: managed_users | length > 0
   tags: [users]
 
+- ansible.builtin.import_tasks: sudoers.yml
+
 - name: Manage SSH keys/config for users
   ansible.builtin.import_tasks: sshkey_management.yml
   when: managed_users | length > 0
