@@ -33,3 +33,11 @@ app_links:
 application_directories:
   - { path: ".config/mpv", attrs: "0755" }
   - { path: ".tmux/plugins", attrs: "0755" }
+
+# GitHub SSH config
+devtools_github_ssh_enabled: true
+devtools_github_ssh_host: github.com
+devtools_github_ssh_hostname: github.com
+devtools_github_ssh_user: git
+devtools_github_ssh_key: github_key
+devtools_github_rewrite_https_to_ssh: true

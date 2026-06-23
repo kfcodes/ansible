@@ -1,0 +1,46 @@
+---
+- name: Deploy local development system
+  hosts: "{{ target_hosts | default('local_system') }}"
+  gather_facts: false
+  become: false
+
+  vars:
+    local_usr: "{{ lookup('env', 'USER') }}"
+
+  pre_tasks:
+    - name: Gather facts as the normal local user, not root
+      ansible.builtin.setup:
+      become: false
+      tags: always
+
+    - name: Show target user and host
+      ansible.builtin.debug:
+        msg:
+          - "Deploying local dev system on: {{ inventory_hostname }}"
+          - "Using local user: {{ local_usr }}"
+          - "User home: /home/{{ local_usr }}"
+      tags: always
+
+  tasks:
+    - name: Configure base system
+      ansible.builtin.import_role:
+        name: system_base
+      become: true
+      tags:
+        - system_base
+        - base
+        - packages
+        - git
+
+    - name: Configure development tools
+      ansible.builtin.import_role:
+        name: system_devtools
+      become: true
+      tags:
+        - system_devtools
+        - devtools
+        - github_ssh
+        - repos
+        - dotfiles
+        - env
+        - apps
