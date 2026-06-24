@@ -1,10 +1,41 @@
-- name: Create symbolic links for dotfiles
-  file:
-    src: "/home/{{ local_usr }}/{{ item.src }}"
-    dest: "/home/{{ local_usr }}/{{ item.dest }}"
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
-    state: link
-    force: yes
+---
+- name: Ensure dotfile destination parent directories exist
+  ansible.builtin.file:
+    path: "{{ (system_dev_home ~ '/' ~ item.dest) | dirname }}"
+    state: directory
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
+    mode: "0755"
   loop: "{{ dotfile_links }}"
-  become_user: "{{ local_usr }}"
+
+- name: Check dotfile source paths
+  ansible.builtin.stat:
+    path: "{{ system_dev_home }}/{{ item.src }}"
+  loop: "{{ dotfile_links }}"
+  loop_control:
+    label: "{{ item.src }}"
+  register: system_dev_dotfile_sources
+
+- name: Fail when required dotfile source is missing
+  ansible.builtin.fail:
+    msg: "Required dotfile source missing: {{ system_dev_home }}/{{ item.item.src }}"
+  loop: "{{ system_dev_dotfile_sources.results }}"
+  loop_control:
+    label: "{{ item.item.src }}"
+  when:
+    - not item.stat.exists
+    - item.item.required | default(true) | bool
+
+- name: Create symbolic links for dotfiles
+  ansible.builtin.file:
+    src: "{{ system_dev_home }}/{{ item.item.src }}"
+    dest: "{{ system_dev_home }}/{{ item.item.dest }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
+    state: link
+    force: true
+    follow: false
+  loop: "{{ system_dev_dotfile_sources.results }}"
+  loop_control:
+    label: "{{ item.item.dest }}"
+  when: item.stat.exists

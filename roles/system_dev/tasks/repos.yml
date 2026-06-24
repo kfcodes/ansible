@@ -1,33 +1,16 @@
 ---
 - name: Validate system_dev inputs
   ansible.builtin.import_tasks: validate.yml
-  tags: [always]
 
 - name: Configure GitHub SSH access
   ansible.builtin.import_tasks: github_ssh.yml
-  tags: [github_ssh, ssh, git]
   when: system_dev_github_ssh_enabled | bool
 
 - name: Configure Git settings
   ansible.builtin.import_tasks: git_config.yml
-  tags: [github_ssh, git, git_config]
 
 - name: Create base development directories
   ansible.builtin.import_tasks: directories.yml
-  tags: [dirs, dotfiles, env, repos, apps]
 
 - name: Clone development repositories
   ansible.builtin.import_tasks: clone_repositories.yml
-  tags: [repos]
-
-- name: Apply dotfile configs
-  ansible.builtin.import_tasks: dotfiles.yml
-  tags: [dotfiles]
-
-- name: Apply environment and application links
-  ansible.builtin.import_tasks: env_links.yml
-  tags: [env]
-
-- name: Set up application dependencies
-  ansible.builtin.import_tasks: app_setup.yml
-  tags: [apps]

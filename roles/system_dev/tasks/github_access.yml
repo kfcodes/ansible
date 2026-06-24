@@ -1,0 +1,10 @@
+---
+- name: Validate system_dev inputs
+  ansible.builtin.import_tasks: validate.yml
+
+- name: Configure GitHub SSH access
+  ansible.builtin.import_tasks: github_ssh.yml
+  when: system_dev_github_ssh_enabled | bool
+
+- name: Configure Git settings
+  ansible.builtin.import_tasks: git_config.yml

@@ -1,19 +1,82 @@
-- name: Create .env file links for dev apps
-  file:
-    src: "/home/{{ local_usr }}/{{ item.src }}"
-    dest: "/home/{{ local_usr }}/{{ item.dest }}"
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
-    state: link
-    force: yes
+---
+- name: Ensure env link destination parent directories exist
+  ansible.builtin.file:
+    path: "{{ (system_dev_home ~ '/' ~ item.dest) | dirname }}"
+    state: directory
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
+    mode: "0755"
   loop: "{{ env_links }}"
-  become_user: "{{ local_usr }}"
+
+- name: Check env link source paths
+  ansible.builtin.stat:
+    path: "{{ system_dev_home }}/{{ item.src }}"
+  loop: "{{ env_links }}"
+  loop_control:
+    label: "{{ item.src }}"
+  register: system_dev_env_link_sources
+
+- name: Fail when required env source is missing
+  ansible.builtin.fail:
+    msg: "Required env source missing: {{ system_dev_home }}/{{ item.item.src }}"
+  loop: "{{ system_dev_env_link_sources.results }}"
+  loop_control:
+    label: "{{ item.item.src }}"
+  when:
+    - not item.stat.exists
+    - item.item.required | default(false) | bool
+
+- name: Create .env file links for dev apps
+  ansible.builtin.file:
+    src: "{{ system_dev_home }}/{{ item.item.src }}"
+    dest: "{{ system_dev_home }}/{{ item.item.dest }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
+    state: link
+    force: true
+    follow: false
+  loop: "{{ system_dev_env_link_sources.results }}"
+  loop_control:
+    label: "{{ item.item.dest }}"
+  when: item.stat.exists
+
+- name: Ensure app link destination parent directories exist
+  ansible.builtin.file:
+    path: "{{ (system_dev_home ~ '/' ~ item.dest) | dirname }}"
+    state: directory
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
+    mode: "0755"
+  loop: "{{ app_links }}"
+
+- name: Check app link source paths
+  ansible.builtin.stat:
+    path: "{{ system_dev_home }}/{{ item.src }}"
+  loop: "{{ app_links }}"
+  loop_control:
+    label: "{{ item.src }}"
+  register: system_dev_app_link_sources
+
+- name: Fail when required app link source is missing
+  ansible.builtin.fail:
+    msg: "Required app link source missing: {{ system_dev_home }}/{{ item.item.src }}"
+  loop: "{{ system_dev_app_link_sources.results }}"
+  loop_control:
+    label: "{{ item.item.src }}"
+  when:
+    - not item.stat.exists
+    - item.item.required | default(false) | bool
 
 - name: Link application directories
-  file:
-    src: "/home/{{ local_usr }}/{{ item.src }}"
-    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+  ansible.builtin.file:
+    src: "{{ system_dev_home }}/{{ item.item.src }}"
+    dest: "{{ system_dev_home }}/{{ item.item.dest }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
     state: link
-    force: yes
-  loop: "{{ app_links }}"
-  become_user: "{{ local_usr }}"
+    force: true
+    follow: false
+  loop: "{{ system_dev_app_link_sources.results }}"
+  loop_control:
+    label: "{{ item.item.dest }}"
+  when: item.stat.exists

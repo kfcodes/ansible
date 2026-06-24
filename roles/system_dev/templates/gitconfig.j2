@@ -1,13 +1,15 @@
 [user]
-  email = +kfcodes@users.noreply.github.com
-  name = kfcodes
+  email = {{ system_dev_git_user_email }}
+  name = {{ system_dev_git_user_name }}
 
 [core]
-  editor = vim
+  editor = {{ system_dev_git_editor }}
 
 [merge]
-  tool = vimdiff
+  tool = {{ system_dev_git_merge_tool }}
   conflictstyle = diff3
 
+{% if system_dev_github_rewrite_https_to_ssh | bool %}
 [url "git@github.com:"]
   insteadOf = https://github.com/
+{% endif %}

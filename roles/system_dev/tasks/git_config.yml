@@ -1,0 +1,11 @@
+---
+- name: Generate global .gitconfig from template
+  ansible.builtin.template:
+    src: gitconfig.j2
+    dest: "{{ system_dev_home }}/.gitconfig"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
+    mode: "0644"
+  become_user: "{{ system_dev_user }}"
+  environment:
+    HOME: "{{ system_dev_home }}"

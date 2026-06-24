@@ -1,0 +1,26 @@
+---
+- name: Validate system_dev_user is set
+  ansible.builtin.assert:
+    that:
+      - system_dev_user is defined
+      - system_dev_user | string | length > 0
+    fail_msg: "system_dev_user must be set."
+
+- name: Check development user exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ system_dev_user }}"
+    fail_key: false
+  register: system_dev_user_getent
+
+- name: Fail if development user does not exist
+  ansible.builtin.fail:
+    msg: "Development user '{{ system_dev_user }}' does not exist."
+  when: system_dev_user not in system_dev_user_getent.ansible_facts.getent_passwd
+
+- name: Validate dev_repositories is a list
+  ansible.builtin.assert:
+    that:
+      - dev_repositories is iterable
+      - dev_repositories is not string
+    fail_msg: "dev_repositories must be a list."

@@ -1,82 +1,61 @@
 ---
 - name: Ensure user .ssh directory exists
   ansible.builtin.file:
-    path: "/home/{{ local_usr }}/.ssh"
+    path: "{{ system_dev_home }}/.ssh"
     state: directory
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
     mode: "0700"
 
 - name: Check GitHub SSH private key exists
   ansible.builtin.stat:
-    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}"
-  register: github_ssh_private_key
+    path: "{{ system_dev_home }}/.ssh/{{ system_dev_github_ssh_key }}"
+  register: system_dev_github_private_key
 
 - name: Fail if GitHub SSH private key is missing
   ansible.builtin.fail:
-    msg: "Missing GitHub SSH private key: /home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}"
-  when: not github_ssh_private_key.stat.exists
+    msg: "Missing GitHub SSH private key: {{ system_dev_home }}/.ssh/{{ system_dev_github_ssh_key }}"
+  when: not system_dev_github_private_key.stat.exists
 
 - name: Set GitHub SSH private key permissions
   ansible.builtin.file:
-    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}"
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
+    path: "{{ system_dev_home }}/.ssh/{{ system_dev_github_ssh_key }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
     mode: "0600"
 
 - name: Check GitHub SSH public key exists
   ansible.builtin.stat:
-    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}.pub"
-  register: github_ssh_public_key
+    path: "{{ system_dev_home }}/.ssh/{{ system_dev_github_ssh_key }}.pub"
+  register: system_dev_github_public_key
 
 - name: Set GitHub SSH public key permissions
   ansible.builtin.file:
-    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}.pub"
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
+    path: "{{ system_dev_home }}/.ssh/{{ system_dev_github_ssh_key }}.pub"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
     mode: "0644"
-  when: github_ssh_public_key.stat.exists
+  when: system_dev_github_public_key.stat.exists
 
 - name: Ensure user SSH config exists
   ansible.builtin.file:
-    path: "/home/{{ local_usr }}/.ssh/config"
+    path: "{{ system_dev_home }}/.ssh/config"
     state: touch
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
     mode: "0600"
 
 - name: Configure github.com SSH host
   ansible.builtin.blockinfile:
-    path: "/home/{{ local_usr }}/.ssh/config"
+    path: "{{ system_dev_home }}/.ssh/config"
     create: true
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
+    owner: "{{ system_dev_user }}"
+    group: "{{ system_dev_user }}"
     mode: "0600"
     marker: "# {mark} ANSIBLE MANAGED BLOCK - github.com ssh"
     block: |
-      Host {{ devtools_github_ssh_host }}
-          HostName {{ devtools_github_ssh_hostname }}
-          User {{ devtools_github_ssh_user }}
-          IdentityFile ~/.ssh/{{ devtools_github_ssh_key }}
+      Host {{ system_dev_github_ssh_host }}
+          HostName {{ system_dev_github_ssh_hostname }}
+          User {{ system_dev_github_ssh_user }}
+          IdentityFile ~/.ssh/{{ system_dev_github_ssh_key }}
           IdentitiesOnly yes
-
-- name: Ensure user gitconfig exists before repository cloning
-  ansible.builtin.file:
-    path: "/home/{{ local_usr }}/.gitconfig"
-    state: touch
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
-    mode: "0644"
-
-- name: Rewrite GitHub HTTPS URLs to SSH before repository cloning
-  ansible.builtin.blockinfile:
-    path: "/home/{{ local_usr }}/.gitconfig"
-    create: true
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
-    mode: "0644"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - github url rewrite"
-    block: |
-      [url "git@github.com:"]
-          insteadOf = https://github.com/
-  when: devtools_github_rewrite_https_to_ssh | bool

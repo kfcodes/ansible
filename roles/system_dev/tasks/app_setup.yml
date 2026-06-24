@@ -1,33 +1,29 @@
-- name: Create application directories
-  file:
-    path: "/home/{{ local_usr }}/{{ item.path }}"
-    mode: "{{ item.attrs }}"
-    state: directory
-    recurse: true
-    owner: "{{ local_usr }}"
-    group: "{{ local_usr }}"
-  loop: "{{ application_directories }}"
-  become_user: "{{ local_usr }}"
+---
+- name: Check React app package.json exists
+  ansible.builtin.stat:
+    path: "{{ system_dev_home }}/.reactapp/package.json"
+  register: system_dev_react_package_json
 
-- name: Install NPM packages for reactapp (if path exists)
+- name: Install NPM packages for React app
   community.general.npm:
-    path: "/home/{{ local_usr }}/.reactapp/"
-    state: latest
-  when: ansible_facts['user_dir'] is defined and ansible_facts['user_dir'] is directory
-  ignore_errors: true
-  become_user: "{{ local_usr }}"
+    path: "{{ system_dev_home }}/.reactapp"
+    state: present
+  when: system_dev_react_package_json.stat.exists
+  become_user: "{{ system_dev_user }}"
+  environment:
+    HOME: "{{ system_dev_home }}"
 
-- name: Install Python requirements for fastAPI (if path exists)
-  pip:
-    requirements: /home/{{ local_usr }}/.fastapi/requirements.txt
-    virtualenv: /home/{{ local_usr }}/.fastapi/.venv
-  when: ansible_facts['user_dir'] is defined and ansible_facts['user_dir'] is directory
-  ignore_errors: true
-  become_user: "{{ local_usr }}"
+- name: Check FastAPI requirements file exists
+  ansible.builtin.stat:
+    path: "{{ system_dev_home }}/.fastapi/requirements.txt"
+  register: system_dev_fastapi_requirements
 
-- name: Generate global .gitconfig from template
-  template:
-    src: "gitconfig.j2"
-    dest: "/home/{{ local_usr }}/.gitconfig"
-    owner: "{{ local_usr }}"
-  become_user: "{{ local_usr }}"
+- name: Install Python requirements for FastAPI
+  ansible.builtin.pip:
+    requirements: "{{ system_dev_home }}/.fastapi/requirements.txt"
+    virtualenv: "{{ system_dev_home }}/.fastapi/.venv"
+    virtualenv_command: python3 -m venv
+  when: system_dev_fastapi_requirements.stat.exists
+  become_user: "{{ system_dev_user }}"
+  environment:
+    HOME: "{{ system_dev_home }}"

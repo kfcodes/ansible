@@ -1,8 +1,14 @@
+---
 - name: Pull development repositories
-  git:
+  ansible.builtin.git:
     repo: "{{ item.repo }}"
-    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    dest: "{{ system_dev_home }}/{{ item.dest }}"
     version: "{{ item.version | default('HEAD') }}"
     accept_hostkey: true
+    update: true
   loop: "{{ dev_repositories }}"
-  become_user: "{{ local_usr }}"
+  loop_control:
+    label: "{{ item.dest }}"
+  become_user: "{{ system_dev_user }}"
+  environment:
+    HOME: "{{ system_dev_home }}"
