@@ -1,0 +1,30 @@
+---
+# Shared defaults for all app/container service groups
+
+container_service_root_path: "{{ system_host_app_root | default('/opt/apps') }}"
+
+container_service_sync_config: true
+container_service_fail_missing_config: false
+container_service_local_config_root: "{{ lookup('env','HOME') }}/.application"
+
+container_service_manage_runtime: true
+container_service_run_healthchecks: true
+container_service_manage_dockerfile: true
+
+service_manage_networks: true
+container_service_default_networks:
+  - app_net
+
+compose_pull: missing
+compose_recreate: auto
+compose_remove_orphans: true
+compose_build: true
+
+container_internal_port: 8000
+
+container_service_healthcheck:
+  enabled: true
+  url: ""
+  status_code: 200
+  retries: 10
+  delay: 3

@@ -6,9 +6,18 @@ allow_reboot: true
 system_base_upgrade_packages: true
 system_base_package_state: present
 
-# Package lists are expected from inventory/group_vars/host_vars
+# Package lists
+# common_system_packages: all managed systems
+# host_system_packages: generic host-specific extras
+# local_system_packages: dev/control-node packages
+# server_system_packages: API/data/container host packages
+# kiosk_system_packages: kiosk host packages
+common_system_packages: []
 host_system_packages: []
 local_system_packages: []
+server_system_packages: []
+kiosk_system_packages: []
+system_base_extra_packages: []
 
 # Optional features
 system_base_install_neovim: true

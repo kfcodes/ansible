@@ -1,4 +1,10 @@
 ---
+# Kiosk hosts: browser/interface machines only
+
+# Base packages needed before kiosk role packages
+kiosk_system_packages:
+  - x11-xserver-utils
+
 # Kiosk target user
 kiosk_user: kiosk
 kiosk_user_group: kiosk
@@ -20,16 +26,20 @@ kiosk_managed_users:
     passwordless_sudo: false
     exclusive_keys: false
 
+# Kiosk behavior
 kiosk_mode_enabled: true
 kiosk_autologin_tty: tty1
 kiosk_manage_autologin: true
 kiosk_restart_getty: false
 
+# Package/session behavior
 kiosk_install_packages: true
 kiosk_apt_install_recommends: false
 
+# Change per-host later if needed in inventory/host_vars/kiosk_N.yml
 kiosk_url: "http://localhost:3000"
 
+# Browser/session
 kiosk_browser: chromium-browser
 kiosk_enable_onboard: true
 kiosk_enable_unclutter: true

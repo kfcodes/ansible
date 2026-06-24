@@ -1,0 +1,16 @@
+---
+# Common managed Linux systems: dev, servers, kiosks
+
+system_base_upgrade_packages: true
+system_base_install_neovim: false
+system_base_setup_testing_tools: false
+system_base_manage_static_ip: true
+
+common_system_packages:
+  - htop
+  - tmux
+  - rsync
+  - curl
+  - git
+  - python3
+  - python3-pip

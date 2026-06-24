@@ -27,9 +27,12 @@
     system_base_packages_to_install: >-
       {{
         (
-          host_system_packages | default([])
-          +
-          local_system_packages | default([])
+          common_system_packages | default([])
+          + host_system_packages | default([])
+          + local_system_packages | default([])
+          + server_system_packages | default([])
+          + kiosk_system_packages | default([])
+          + system_base_extra_packages | default([])
         ) | unique | list
       }}
 

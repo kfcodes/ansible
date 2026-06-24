@@ -3,7 +3,7 @@
 
 allow_reboot: true
 
-# system_host role
+# system_host role: Docker/app runtime
 system_host_install_docker: true
 
 system_host_deploy_user: "{{ deploy_user }}"
@@ -15,14 +15,8 @@ system_host_app_root_owner: root
 system_host_app_root_group: root
 system_host_app_root_mode: "0755"
 
-host_system_packages:
-  - htop
-  - tmux
-  - rsync
+# Server-only base packages
+server_system_packages:
   - ripgrep
   - ranger
-  - curl
-  - git
-  - python3
-  - python3-pip
   - ttf-mscorefonts-installer

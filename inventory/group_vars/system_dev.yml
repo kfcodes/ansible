@@ -2,20 +2,23 @@
 # system_dev = control node + dev workstation
 is_control_node: true
 allow_reboot: false
-install_docker: true
 
-# Dev/control node login user config (if you create a local user via Ansible)
+# Dev/control node login user config, if creating a local user via Ansible
 managed_users:
   - name: devuser
+    state: present
+    shell: /bin/bash
     create_home: true
-    groups: ["video"]
+    groups:
+      - video
+    append_groups: true
     authorized_keys:
       - "{{ lookup('file', ssh_key_dir + '/host_systems.pub') }}"
     exclusive_keys: true
 
 create_internal_users: false
 
-# Control-node key generation (local only)
+# Control-node key generation
 ssh_keys_to_generate:
   - host_systems
   - github
@@ -26,27 +29,35 @@ control_node_root: "/srv/control"
 control_backups_root: "{{ control_node_root }}/backups"
 control_artifacts_root: "{{ control_node_root }}/artifacts"
 
-default_rsync_opts:
+# backup_sync role
+backup_sync_default_rsync_opts:
   - "--archive"
   - "--compress"
 
-pull_jobs:
+# These run from the system_dev host when maintenance.yml targets system_dev.
+# Adjust src/dest later depending on whether backups are local paths or remote rsync paths.
+backup_sync_jobs:
   - name: "Pull app resources"
     src: "/opt/app/resources/"
     dest: "{{ control_backups_root }}/app_resources/{{ inventory_hostname }}/"
-    rsync_opts: "{{ default_rsync_opts }}"
+    mode: pull
+    rsync_opts: "{{ backup_sync_default_rsync_opts }}"
+
   - name: "Pull DB backups"
     src: "/var/backups/db/"
     dest: "{{ control_backups_root }}/db/{{ inventory_hostname }}/"
-    rsync_opts: "{{ default_rsync_opts }}"
+    mode: pull
+    rsync_opts: "{{ backup_sync_default_rsync_opts }}"
 
-push_jobs:
   - name: "Push app configuration"
     src: "{{ control_artifacts_root }}/app_config/"
     dest: "/etc/myapp/config/"
-    rsync_opts: "{{ default_rsync_opts }}"
+    mode: push
+    rsync_opts: "{{ backup_sync_default_rsync_opts }}"
 
-# Dev workstation packages (local)
+backup_cron_jobs: []
+
+# Dev workstation packages
 cli_tools:
   - python3-venv
   - fd-find

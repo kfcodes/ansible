@@ -1,5 +1,6 @@
 ---
-# Shared secure-host user for Ansible automation
+# Shared security layer for servers and kiosks
+
 secure_managed_users:
   - name: "{{ deploy_user }}"
     state: present
@@ -14,7 +15,7 @@ secure_managed_users:
       - "{{ lookup('file', ssh_key_dir + '/' + deploy_user + '.pub') }}"
     exclusive_keys: true
 
-# Shared security settings
+# system_security role
 system_security_install_packages: true
 
 system_security_manage_sshd: true
@@ -24,6 +25,7 @@ system_security_kbd_interactive_authentication: "no"
 system_security_pubkey_authentication: "yes"
 system_security_x11_forwarding: "no"
 
+# Keep this true for managed secure hosts once bootstrap SSH is working.
 system_security_enable_firewall: true
 system_security_firewall_allow_ports:
   - port: 22
