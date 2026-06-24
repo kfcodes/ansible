@@ -26,7 +26,7 @@
       become: false
 
 - name: Bootstrap SSH key access on new hosts
-  hosts: "{{ target_hosts | default('secure_hosts') }}"
+  hosts: "{{ target_hosts | default('secured_linux_hosts') }}"
   gather_facts: false
   become: false
 

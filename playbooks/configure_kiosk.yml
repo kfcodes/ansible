@@ -1,6 +1,6 @@
 ---
-- name: Configure kiosk hosts
-  hosts: kiosk_hosts
+- name: Configure kiosk display hosts
+  hosts: kiosk_display_hosts
   gather_facts: true
   become: true
 

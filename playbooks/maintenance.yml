@@ -1,17 +1,39 @@
 ---
 - name: System maintenance
-  hosts: systems
+  hosts: managed_linux_hosts
+  gather_facts: true
   become: true
-  tags: [maintenance]
+
   tasks:
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+      tags:
+        - maintenance
+        - apt
+        - packages
 
 - name: Backup synchronization
-  hosts: system_dev
+  hosts: dev_control_hosts
+  gather_facts: true
   become: true
-  tags: [backups]
-  roles:
-    - backup_sync
+
+  tasks:
+    - name: Run backup sync role
+      ansible.builtin.include_role:
+        name: backup_sync
+        apply:
+          tags:
+            - backup_sync
+            - sync
+            - backup
+            - cron
+            - scripts
+      tags:
+        - backup_sync
+        - sync
+        - backup
+        - cron
+        - scripts

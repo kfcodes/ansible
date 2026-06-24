@@ -1,6 +1,6 @@
 ---
-- name: Provision common managed systems
-  hosts: systems
+- name: Provision common managed Linux hosts
+  hosts: managed_linux_hosts
   gather_facts: true
   become: true
 
@@ -17,28 +17,28 @@
         - base
         - provision
 
-- name: Provision server runtime hosts
-  hosts: server_hosts
+- name: Provision service runtime hosts
+  hosts: service_runtime_hosts
   gather_facts: true
   become: true
 
   tasks:
-    - name: Configure server runtime
+    - name: Configure service runtime
       ansible.builtin.include_role:
         name: system_host
         apply:
           tags:
             - system_host
-            - server
+            - service_runtime
             - docker
       tags:
         - system_host
-        - server
+        - service_runtime
         - docker
         - provision
 
-- name: Provision dev / control node
-  hosts: system_dev
+- name: Provision dev / control hosts
+  hosts: dev_control_hosts
   gather_facts: true
   become: true
 

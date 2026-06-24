@@ -1,6 +1,6 @@
 ---
-- name: Configure shared security on managed hosts
-  hosts: secure_hosts
+- name: Configure shared security on secured Linux hosts
+  hosts: secured_linux_hosts
   gather_facts: true
   become: true
 

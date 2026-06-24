@@ -1,5 +1,5 @@
 ---
-# Common managed Linux systems: dev, servers, kiosks
+# Common managed Linux hosts: dev/control, service runtime, and kiosk display machines
 
 system_base_upgrade_packages: true
 system_base_install_neovim: false
