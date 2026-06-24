@@ -34,10 +34,10 @@
 
     - name: Configure development tools
       ansible.builtin.import_role:
-        name: system_devtools
+        name: system_dev
       become: true
       tags:
-        - system_devtools
+        - system_dev
         - devtools
         - github_ssh
         - repos

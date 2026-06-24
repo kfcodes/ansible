@@ -1,0 +1,248 @@
+
+===== roles/system_dev/defaults/main.yml =====
+dev_repositories:
+  - { repo: "git@github.com:kfcodes/neovim.git", dest: ".nvim" }
+  - { repo: "git@github.com:kfcodes/dotfiles.git", dest: ".dotfiles" }
+  - { repo: "git@github.com:kfcodes/bash_scripts.git", dest: ".local/bin" }
+  - { repo: "git@github.com:kfcodes/docker_scripts.git", dest: ".docker_scripts" }
+  - { repo: "git@github.com:kfcodes/ansible.git", dest: ".my_ansible" }
+  - { repo: "git@github.com:kfcodes/dmenu.git", dest: ".suckless/dmenu" }
+  - { repo: "git@github.com:kfcodes/dwm.git", dest: ".suckless/dwm" }
+  - { repo: "git@github.com:kfcodes/reactapp.git", dest: "reactapp", version: "dev" }
+  - { repo: "git@github.com:kfcodes/fastapi.git", dest: ".fastapi", version: "dev" }
+  - { repo: "https://github.com/tmux-plugins/tpm", dest: ".tmux/plugins/tpm" }
+
+dotfile_links:
+  - { src: ".dotfiles/dircolors", dest: ".dircolors" }
+  - { src: ".dotfiles/Xresources", dest: ".Xresources" }
+  - { src: ".dotfiles/xsession", dest: ".xsession" }
+  - { src: ".dotfiles/inputrc", dest: ".inputrc" }
+  - { src: ".dotfiles/mpv.conf", dest: ".config/mpv/mpv.conf" }
+  - { src: ".dotfiles/tmux.conf", dest: ".tmux.conf" }
+  - { src: ".nvim", dest: ".config/nvim" }
+
+env_links:
+  - { src: ".application/app_control/env_vars/reactApp.env", dest: "{{ reactapp_path }}.reactapp/.env" }
+  - { src: ".application/app_control/env_vars/fastAPI.env", dest: "{{ reactapp_path }}.fastapi/app/.env" }
+  - { src: ".application/app_control/env_vars/fastAPI.env", dest: "{{ reactapp_path }}.fastapi/app/.env" }
+
+app_links:
+  - { src: ".application/app_files/data_models_layer", dest: ".fastapi/app/physical_layer/data_models_layer" }
+  - { src: ".application/app_files/label_structure_layer", dest: ".fastapi/app/physical_layer/label_structure_layer" }
+  - { src: ".application/app_files/production_images", dest: ".fastapi/app/physical_layer/production_images" }
+  - { src: ".application/app_files/report_images", dest: ".fastapi/app/physical_layer/report_images" }
+
+application_directories:
+  - { path: ".config/mpv", attrs: "0755" }
+  - { path: ".tmux/plugins", attrs: "0755" }
+
+# GitHub SSH config
+devtools_github_ssh_enabled: true
+devtools_github_ssh_host: github.com
+devtools_github_ssh_hostname: github.com
+devtools_github_ssh_user: git
+devtools_github_ssh_key: github_key
+devtools_github_rewrite_https_to_ssh: true
+
+===== roles/system_dev/tasks/app_setup.yml =====
+- name: Create application directories
+  file:
+    path: "/home/{{ local_usr }}/{{ item.path }}"
+    mode: "{{ item.attrs }}"
+    state: directory
+    recurse: true
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+  loop: "{{ application_directories }}"
+  become_user: "{{ local_usr }}"
+
+- name: Install NPM packages for reactapp (if path exists)
+  community.general.npm:
+    path: "/home/{{ local_usr }}/.reactapp/"
+    state: latest
+  when: ansible_facts['user_dir'] is defined and ansible_facts['user_dir'] is directory
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Install Python requirements for fastAPI (if path exists)
+  pip:
+    requirements: /home/{{ local_usr }}/.fastapi/requirements.txt
+    virtualenv: /home/{{ local_usr }}/.fastapi/.venv
+  when: ansible_facts['user_dir'] is defined and ansible_facts['user_dir'] is directory
+  ignore_errors: true
+  become_user: "{{ local_usr }}"
+
+- name: Generate global .gitconfig from template
+  template:
+    src: "gitconfig.j2"
+    dest: "/home/{{ local_usr }}/.gitconfig"
+    owner: "{{ local_usr }}"
+  become_user: "{{ local_usr }}"
+
+===== roles/system_dev/tasks/clone_repositories.yml =====
+- name: Pull development repositories
+  git:
+    repo: "{{ item.repo }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    version: "{{ item.version | default('HEAD') }}"
+    accept_hostkey: true
+  loop: "{{ dev_repositories }}"
+  become_user: "{{ local_usr }}"
+
+===== roles/system_dev/tasks/dotfiles.yml =====
+- name: Create symbolic links for dotfiles
+  file:
+    src: "/home/{{ local_usr }}/{{ item.src }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+  loop: "{{ dotfile_links }}"
+  become_user: "{{ local_usr }}"
+
+===== roles/system_dev/tasks/env_links.yml =====
+- name: Create .env file links for dev apps
+  file:
+    src: "/home/{{ local_usr }}/{{ item.src }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    state: link
+    force: yes
+  loop: "{{ env_links }}"
+  become_user: "{{ local_usr }}"
+
+- name: Link application directories
+  file:
+    src: "/home/{{ local_usr }}/{{ item.src }}"
+    dest: "/home/{{ local_usr }}/{{ item.dest }}"
+    state: link
+    force: yes
+  loop: "{{ app_links }}"
+  become_user: "{{ local_usr }}"
+
+===== roles/system_dev/tasks/github_ssh.yml =====
+---
+- name: Ensure user .ssh directory exists
+  ansible.builtin.file:
+    path: "/home/{{ local_usr }}/.ssh"
+    state: directory
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0700"
+
+- name: Check GitHub SSH private key exists
+  ansible.builtin.stat:
+    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}"
+  register: github_ssh_private_key
+
+- name: Fail if GitHub SSH private key is missing
+  ansible.builtin.fail:
+    msg: "Missing GitHub SSH private key: /home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}"
+  when: not github_ssh_private_key.stat.exists
+
+- name: Set GitHub SSH private key permissions
+  ansible.builtin.file:
+    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}"
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0600"
+
+- name: Check GitHub SSH public key exists
+  ansible.builtin.stat:
+    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}.pub"
+  register: github_ssh_public_key
+
+- name: Set GitHub SSH public key permissions
+  ansible.builtin.file:
+    path: "/home/{{ local_usr }}/.ssh/{{ devtools_github_ssh_key }}.pub"
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0644"
+  when: github_ssh_public_key.stat.exists
+
+- name: Ensure user SSH config exists
+  ansible.builtin.file:
+    path: "/home/{{ local_usr }}/.ssh/config"
+    state: touch
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0600"
+
+- name: Configure github.com SSH host
+  ansible.builtin.blockinfile:
+    path: "/home/{{ local_usr }}/.ssh/config"
+    create: true
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0600"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - github.com ssh"
+    block: |
+      Host {{ devtools_github_ssh_host }}
+          HostName {{ devtools_github_ssh_hostname }}
+          User {{ devtools_github_ssh_user }}
+          IdentityFile ~/.ssh/{{ devtools_github_ssh_key }}
+          IdentitiesOnly yes
+
+- name: Ensure user gitconfig exists before repository cloning
+  ansible.builtin.file:
+    path: "/home/{{ local_usr }}/.gitconfig"
+    state: touch
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0644"
+
+- name: Rewrite GitHub HTTPS URLs to SSH before repository cloning
+  ansible.builtin.blockinfile:
+    path: "/home/{{ local_usr }}/.gitconfig"
+    create: true
+    owner: "{{ local_usr }}"
+    group: "{{ local_usr }}"
+    mode: "0644"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - github url rewrite"
+    block: |
+      [url "git@github.com:"]
+          insteadOf = https://github.com/
+  when: devtools_github_rewrite_https_to_ssh | bool
+
+===== roles/system_dev/tasks/main.yml =====
+# - name: Clone local config repos
+#   import_tasks: local_repos.yml
+#   tags: [local_repos]
+
+- name: Configure GitHub SSH access
+  import_tasks: github_ssh.yml
+  tags: [github_ssh, ssh, git]
+  when: devtools_github_ssh_enabled | bool
+
+- name: Apply the dotfile configs
+  import_tasks: dotfiles.yml
+  tags: [dotfiles]
+
+- name: Apply environment file links
+  import_tasks: env_links.yml
+  tags: [env]
+
+- name: Clone dev repositories
+  import_tasks: clone_repositories.yml
+  tags: [repos]
+
+- name: Set up application and package dependencies
+  import_tasks: app_setup.yml
+  tags: [apps]
+
+===== roles/system_dev/templates/gitconfig.j2 =====
+[user]
+  email = +kfcodes@users.noreply.github.com
+  name = kfcodes
+
+[core]
+  editor = vim
+
+[merge]
+  tool = vimdiff
+  conflictstyle = diff3
+
+[url "git@github.com:"]
+  insteadOf = https://github.com/

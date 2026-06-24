@@ -1,0 +1,28 @@
+---
+- name: Install host packages
+  ansible.builtin.apt:
+    name: "{{ system_host_packages }}"
+    state: present
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Ensure application root exists
+  ansible.builtin.file:
+    path: "{{ system_host_app_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Add deploy user to docker group when user exists
+  ansible.builtin.user:
+    name: "{{ system_host_deploy_user }}"
+    groups: docker
+    append: true
+  when: system_host_deploy_user is defined

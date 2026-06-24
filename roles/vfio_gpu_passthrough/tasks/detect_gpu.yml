@@ -12,7 +12,7 @@
   debug:
     msg: |
       GPU passthrough setup skipped because variables are unset.
-      Please copy the following into roles/system_gpu_passthrough/defaults/main.yml:
+      Please copy the following into roles/vfio_gpu_passthrough/defaults/main.yml:
 
       gpu_bdf:
       {% for line in detected_gpu.stdout_lines %}

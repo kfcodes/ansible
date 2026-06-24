@@ -1,0 +1,12 @@
+---
+system_host_packages:
+  - docker.io
+  - docker-compose-plugin
+  - ufw
+  - fail2ban
+  - unattended-upgrades
+
+system_host_deploy_user: deploy
+system_host_app_root: /opt/apps
+system_host_enable_firewall: true
+system_host_allowed_ssh_port: 22

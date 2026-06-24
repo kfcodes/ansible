@@ -14,7 +14,7 @@
 #   tags: [provision, system_dev]
 #   roles:
 #     - user_account
-#     - system_devtools
+#     - system_dev
 
 # - name: Provision GPU passthrough hosts
 #   hosts: vfio_hosts
@@ -22,4 +22,4 @@
 #   gather_facts: true
 #   tags: [provision, vfio]
 #   roles:
-#     - system_gpu_passthrough
+#     - vfio_gpu_passthrough
