@@ -1,4 +1,6 @@
-service_name: "labelapi"
+---
+service_name: labelapi
+
 fastapi_repo_url: "git@github.com:kfcodes/fastapi.git"
 
 fastapi_tags:
@@ -9,11 +11,19 @@ ports:
   stable: 8001
   update: 8002
 
+container_service_manage_dockerfile: true
+container_internal_port: 8000
+container_service_uvicorn_app: "app:app"
+
 container_services:
-  - name_suffix: "stable"
+  - name_suffix: stable
+    repo: "{{ fastapi_repo_url }}"
     version: "{{ fastapi_tags.stable }}"
     host_port: "{{ ports.stable }}"
+    container_port: "{{ container_internal_port }}"
 
-  - name_suffix: "update"
+  - name_suffix: update
+    repo: "{{ fastapi_repo_url }}"
     version: "{{ fastapi_tags.update }}"
     host_port: "{{ ports.update }}"
+    container_port: "{{ container_internal_port }}"

@@ -1,33 +1,29 @@
-# GIT REPO PATH
+---
+service_name: databaseapi
+
 fastapi_repo_url: "git@github.com:kfcodes/fastapi.git"
 
-# GIT BRANCH DETAILS
-fastapi_stable_tag: v0.02
-fastapi_update_tag: rc0.1.4.3
-default_branch: main
+fastapi_tags:
+  stable: "v0.02"
+  update: "rc0.1.4.3"
 
-# REPOSITORY DETAILS
-fastapi_repo:
-  repo_name: "fastAPI"
-  repo_url: "{{ fastapi_repo_url }}"
-  version: "{{ fastapi_stable_tag }}"
-  user_name: "{{ user_name }}"
-  port: "8001"
+ports:
+  stable: 8011
+  update: 8012
 
-fastapi_update_repo:
-  repo_name: "fastAPI_update_2"
-  repo_url: "{{ fastapi_repo_url }}"
-  version: "{{ fastapi_update_tag }}"
-  user_name: "{{ user_name }}"
-  port: "8002"
+container_service_manage_dockerfile: true
+container_internal_port: 8000
+container_service_uvicorn_app: "app:app"
 
-backup_cron_jobs:
-  - name: "Frontend static export backup"
-    script: run_daily_backup.sh # script deployed by the app/role
-    enabled: true
-    schedule: daily # or use minute/hour if your role supports explicit fields
+container_services:
+  - name_suffix: stable
+    repo: "{{ fastapi_repo_url }}"
+    version: "{{ fastapi_tags.stable }}"
+    host_port: "{{ ports.stable }}"
+    container_port: "{{ container_internal_port }}"
 
-  - name: "Label API hourly DB backup"
-    script: run_hourly_backup.sh
-    enabled: true
-    schedule: hourly
+  - name_suffix: update
+    repo: "{{ fastapi_repo_url }}"
+    version: "{{ fastapi_tags.update }}"
+    host_port: "{{ ports.update }}"
+    container_port: "{{ container_internal_port }}"
