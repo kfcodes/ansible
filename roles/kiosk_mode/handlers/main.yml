@@ -1,11 +1,12 @@
 ---
 - name: systemd daemon-reload
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   become: true
 
 - name: restart agetty
-  systemd:
-    name: "getty@{{ autologin_tty }}.service"
+  ansible.builtin.systemd:
+    name: "getty@{{ kiosk_autologin_tty }}.service"
     state: restarted
   become: true
+  when: kiosk_restart_getty | bool

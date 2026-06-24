@@ -1,57 +1,30 @@
 ---
-- name: Ensure required packages are installed
-  apt:
-    name: "{{ base_packages + wm_packages + (['unclutter'] if enable_unclutter else []) + extra_packages }}"
-    state: present
-    update_cache: true
-    install_recommends: "{{ apt_install_recommends }}"
-  become: true
+- name: Validate kiosk_mode inputs
+  ansible.builtin.import_tasks: validate.yml
+  tags: [kiosk, kiosk_mode, validate]
 
-- name: Create systemd drop-in directory for agetty
-  file:
-    path: "/etc/systemd/system/getty@{{ autologin_tty }}.service.d"
-    state: directory
-    mode: "0755"
-  become: true
+- name: Install kiosk packages
+  ansible.builtin.import_tasks: packages.yml
+  when:
+    - kiosk_mode_enabled | bool
+    - kiosk_install_packages | bool
+  tags: [kiosk, kiosk_mode, packages]
 
-- name: Configure agetty auto-login drop-in
-  template:
-    src: getty-override.conf.j2
-    dest: "/etc/systemd/system/getty@{{ autologin_tty }}.service.d/override.conf"
-    mode: "0644"
-  notify:
-    - systemd daemon-reload
-    - restart agetty
-  become: true
+- name: Configure kiosk autologin
+  ansible.builtin.import_tasks: autologin.yml
+  when: kiosk_manage_autologin | bool
+  tags: [kiosk, kiosk_mode, autologin]
 
-- name: Verify kiosk user's home exists
-  stat:
-    path: "/home/{{ kiosk_user }}"
-  register: kiosk_home
+- name: Configure kiosk user session
+  ansible.builtin.import_tasks: user_session.yml
+  tags: [kiosk, kiosk_mode, session]
 
-- name: Fail if kiosk user/home missing
-  fail:
-    msg: "User {{ kiosk_user }} or /home/{{ kiosk_user }} not found. Create the user or override kiosk_user."
-  when: not kiosk_home.stat.exists
-
-- name: Install ~/.xinitrc
-  template:
-    src: xinitrc.j2
-    dest: "/home/{{ kiosk_user }}/.xinitrc"
-    owner: "{{ kiosk_user }}"
-    group: "{{ kiosk_user }}"
-    mode: "0755"
-
-- name: Install ~/.bash_profile to auto-run startx
-  template:
-    src: bash_profile.j2
-    dest: "/home/{{ kiosk_user }}/.bash_profile"
-    owner: "{{ kiosk_user }}"
-    group: "{{ kiosk_user }}"
-    mode: "0644"
-
-- name: Summary (reboot recommended)
-  debug:
-    msg: >
-      Kiosk ready for user {{ kiosk_user }} on {{ autologin_tty }}.
-      On reboot, Matchbox + Onboard will start and Chromium will open {{ kiosk_url }} in kiosk mode.
+- name: Kiosk summary
+  ansible.builtin.debug:
+    msg:
+      - "kiosk_mode_enabled={{ kiosk_mode_enabled }}"
+      - "kiosk_user={{ kiosk_user }}"
+      - "kiosk_autologin_tty={{ kiosk_autologin_tty }}"
+      - "kiosk_url={{ kiosk_url }}"
+      - "Reboot recommended after enabling/disabling kiosk autologin."
+  tags: [kiosk, kiosk_mode]

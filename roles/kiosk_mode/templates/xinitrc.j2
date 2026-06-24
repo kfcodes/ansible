@@ -1,19 +1,34 @@
-#!/bin/sh
+#!/usr/bin/env sh
 set -eu
 
-# Window manager (Matchbox)
-matchbox-window-manager -use_titlebar no -use_dialogs no &
-
-# On-screen keyboard
-onboard &
-
-# Optional: hide mouse when idle
-{% if enable_unclutter %}
-command -v unclutter >/dev/null 2>&1 && unclutter &
+# Disable screen blanking and power management.
+{% if kiosk_disable_screen_blanking | bool %}
+if command -v xset >/dev/null 2>&1; then
+  xset s off || true
+  xset s noblank || true
+  xset -dpms || true
+fi
 {% endif %}
 
-# Let WM/keyboard settle
+# Window manager.
+{{ kiosk_window_manager_command }} &
+
+# On-screen keyboard.
+{% if kiosk_enable_onboard | bool %}
+if command -v onboard >/dev/null 2>&1; then
+  onboard &
+fi
+{% endif %}
+
+# Hide mouse cursor when idle.
+{% if kiosk_enable_unclutter | bool %}
+if command -v unclutter >/dev/null 2>&1; then
+  unclutter &
+fi
+{% endif %}
+
+# Let WM/keyboard settle.
 sleep 1
 
-# Chromium in kiosk
-exec chromium-browser {% for f in browser_flags_chromium %} {{ f }}{% endfor %}
+# Browser in kiosk mode.
+exec {{ kiosk_browser | quote }}{% for flag in kiosk_browser_flags %} {{ flag | quote }}{% endfor %}

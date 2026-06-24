@@ -1,0 +1,37 @@
+---
+- name: Check kiosk user home exists
+  ansible.builtin.stat:
+    path: "{{ kiosk_user_home }}"
+  register: kiosk_home
+
+- name: Fail if kiosk user home is missing
+  ansible.builtin.fail:
+    msg: "Kiosk user home {{ kiosk_user_home }} not found. Create the user first or override kiosk_user/kiosk_user_home."
+  when: not kiosk_home.stat.exists
+
+- name: Install kiosk .xinitrc
+  ansible.builtin.template:
+    src: xinitrc.j2
+    dest: "{{ kiosk_xinitrc_path }}"
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user_group }}"
+    mode: "0755"
+  when: kiosk_mode_enabled | bool
+
+- name: Add managed kiosk startx block to bash profile
+  ansible.builtin.blockinfile:
+    path: "{{ kiosk_bash_profile_path }}"
+    create: true
+    owner: "{{ kiosk_user }}"
+    group: "{{ kiosk_user_group }}"
+    mode: "0644"
+    marker: "# {mark} ANSIBLE MANAGED KIOSK STARTX"
+    block: "{{ lookup('template', 'bash_profile_block.j2') }}"
+  when: kiosk_mode_enabled | bool
+
+- name: Remove managed kiosk startx block when disabled
+  ansible.builtin.blockinfile:
+    path: "{{ kiosk_bash_profile_path }}"
+    marker: "# {mark} ANSIBLE MANAGED KIOSK STARTX"
+    state: absent
+  when: not kiosk_mode_enabled | bool

@@ -1,15 +1,34 @@
-# kiosk (Ubuntu → Chromium kiosk)
+# Ansible Role: kiosk_mode
 
-Boot to auto-login on tty1, start Xorg with Matchbox WM, launch Onboard (on-screen keyboard),
-and run Chromium in kiosk mode.
+This role configures a simple Ubuntu kiosk session.
 
-## Variables
+It can:
 
-See `defaults/main.yml` (URL, flags, user, TTY, extras).
+- Configure TTY autologin
+- Start X automatically on the kiosk TTY
+- Launch Matchbox window manager
+- Launch Onboard on-screen keyboard
+- Launch Chromium in kiosk mode
+- Optionally disable the managed kiosk startup again
 
-## Requirements
+## Responsibilities
 
-- Existing user with home (default: ubuntu).
-- Ubuntu Server 22.04/24.04+.
+This role owns kiosk-specific desktop/session behavior only.
 
-## Apply
+It should not manage:
+
+- User creation
+- SSH access
+- Docker
+- Application deployment
+- General base system configuration
+
+Create the kiosk user with `user_account` before applying this role.
+
+## Main variables
+
+```yaml
+kiosk_mode_enabled: true
+kiosk_user: ubuntu
+kiosk_autologin_tty: tty1
+kiosk_url: "https://example.com" 

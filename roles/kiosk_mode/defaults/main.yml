@@ -1,21 +1,40 @@
 ---
+# Enable/disable kiosk behavior.
+# true  = configure autologin and kiosk startup
+# false = remove the managed autologin override and bash_profile block
+kiosk_mode_enabled: true
+
 # User that auto-logs in and runs the kiosk
 kiosk_user: "ubuntu"
+kiosk_user_home: "/home/{{ kiosk_user }}"
+kiosk_user_group: "{{ kiosk_user }}"
 
 # TTY to auto-login
-autologin_tty: "tty1"
+kiosk_autologin_tty: "{{ autologin_tty | default('tty1') }}"
 
-# Window manager fixed per request
-window_manager: "matchbox"
+# Whether to manage the getty autologin override
+kiosk_manage_autologin: true
 
-# Browser choice fixed per request
-browser_choice: "chromium-browser"
+# Safer default: do not restart active getty immediately.
+# Reboot is usually cleaner for kiosk enablement.
+kiosk_restart_getty: false
+
+# Whether to install packages from this role
+kiosk_install_packages: true
+kiosk_apt_install_recommends: "{{ apt_install_recommends | default(false) }}"
 
 # Kiosk URL
 kiosk_url: "https://example.com"
 
-# Extra browser flags
-browser_flags_chromium:
+# Window manager
+kiosk_window_manager: "matchbox"
+kiosk_window_manager_command: "matchbox-window-manager -use_titlebar no -use_dialogs no"
+
+# Browser
+kiosk_browser: "{{ browser_choice | default('chromium-browser') }}"
+
+# Browser flags
+kiosk_browser_flags:
   - "--kiosk"
   - "--start-fullscreen"
   - "--app={{ kiosk_url }}"
@@ -26,19 +45,38 @@ browser_flags_chromium:
   - "--noerrdialogs"
   - "--autoplay-policy=no-user-gesture-required"
 
-# On-screen keyboard + helpers
-enable_unclutter: true
-
-# Keep minimal installs
-apt_install_recommends: false
+# On-screen keyboard and helpers
+kiosk_enable_onboard: true
+kiosk_enable_unclutter: "{{ enable_unclutter | default(true) }}"
+kiosk_disable_screen_blanking: true
 
 # Packages
-base_packages:
+kiosk_base_packages:
   - xorg
+  - at-spi2-core
+  - "{{ kiosk_browser }}"
+
+kiosk_onboard_packages:
   - onboard
   - onboard-data
-  - at-spi2-core # helps auto-popup
-  - "{{ browser_choice }}" # chromium-browser (snap wrapper on recent Ubuntu)
-wm_packages:
+
+kiosk_wm_packages:
   - matchbox-window-manager
-extra_packages: [] # append if needed
+
+kiosk_helper_packages:
+  - unclutter
+
+kiosk_extra_packages: "{{ extra_packages | default([]) }}"
+
+kiosk_packages: >-
+  {{
+    kiosk_base_packages
+    + kiosk_wm_packages
+    + (kiosk_onboard_packages if kiosk_enable_onboard | bool else [])
+    + (kiosk_helper_packages if kiosk_enable_unclutter | bool else [])
+    + kiosk_extra_packages
+  }}
+
+# Managed file paths
+kiosk_xinitrc_path: "{{ kiosk_user_home }}/.xinitrc"
+kiosk_bash_profile_path: "{{ kiosk_user_home }}/.bash_profile"

@@ -1,0 +1,26 @@
+---
+- name: Create systemd drop-in directory for kiosk getty
+  ansible.builtin.file:
+    path: "/etc/systemd/system/getty@{{ kiosk_autologin_tty }}.service.d"
+    state: directory
+    mode: "0755"
+  when: kiosk_mode_enabled | bool
+
+- name: Configure kiosk agetty auto-login drop-in
+  ansible.builtin.template:
+    src: getty-override.conf.j2
+    dest: "/etc/systemd/system/getty@{{ kiosk_autologin_tty }}.service.d/override.conf"
+    mode: "0644"
+  when: kiosk_mode_enabled | bool
+  notify:
+    - systemd daemon-reload
+    - restart agetty
+
+- name: Remove kiosk agetty auto-login drop-in when disabled
+  ansible.builtin.file:
+    path: "/etc/systemd/system/getty@{{ kiosk_autologin_tty }}.service.d/override.conf"
+    state: absent
+  when: not kiosk_mode_enabled | bool
+  notify:
+    - systemd daemon-reload
+    - restart agetty

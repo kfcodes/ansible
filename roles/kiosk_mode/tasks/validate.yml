@@ -1,0 +1,42 @@
+---
+- name: Validate kiosk user
+  ansible.builtin.assert:
+    that:
+      - kiosk_user is defined
+      - kiosk_user | string | length > 0
+    fail_msg: "kiosk_user must be set."
+
+- name: Validate kiosk user home
+  ansible.builtin.assert:
+    that:
+      - kiosk_user_home is defined
+      - kiosk_user_home | string | length > 0
+      - kiosk_user_home is match('^/')
+    fail_msg: "kiosk_user_home must be an absolute path."
+
+- name: Validate autologin TTY
+  ansible.builtin.assert:
+    that:
+      - kiosk_autologin_tty is match('^tty[0-9]+$')
+    fail_msg: "kiosk_autologin_tty must look like tty1, tty2, etc."
+
+- name: Validate kiosk URL
+  ansible.builtin.assert:
+    that:
+      - kiosk_url is defined
+      - kiosk_url | string | length > 0
+    fail_msg: "kiosk_url must be set."
+
+- name: Validate browser flags list
+  ansible.builtin.assert:
+    that:
+      - kiosk_browser_flags is iterable
+      - kiosk_browser_flags is not string
+    fail_msg: "kiosk_browser_flags must be a list."
+
+- name: Validate package list
+  ansible.builtin.assert:
+    that:
+      - kiosk_packages is iterable
+      - kiosk_packages is not string
+    fail_msg: "kiosk_packages must be a list."
