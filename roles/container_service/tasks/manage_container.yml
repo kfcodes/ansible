@@ -4,11 +4,14 @@
     name: "{{ item }}"
     state: present
   loop: "{{ container_service_networks }}"
+  loop_control:
+    label: "{{ item }}"
   when:
+    - container_service_state == 'present'
     - service_manage_networks | bool
     - container_service_networks | length > 0
 
-- name: Compute whether we need to build
+- name: Compute whether compose build is needed
   ansible.builtin.set_fact:
     container_service_needs_build: >-
       {{
@@ -16,21 +19,29 @@
         or (compose_template_result is defined and compose_template_result.changed)
         or (dockerfile_template_result is defined and dockerfile_template_result.changed)
       }}
-  when: service_state == 'present'
+  when: container_service_state == 'present'
 
-- name: Deploy service with Docker Compose v2 (build only if needed)
+- name: Deploy service with Docker Compose v2
   community.docker.docker_compose_v2:
     project_src: "{{ container_service_app_path }}"
     state: present
     pull: "{{ compose_pull }}"
     recreate: "{{ compose_recreate }}"
     remove_orphans: "{{ compose_remove_orphans }}"
-    build: "{{ container_service_needs_build | default(false) }}"
-  when: service_state == 'present'
+    build: "{{ ((compose_build | bool) and (container_service_needs_build | default(false) | bool)) | ternary('always', 'never') }}"
+  when: container_service_state == 'present'
+
+- name: Check compose project path before removal
+  ansible.builtin.stat:
+    path: "{{ container_service_app_path }}/docker-compose.yml"
+  register: container_service_compose_file
+  when: container_service_state == 'absent'
 
 - name: Remove service with Docker Compose v2
   community.docker.docker_compose_v2:
     project_src: "{{ container_service_app_path }}"
     state: absent
     remove_orphans: true
-  when: service_state == 'absent'
+  when:
+    - container_service_state == 'absent'
+    - container_service_compose_file.stat.exists

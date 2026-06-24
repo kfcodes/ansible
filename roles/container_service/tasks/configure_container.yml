@@ -3,27 +3,25 @@
   ansible.builtin.file:
     path: "{{ container_service_app_path }}/{{ container_service_remote_env_dir }}"
     state: directory
+    owner: "{{ container_service_app_owner }}"
+    group: "{{ container_service_app_group }}"
     mode: "0755"
-  when: service_state == 'present'
 
-- name: Verify local source-of-truth directory exists
+- name: Check local source-of-truth config directory
   ansible.builtin.stat:
     path: "{{ container_service_local_src_dir }}"
   register: local_config_dir
   delegate_to: localhost
-  when: service_state == 'present'
+  become: false
 
-- name: Fail if local config directory is missing
-  ansible.builtin.assert:
-    that:
-      - local_config_dir.stat.exists
-      - local_config_dir.stat.isdir
-    fail_msg: >-
-      Missing local config directory:
-      {{ container_service_local_src_dir }}
-  when: service_state == 'present'
+- name: Fail if required local config directory is missing
+  ansible.builtin.fail:
+    msg: "Missing local config directory: {{ container_service_local_src_dir }}"
+  when:
+    - container_service_fail_missing_config | bool
+    - not (local_config_dir.stat.exists and local_config_dir.stat.isdir)
 
-- name: Sync local config directory to remote container env dir
+- name: Sync local config directory to remote env directory
   ansible.posix.synchronize:
     src: "{{ container_service_local_src_dir }}/"
     dest: "{{ container_service_app_path }}/{{ container_service_remote_env_dir }}/"
@@ -31,4 +29,13 @@
     compress: true
     delete: false
   register: config_copy_result
-  when: service_state == 'present'
+  when:
+    - local_config_dir.stat.exists
+    - local_config_dir.stat.isdir
+
+- name: Report skipped config sync
+  ansible.builtin.debug:
+    msg: "Skipped config sync because local directory is missing: {{ container_service_local_src_dir }}"
+  when:
+    - not container_service_fail_missing_config | bool
+    - not (local_config_dir.stat.exists and local_config_dir.stat.isdir)

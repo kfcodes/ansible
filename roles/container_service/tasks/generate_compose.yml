@@ -3,6 +3,8 @@
   ansible.builtin.template:
     src: docker_compose.yml.j2
     dest: "{{ container_service_app_path }}/docker-compose.yml"
+    owner: "{{ container_service_app_owner }}"
+    group: "{{ container_service_app_group }}"
     mode: "0644"
   register: compose_template_result
-  when: service_state == 'present'
+  when: container_service_state == 'present'

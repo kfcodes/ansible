@@ -1,21 +1,11 @@
 ---
-- name: Compute effective app path and networks
+- name: Compute effective app path, networks, container name, and healthcheck
   ansible.builtin.set_fact:
     container_service_app_path: >-
       {{
         (app.path | default('') | length > 0)
-          | ternary(app.path, container_service_root_path ~ '/' ~ app.name)
+        | ternary(app.path, container_service_root_path ~ '/' ~ app.name)
       }}
-    container_service_networks: >-
-      {{
-        (app.networks | default([]) | length > 0)
-          | ternary(app.networks, container_service_default_networks)
-      }}
+    container_service_networks: "{{ app.networks | default(container_service_default_networks) }}"
     container_service_container_name: "{{ app.container_name | default(app.name) }}"
-
-- name: Compute effective healthcheck configuration
-  ansible.builtin.set_fact:
-    container_service_effective_healthcheck: >-
-      {{
-        container_service_healthcheck | combine(app.healthcheck | default({}), recursive=True)
-      }}
+    container_service_effective_healthcheck: "{{ app.healthcheck | default(container_service_healthcheck) }}"

@@ -1,33 +1,65 @@
 ---
-- name: Build per-container app definition
+- name: Build effective app definition
   ansible.builtin.set_fact:
     app:
-      name: "{{ service_name }}-{{ svc.name_suffix }}"
-      container_name: "{{ service_name }}-{{ svc.name_suffix }}"
-      compose_service_name: "{{ service_name }}"
-      repo: "{{ fastapi_repo_url }}"
-      version: "{{ svc.version }}"
-      ports:
-        - "{{ svc.host_port }}:{{ container_internal_port }}"
-      volumes: "{{ service_common.volumes }}"
-      healthcheck:
-        url: "http://localhost:{{ svc.host_port }}/health"
+      name: "{{ svc.name | default((service_name | default('service')) ~ '-' ~ (svc.name_suffix | default('default'))) }}"
+      container_name: "{{ svc.container_name | default(svc.name | default((service_name | default('service')) ~ '-' ~ (svc.name_suffix | default('default')))) }}"
+      compose_service_name: "{{ svc.compose_service_name | default(service_name | default(svc.name | default('app'))) }}"
+      repo: "{{ svc.repo | default(container_service_repo_url | default(fastapi_repo_url | default(''))) }}"
+      version: "{{ svc.version | default(container_service_default_version | default('')) }}"
+      path: "{{ svc.path | default('') }}"
+      ports: >-
+        {{
+          svc.ports | default(
+            (
+              [ (svc.host_port | string) ~ ':' ~ ((svc.container_port | default(container_internal_port)) | string) ]
+              if svc.host_port is defined
+              else []
+            )
+          )
+        }}
+      volumes: "{{ svc.volumes | default(container_service_default_volumes) }}"
+      env_files: "{{ svc.env_files | default(container_service_default_env_files) }}"
+      networks: "{{ svc.networks | default(container_service_default_networks) }}"
+      healthcheck: >-
+        {{
+          container_service_healthcheck
+          | combine(
+              (
+                {'url': 'http://localhost:' ~ (svc.host_port | string) ~ '/health'}
+                if svc.host_port is defined
+                else {}
+              ),
+              recursive=True
+            )
+          | combine(svc.healthcheck | default({}), recursive=True)
+        }}
+      base_image: "{{ svc.base_image | default(container_service_base_image) }}"
+      workdir: "{{ svc.workdir | default(container_service_workdir) }}"
+      uvicorn_app: "{{ svc.uvicorn_app | default(container_service_uvicorn_app) }}"
 
-- name: Validate inputs
+- name: Validate app definition
   ansible.builtin.import_tasks: validate.yml
 
 - name: Precompute derived variables
   ansible.builtin.import_tasks: precompute.yml
 
-- name: Compute local config source directory (controller)
+- name: Compute local config source directory
   ansible.builtin.set_fact:
-    container_service_local_src_dir: "{{ container_service_local_config_root }}/{{ container_service_local_config_dir }}"
+    container_service_local_src_dir: >-
+      {{
+        svc.local_config_dir
+        | default(container_service_local_config_root ~ '/' ~ container_service_local_config_dir)
+      }}
 
-- name: Clone repository
+- name: Clone or update repository
   ansible.builtin.import_tasks: clone_repo.yml
 
-- name: Sync config directory into project (controller -> host)
+- name: Sync config directory into project
   ansible.builtin.import_tasks: configure_container.yml
+  when:
+    - container_service_state == 'present'
+    - container_service_sync_config | bool
 
 - name: Generate Dockerfile
   ansible.builtin.import_tasks: generate_dockerfile.yml
@@ -35,8 +67,12 @@
 - name: Generate docker-compose.yml
   ansible.builtin.import_tasks: generate_compose.yml
 
-- name: Build/run container with Docker Compose v2
+- name: Manage container with Docker Compose
   ansible.builtin.import_tasks: manage_container.yml
+  when: container_service_manage_runtime | bool
 
 - name: Post-deployment verification
   ansible.builtin.import_tasks: post_deploy.yml
+  when:
+    - container_service_manage_runtime | bool
+    - container_service_run_healthchecks | bool

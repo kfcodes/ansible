@@ -10,10 +10,10 @@
     - container_info.container.State is defined
     - container_info.container.State.Status == "running"
   when:
-    - service_state == 'present'
+    - container_service_state == 'present'
     - container_service_effective_healthcheck.enabled | bool
 
-- name: HTTP healthcheck (optional)
+- name: HTTP healthcheck
   ansible.builtin.uri:
     url: "{{ container_service_effective_healthcheck.url }}"
     status_code: "{{ container_service_effective_healthcheck.status_code }}"
@@ -22,6 +22,6 @@
   delay: "{{ container_service_effective_healthcheck.delay }}"
   until: healthcheck_result.status == container_service_effective_healthcheck.status_code
   when:
-    - service_state == 'present'
+    - container_service_state == 'present'
     - container_service_effective_healthcheck.enabled | bool
     - container_service_effective_healthcheck.url | length > 0

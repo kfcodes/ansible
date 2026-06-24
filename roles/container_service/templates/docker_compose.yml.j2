@@ -2,29 +2,35 @@ services:
   "{{ app.compose_service_name | default(app.name) }}":
     build: .
     container_name: "{{ app.container_name | default(app.name) }}"
-
-    {% if app.volumes is defined and app.volumes | length > 0 %}
-    volumes:
-    {% for v in app.volumes %}
-      - "{{ v }}"
-    {% endfor %}
-    {% endif %}
-
-    {% if app.ports is defined and app.ports | length > 0 %}
-    ports:
-    {% for p in app.ports %}
-      - "{{ p }}"
-    {% endfor %}
-    {% endif %}
-
     restart: unless-stopped
 
-    {% if container_service_networks is defined and container_service_networks | length > 0 %}
+{% if app.env_files is defined and app.env_files | length > 0 %}
+    env_file:
+{% for env_file in app.env_files %}
+      - "{{ env_file }}"
+{% endfor %}
+{% endif %}
+
+{% if app.volumes is defined and app.volumes | length > 0 %}
+    volumes:
+{% for v in app.volumes %}
+      - "{{ v }}"
+{% endfor %}
+{% endif %}
+
+{% if app.ports is defined and app.ports | length > 0 %}
+    ports:
+{% for p in app.ports %}
+      - "{{ p }}"
+{% endfor %}
+{% endif %}
+
+{% if container_service_networks is defined and container_service_networks | length > 0 %}
     networks:
-    {% for n in container_service_networks %}
+{% for n in container_service_networks %}
       - "{{ n }}"
-    {% endfor %}
-    {% endif %}
+{% endfor %}
+{% endif %}
 
 {% if container_service_networks is defined and container_service_networks | length > 0 %}
 networks:

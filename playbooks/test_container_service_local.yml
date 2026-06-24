@@ -1,0 +1,30 @@
+---
+- name: Test container_service locally without Docker runtime
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  vars:
+    service_name: localapi
+    container_service_root_path: /tmp/container-service-test-apps
+    container_service_sync_config: false
+    container_service_manage_runtime: false
+    container_service_run_healthchecks: false
+    container_service_manage_dockerfile: true
+    service_manage_networks: false
+
+    container_services:
+      - name_suffix: stable
+        repo: "file:///tmp/container-service-test-repo"
+        version: stable
+        host_port: 18080
+        networks: []
+        env_files: []
+        volumes: []
+
+  roles:
+    - role: container_service
+      tags:
+        - container_service
+        - containers

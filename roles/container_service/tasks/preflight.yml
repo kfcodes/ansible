@@ -1,0 +1,22 @@
+---
+- name: Compute effective container service list
+  ansible.builtin.set_fact:
+    container_service_effective_services: "{{ container_service_services | default(container_services | default([])) }}"
+
+- name: Validate container_service_effective_services is a list
+  ansible.builtin.assert:
+    that:
+      - container_service_effective_services is iterable
+      - container_service_effective_services is not string
+    fail_msg: "container_service requires container_services or container_service_services as a list."
+
+- name: Fail if no container services are provided
+  ansible.builtin.fail:
+    msg: "container_service requires at least one service in container_services or container_service_services."
+  when: container_service_effective_services | length == 0
+
+- name: Validate service_state
+  ansible.builtin.assert:
+    that:
+      - container_service_state in ['present', 'absent']
+    fail_msg: "container_service_state/service_state must be present or absent."

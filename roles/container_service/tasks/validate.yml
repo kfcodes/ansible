@@ -5,17 +5,24 @@
       - app is defined
       - app is mapping
       - app.name is defined
-      - (app.name | string | length) > 0
+      - app.name | string | length > 0
       - app.repo is defined
-      - (app.repo | string | length) > 0
+      - app.repo | string | length > 0
       - app.version is defined
-      - (app.version | string | length) > 0
-    fail_msg: >-
-      container_service: missing required config.
-      Define app.name, app.repo and app.version in the service group_vars.
+      - app.version | string | length > 0
+      - app.ports is iterable
+      - app.ports is not string
+      - app.volumes is iterable
+      - app.volumes is not string
+      - app.env_files is iterable
+      - app.env_files is not string
+      - app.networks is iterable
+      - app.networks is not string
+    fail_msg: "container_service: each service requires name, repo, version, and list fields for ports/volumes/env_files/networks."
 
-- name: Disallow main/master deployments (stable/update tags only)
+- name: Disallow main/master deployments unless explicitly allowed
   ansible.builtin.assert:
     that:
       - app.version not in ['main', 'master']
     fail_msg: "container_service: app.version must be a stable/update tag, not main/master."
+  when: not (svc.allow_main_branch | default(false) | bool)

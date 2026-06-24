@@ -1,37 +1,62 @@
 ---
+# present | absent
 service_state: present
-service_manage_networks: true
+container_service_state: "{{ service_state }}"
 
+# Service definitions.
+# Supports legacy variable name: container_services
+container_service_services: "{{ container_services | default([]) }}"
+
+# Paths
+container_service_root_path: "{{ system_host_app_root | default('/opt/apps') }}"
+container_service_app_owner: root
+container_service_app_group: root
+container_service_app_mode: "0755"
+
+# Docker networks
+service_manage_networks: true
 container_service_default_networks:
   - app_net
 
-container_service_root_path: "/opt"
-
-compose_pull: missing # missing | always | never
-compose_recreate: auto # auto | always | never
+# Docker Compose behavior
+compose_pull: missing          # missing | always | never | policy
+compose_recreate: auto         # auto | always | never
 compose_remove_orphans: true
 compose_build: true
 
+# Container defaults
 container_internal_port: 8000
+
 service_common:
   env_files:
     - "./app/env/config.env"
   volumes:
     - "./app:/app"
 
+container_service_default_env_files: "{{ service_common.env_files | default([]) }}"
+container_service_default_volumes: "{{ service_common.volumes | default([]) }}"
+
+# Config sync from controller to remote host
+container_service_sync_config: true
+container_service_fail_missing_config: false
+container_service_local_config_root: "{{ lookup('env','HOME') }}/.application"
+container_service_local_config_dir: "{{ service_name | default('') }}"
+container_service_remote_env_dir: "app/env"
+
+# Healthcheck
 container_service_healthcheck:
   enabled: true
-  url: "" # if empty, http healthcheck skipped
+  url: ""
   status_code: 200
   retries: 10
   delay: 3
 
-container_service_local_config_root: "{{ lookup('env','HOME') }}/.application"
-container_service_local_config_dir: "fastapi"
-container_service_remote_env_dir: "app/env"
-#
 # Dockerfile templating
 container_service_manage_dockerfile: true
 container_service_base_image: "python:3.11.1-slim"
 container_service_workdir: "/"
 container_service_uvicorn_app: "app:app"
+
+# Local/testing controls
+container_service_manage_runtime: true
+container_service_run_healthchecks: true
