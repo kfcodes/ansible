@@ -1,0 +1,19 @@
+---
+- name: Test system_host locally
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  vars:
+    system_host_enable_firewall: false
+    system_host_install_docker: true
+    system_host_deploy_user: "{{ lookup('env', 'USER') }}"
+    system_host_docker_users:
+      - "{{ lookup('env', 'USER') }}"
+    system_host_app_root: /tmp/system-host-test-apps
+
+  roles:
+    - role: system_host
+      tags:
+        - system_host
