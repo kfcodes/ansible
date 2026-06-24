@@ -1,25 +1,116 @@
 ---
-- name: Provision system hosts (base OS, users, docker prerequisites)
+- name: Provision system hosts
   hosts: system_host
-  become: true
   gather_facts: true
-  tags: [provision, system_host]
-  roles:
-    - user_account
-    - system_base
-# - name: Provision dev / control node
-#   hosts: system_dev
-#   become: true
-#   gather_facts: true
-#   tags: [provision, system_dev]
-#   roles:
-#     - user_account
-#     - system_dev
+  become: true
 
-# - name: Provision GPU passthrough hosts
-#   hosts: vfio_hosts
-#   become: true
-#   gather_facts: true
-#   tags: [provision, vfio]
-#   roles:
-#     - vfio_gpu_passthrough
+  tasks:
+    - name: Configure user accounts
+      ansible.builtin.include_role:
+        name: user_account
+        apply:
+          tags:
+            - user_account
+            - users
+      tags:
+        - user_account
+        - users
+        - provision
+
+    - name: Configure base OS
+      ansible.builtin.include_role:
+        name: system_base
+        apply:
+          tags:
+            - system_base
+            - base
+      tags:
+        - system_base
+        - base
+        - provision
+
+    - name: Configure host runtime
+      ansible.builtin.include_role:
+        name: system_host
+        apply:
+          tags:
+            - system_host
+            - host
+            - docker
+            - security
+      tags:
+        - system_host
+        - host
+        - docker
+        - security
+        - provision
+
+- name: Provision dev / control node
+  hosts: system_dev
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Configure user accounts
+      ansible.builtin.include_role:
+        name: user_account
+        apply:
+          tags:
+            - user_account
+            - users
+      tags:
+        - user_account
+        - users
+        - provision
+
+    - name: Configure base OS
+      ansible.builtin.include_role:
+        name: system_base
+        apply:
+          tags:
+            - system_base
+            - base
+      tags:
+        - system_base
+        - base
+        - provision
+
+    - name: Configure development system
+      ansible.builtin.include_role:
+        name: system_dev
+        apply:
+          tags:
+            - system_dev
+            - github_ssh
+            - git
+            - repos
+            - dotfiles
+            - env
+            - apps
+      tags:
+        - system_dev
+        - github_ssh
+        - git
+        - repos
+        - dotfiles
+        - env
+        - apps
+        - provision
+
+- name: Provision GPU passthrough hosts
+  hosts: vfio_hosts
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Configure GPU passthrough
+      ansible.builtin.include_role:
+        name: vfio_gpu_passthrough
+        apply:
+          tags:
+            - vfio
+            - gpu
+      tags:
+        - vfio
+        - gpu
+        - provision
