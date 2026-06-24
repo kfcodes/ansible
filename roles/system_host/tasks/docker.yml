@@ -1,0 +1,57 @@
+---
+- name: Install Docker packages on Debian/Ubuntu
+  ansible.builtin.apt:
+    name: "{{ system_host_docker_packages }}"
+    state: present
+    update_cache: true
+  when:
+    - ansible_os_family == "Debian"
+    - system_host_docker_package_method == "distro"
+
+- name: Install Docker packages on RedHat/Fedora
+  ansible.builtin.dnf:
+    name: "{{ system_host_docker_packages }}"
+    state: present
+    update_cache: true
+  when:
+    - ansible_os_family == "RedHat"
+    - system_host_docker_package_method == "distro"
+
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Check Docker user accounts exist
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item }}"
+    fail_key: false
+  loop: "{{ system_host_docker_users }}"
+  loop_control:
+    label: "{{ item }}"
+  register: system_host_docker_user_getent
+
+- name: Add existing users to docker group
+  ansible.builtin.user:
+    name: "{{ item.item }}"
+    groups: docker
+    append: true
+  loop: "{{ system_host_docker_user_getent.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.ansible_facts.getent_passwd | default({}) | length > 0
+
+- name: Report skipped Docker users that do not exist
+  ansible.builtin.debug:
+    msg: "Skipped adding '{{ item.item }}' to docker group because the user does not exist."
+  loop: "{{ system_host_docker_user_getent.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.ansible_facts.getent_passwd | default({}) | length == 0
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.service:
+    name: "{{ system_host_docker_service_name }}"
+    state: started
+    enabled: true

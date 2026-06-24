@@ -1,28 +1,26 @@
 ---
+- name: Validate system_host inputs
+  ansible.builtin.import_tasks: validate.yml
+  tags: [always]
+
 - name: Install host packages
-  ansible.builtin.apt:
-    name: "{{ system_host_packages }}"
-    state: present
-    update_cache: true
-  when: ansible_os_family == "Debian"
+  ansible.builtin.import_tasks: packages.yml
+  tags: [packages, host_packages]
 
-- name: Ensure application root exists
-  ansible.builtin.file:
-    path: "{{ system_host_app_root }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
+- name: Create host directories
+  ansible.builtin.import_tasks: directories.yml
+  tags: [directories, apps]
 
-- name: Ensure Docker service is enabled and started
-  ansible.builtin.service:
-    name: docker
-    state: started
-    enabled: true
+- name: Configure Docker host
+  ansible.builtin.import_tasks: docker.yml
+  when: system_host_install_docker | bool
+  tags: [docker]
 
-- name: Add deploy user to docker group when user exists
-  ansible.builtin.user:
-    name: "{{ system_host_deploy_user }}"
-    groups: docker
-    append: true
-  when: system_host_deploy_user is defined
+- name: Configure host security services
+  ansible.builtin.import_tasks: security.yml
+  tags: [security]
+
+- name: Configure firewall
+  ansible.builtin.import_tasks: firewall.yml
+  when: system_host_enable_firewall | bool
+  tags: [firewall, security]

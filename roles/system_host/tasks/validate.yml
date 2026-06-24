@@ -1,0 +1,22 @@
+---
+- name: Validate system_host_app_root is set
+  ansible.builtin.assert:
+    that:
+      - system_host_app_root is defined
+      - system_host_app_root | string | length > 0
+    fail_msg: "system_host_app_root must be set."
+
+- name: Validate system_host_packages is a list
+  ansible.builtin.assert:
+    that:
+      - system_host_packages is iterable
+      - system_host_packages is not string
+    fail_msg: "system_host_packages must be a list."
+
+- name: Validate system_host_docker_users is a list
+  ansible.builtin.assert:
+    that:
+      - system_host_docker_users is iterable
+      - system_host_docker_users is not string
+    fail_msg: "system_host_docker_users must be a list."
+  when: system_host_install_docker | bool
