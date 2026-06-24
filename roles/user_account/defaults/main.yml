@@ -6,14 +6,22 @@ user_defaults:
   shell: /bin/bash
   create_home: true
   system: false
-  password_lock: false # <-- rename
+  password_lock: false
   groups: []
+  append_groups: false
   exclusive_keys: true
+  passwordless_sudo: false
 
+# SSH authorized_keys management
 user_accounts_enable_key_mgmt: "{{ enable_ssh_key_management | default(true) }}"
+
+# Optional per-user ~/.ssh/config management.
+# Do not use this for GitHub dev SSH. That belongs in system_dev.
 user_accounts_manage_ssh_config: false
 user_accounts_ssh_config_hosts: []
 
+# Optional key generation on the Ansible control node.
+# This is for bootstrap/login keys, not GitHub personal keys.
 user_accounts_generate_keys: "{{ ssh_keys_to_generate | default([]) }}"
 user_accounts_ssh_key_dir: "{{ ssh_key_dir | default(lookup('env','HOME') ~ '/.ssh') }}"
 user_accounts_key_type: "{{ ssh_key_type | default('ed25519') }}"

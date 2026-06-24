@@ -1,0 +1,55 @@
+---
+- name: Test user_account and system_host locally
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  vars:
+    # user_account local test
+    managed_users:
+      - name: ansible_role_test
+        state: present
+        shell: /bin/bash
+        create_home: true
+        password_lock: true
+        groups: []
+        append_groups: true
+        passwordless_sudo: false
+        exclusive_keys: true
+        authorized_keys:
+          - "{{ lookup('file', lookup('env', 'HOME') ~ '/.ssh/github_key.pub') }}"
+
+    # system_host local test — WSL-safe
+    system_host_packages: []
+    system_host_app_root: /tmp/system-host-test-apps
+    system_host_install_docker: false
+    system_host_enable_firewall: false
+    system_host_enable_fail2ban: false
+    system_host_enable_unattended_upgrades: false
+    system_host_docker_users: []
+
+  tasks:
+    - name: Test user_account role
+      ansible.builtin.include_role:
+        name: user_account
+        apply:
+          tags:
+            - user_account
+            - users
+            - keys
+      tags:
+        - user_account
+        - users
+        - keys
+
+    - name: Test system_host role
+      ansible.builtin.include_role:
+        name: system_host
+        apply:
+          tags:
+            - system_host
+            - host
+      tags:
+        - system_host
+        - host

@@ -17,6 +17,8 @@
     mode: "0600"
     force: false
   loop: "{{ user_accounts_generate_keys }}"
+  loop_control:
+    label: "{{ item }}"
   delegate_to: localhost
   run_once: true
   become: false

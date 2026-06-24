@@ -1,21 +1,33 @@
 ---
-- name: Validate inputs
+- name: Validate user_account inputs
   ansible.builtin.import_tasks: validate.yml
   tags: [always]
 
-- name: Create/manage users
+- name: Generate control-node keys
+  ansible.builtin.import_tasks: generate_sshkeys.yml
+  when: user_accounts_generate_keys | length > 0
+  tags: [generate_keys, keys]
+
+- name: Create and manage users
   ansible.builtin.import_tasks: user_account.yml
   when: managed_users | length > 0
   tags: [users]
 
-- ansible.builtin.import_tasks: sudoers.yml
-
-- name: Manage SSH keys/config for users
-  ansible.builtin.import_tasks: sshkey_management.yml
+- name: Configure sudoers
+  ansible.builtin.import_tasks: sudoers.yml
   when: managed_users | length > 0
-  tags: [keys]
+  tags: [sudoers, users]
 
-- name: Generate control-node keys (optional)
-  ansible.builtin.import_tasks: generate_sshkeys.yml
-  when: user_accounts_generate_keys | length > 0
-  tags: [generate_keys]
+- name: Manage authorized_keys
+  ansible.builtin.import_tasks: authorized_keys.yml
+  when:
+    - managed_users | length > 0
+    - user_accounts_enable_key_mgmt | bool
+  tags: [keys, authorized_keys]
+
+- name: Manage optional user SSH config
+  ansible.builtin.import_tasks: ssh_config.yml
+  when:
+    - managed_users | length > 0
+    - user_accounts_manage_ssh_config | bool
+  tags: [ssh_config, keys]

@@ -1,10 +1,17 @@
 ---
-- name: Install sudo package (Debian/Ubuntu)
+- name: Install sudo package on Debian/Ubuntu
   ansible.builtin.apt:
     name: sudo
     state: present
     update_cache: false
   when: ansible_facts.os_family == "Debian"
+
+- name: Install sudo package on RedHat/Fedora
+  ansible.builtin.dnf:
+    name: sudo
+    state: present
+    update_cache: false
+  when: ansible_facts.os_family == "RedHat"
 
 - name: Configure passwordless sudo for users that request it
   ansible.builtin.copy:
@@ -18,5 +25,15 @@
   loop_control:
     label: "{{ item.name }}"
   when:
-    - item.passwordless_sudo | default(false) | bool
+    - item.passwordless_sudo | default(user_defaults.passwordless_sudo) | bool
     - item.state | default(user_defaults.state) == "present"
+
+- name: Remove passwordless sudo file for absent users
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/99-{{ item.name }}"
+    state: absent
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when:
+    - item.state | default(user_defaults.state) == "absent"

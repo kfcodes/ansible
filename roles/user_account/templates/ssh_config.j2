@@ -8,6 +8,9 @@ Host {{ h.host }}
 {% if h.identity_file is defined %}
   IdentityFile {{ h.identity_file }}
 {% endif %}
+{% if h.identities_only is defined %}
+  IdentitiesOnly {{ 'yes' if h.identities_only | bool else 'no' }}
+{% endif %}
 {% if h.extra_options is defined %}
 {%   for line in h.extra_options %}
   {{ line }}
