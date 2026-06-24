@@ -1,0 +1,23 @@
+---
+- name: Validate system_security inputs
+  ansible.builtin.import_tasks: validate.yml
+  tags: [security, system_security, validate]
+
+- name: Install security packages
+  ansible.builtin.import_tasks: packages.yml
+  when: system_security_install_packages | bool
+  tags: [security, system_security, packages]
+
+- name: Configure SSH daemon hardening
+  ansible.builtin.import_tasks: sshd.yml
+  when: system_security_manage_sshd | bool
+  tags: [security, system_security, ssh]
+
+- name: Configure firewall
+  ansible.builtin.import_tasks: firewall.yml
+  when: system_security_enable_firewall | bool
+  tags: [security, system_security, firewall]
+
+- name: Configure security services
+  ansible.builtin.import_tasks: services.yml
+  tags: [security, system_security, services]

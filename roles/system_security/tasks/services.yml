@@ -1,0 +1,15 @@
+---
+- name: Enable and start fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
+  when: system_security_enable_fail2ban | bool
+
+- name: Enable unattended-upgrades service when present
+  ansible.builtin.service:
+    name: unattended-upgrades
+    state: started
+    enabled: true
+  when: system_security_enable_unattended_upgrades | bool
+  failed_when: false

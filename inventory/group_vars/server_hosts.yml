@@ -1,0 +1,31 @@
+---
+# Server/runtime hosts: API/data/container machines only
+
+allow_reboot: true
+
+# system_host role
+system_host_install_docker: true
+system_host_enable_firewall: false
+system_host_enable_fail2ban: false
+system_host_enable_unattended_upgrades: false
+
+system_host_deploy_user: "{{ deploy_user }}"
+system_host_docker_users:
+  - "{{ deploy_user }}"
+
+system_host_app_root: /opt/apps
+system_host_app_root_owner: root
+system_host_app_root_group: root
+system_host_app_root_mode: "0755"
+
+host_system_packages:
+  - htop
+  - tmux
+  - rsync
+  - ripgrep
+  - ranger
+  - curl
+  - git
+  - python3
+  - python3-pip
+  - ttf-mscorefonts-installer

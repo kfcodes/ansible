@@ -1,0 +1,15 @@
+---
+host_ip: "192.168.1.50"
+system_hostname: "kiosk-1"
+
+network:
+  configure: true
+  interface: "enp3s0"
+  type: "ethernet"
+  static:
+    enabled: true
+    address: "{{ host_ip }}/24"
+    gateway: "192.168.1.1"
+    dns:
+      - "1.1.1.1"
+      - "1.0.0.1"

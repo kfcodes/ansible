@@ -1,0 +1,47 @@
+---
+# Kiosk target user
+kiosk_user: kiosk
+kiosk_user_group: kiosk
+kiosk_user_home: "/home/{{ kiosk_user }}"
+
+kiosk_create_user: true
+kiosk_managed_users:
+  - name: "{{ kiosk_user }}"
+    state: present
+    shell: /bin/bash
+    create_home: true
+    password_lock: true
+    groups:
+      - users
+      - video
+      - audio
+      - input
+    append_groups: true
+    passwordless_sudo: false
+    exclusive_keys: false
+
+kiosk_mode_enabled: true
+kiosk_autologin_tty: tty1
+kiosk_manage_autologin: true
+kiosk_restart_getty: false
+
+kiosk_install_packages: true
+kiosk_apt_install_recommends: false
+
+kiosk_url: "http://localhost:3000"
+
+kiosk_browser: chromium-browser
+kiosk_enable_onboard: true
+kiosk_enable_unclutter: true
+kiosk_disable_screen_blanking: true
+
+kiosk_browser_flags:
+  - "--kiosk"
+  - "--start-fullscreen"
+  - "--app={{ kiosk_url }}"
+  - "--incognito"
+  - "--no-first-run"
+  - "--disable-session-crashed-bubble"
+  - "--disable-infobars"
+  - "--noerrdialogs"
+  - "--autoplay-policy=no-user-gesture-required"

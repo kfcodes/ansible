@@ -1,0 +1,38 @@
+---
+- name: Configure shared security on managed hosts
+  hosts: secure_hosts
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Configure secure automation user
+      ansible.builtin.include_role:
+        name: user_account
+        apply:
+          tags:
+            - security
+            - users
+            - user_account
+      vars:
+        managed_users: "{{ secure_managed_users | default([]) }}"
+      tags:
+        - security
+        - users
+        - user_account
+
+    - name: Configure host security
+      ansible.builtin.include_role:
+        name: system_security
+        apply:
+          tags:
+            - security
+            - system_security
+            - ssh
+            - firewall
+            - services
+      tags:
+        - security
+        - system_security
+        - ssh
+        - firewall
+        - services

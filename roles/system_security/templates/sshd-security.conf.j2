@@ -1,0 +1,7 @@
+# Managed by Ansible: system_security
+
+PermitRootLogin {{ system_security_permit_root_login }}
+PasswordAuthentication {{ system_security_password_authentication }}
+KbdInteractiveAuthentication {{ system_security_kbd_interactive_authentication }}
+PubkeyAuthentication {{ system_security_pubkey_authentication }}
+X11Forwarding {{ system_security_x11_forwarding }}

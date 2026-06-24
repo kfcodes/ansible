@@ -1,22 +1,10 @@
 ---
-- name: Provision system hosts
-  hosts: system_host
+- name: Provision common managed systems
+  hosts: systems
   gather_facts: true
   become: true
 
   tasks:
-    - name: Configure user accounts
-      ansible.builtin.include_role:
-        name: user_account
-        apply:
-          tags:
-            - user_account
-            - users
-      tags:
-        - user_account
-        - users
-        - provision
-
     - name: Configure base OS
       ansible.builtin.include_role:
         name: system_base
@@ -29,20 +17,24 @@
         - base
         - provision
 
-    - name: Configure host runtime
+- name: Provision server runtime hosts
+  hosts: server_hosts
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Configure server runtime
       ansible.builtin.include_role:
         name: system_host
         apply:
           tags:
             - system_host
-            - host
+            - server
             - docker
-            - security
       tags:
         - system_host
-        - host
+        - server
         - docker
-        - security
         - provision
 
 - name: Provision dev / control node
@@ -51,7 +43,7 @@
   become: true
 
   tasks:
-    - name: Configure user accounts
+    - name: Configure development users
       ansible.builtin.include_role:
         name: user_account
         apply:
@@ -61,18 +53,6 @@
       tags:
         - user_account
         - users
-        - provision
-
-    - name: Configure base OS
-      ansible.builtin.include_role:
-        name: system_base
-        apply:
-          tags:
-            - system_base
-            - base
-      tags:
-        - system_base
-        - base
         - provision
 
     - name: Configure development system

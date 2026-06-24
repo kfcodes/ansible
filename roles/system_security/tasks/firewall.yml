@@ -1,0 +1,34 @@
+---
+- name: Set UFW default incoming policy
+  ansible.builtin.command: "ufw default {{ system_security_firewall_default_incoming }} incoming"
+  register: ufw_default_incoming
+  changed_when: "'Default incoming policy changed' in ufw_default_incoming.stdout"
+  when: not ansible_check_mode
+
+- name: Set UFW default outgoing policy
+  ansible.builtin.command: "ufw default {{ system_security_firewall_default_outgoing }} outgoing"
+  register: ufw_default_outgoing
+  changed_when: "'Default outgoing policy changed' in ufw_default_outgoing.stdout"
+  when: not ansible_check_mode
+
+- name: Allow configured firewall ports
+  ansible.builtin.command: "ufw allow {{ item.port }}/{{ item.proto | default('tcp') }}"
+  register: ufw_allow_result
+  changed_when: >-
+    'Rule added' in ufw_allow_result.stdout
+    or 'Rules updated' in ufw_allow_result.stdout
+  loop: "{{ system_security_firewall_allow_ports }}"
+  loop_control:
+    label: "{{ item.port }}/{{ item.proto | default('tcp') }}"
+  when: not ansible_check_mode
+
+- name: Enable UFW
+  ansible.builtin.command: ufw --force enable
+  register: ufw_enable_result
+  changed_when: "'Firewall is active and enabled' in ufw_enable_result.stdout"
+  when: not ansible_check_mode
+
+- name: Show firewall check-mode notice
+  ansible.builtin.debug:
+    msg: "Skipping UFW command execution in check mode."
+  when: ansible_check_mode

@@ -1,0 +1,19 @@
+---
+- name: Ensure sshd drop-in directory exists
+  ansible.builtin.file:
+    path: "{{ system_security_sshd_dropin_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install SSH daemon hardening drop-in
+  ansible.builtin.template:
+    src: sshd-security.conf.j2
+    dest: "{{ system_security_sshd_dropin_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - validate sshd config
+    - reload sshd

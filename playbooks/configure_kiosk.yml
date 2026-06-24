@@ -1,0 +1,41 @@
+---
+- name: Configure kiosk hosts
+  hosts: kiosk_hosts
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Ensure kiosk user exists
+      ansible.builtin.include_role:
+        name: user_account
+        apply:
+          tags:
+            - kiosk
+            - user_account
+            - users
+      vars:
+        managed_users: "{{ kiosk_managed_users | default([]) }}"
+      when:
+        - kiosk_create_user | default(true) | bool
+        - kiosk_managed_users | default([]) | length > 0
+      tags:
+        - kiosk
+        - user_account
+        - users
+
+    - name: Configure kiosk mode
+      ansible.builtin.include_role:
+        name: kiosk_mode
+        apply:
+          tags:
+            - kiosk
+            - kiosk_mode
+            - packages
+            - autologin
+            - session
+      tags:
+        - kiosk
+        - kiosk_mode
+        - packages
+        - autologin
+        - session

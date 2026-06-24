@@ -3,7 +3,7 @@
   ansible.builtin.import_tasks: validate.yml
   tags: [always]
 
-- name: Install host packages
+- name: Install host runtime packages
   ansible.builtin.import_tasks: packages.yml
   tags: [packages, host_packages]
 
@@ -15,12 +15,3 @@
   ansible.builtin.import_tasks: docker.yml
   when: system_host_install_docker | bool
   tags: [docker]
-
-- name: Configure host security services
-  ansible.builtin.import_tasks: security.yml
-  tags: [security]
-
-- name: Configure firewall
-  ansible.builtin.import_tasks: firewall.yml
-  when: system_host_enable_firewall | bool
-  tags: [firewall, security]

@@ -1,0 +1,36 @@
+---
+# Package/security service setup
+system_security_install_packages: true
+
+system_security_packages:
+  - openssh-server
+  - ufw
+  - fail2ban
+  - unattended-upgrades
+
+# SSH daemon hardening
+system_security_manage_sshd: true
+system_security_ssh_service_name: ssh
+system_security_sshd_dropin_dir: /etc/ssh/sshd_config.d
+system_security_sshd_dropin_file: /etc/ssh/sshd_config.d/99-ansible-security.conf
+
+system_security_permit_root_login: "no"
+system_security_password_authentication: "no"
+system_security_kbd_interactive_authentication: "no"
+system_security_pubkey_authentication: "yes"
+system_security_x11_forwarding: "no"
+
+# Firewall
+# Keep default false so a new host is not accidentally locked out.
+system_security_enable_firewall: false
+system_security_firewall_default_incoming: deny
+system_security_firewall_default_outgoing: allow
+
+system_security_firewall_allow_ports:
+  - port: 22
+    proto: tcp
+    comment: SSH
+
+# Security services
+system_security_enable_fail2ban: true
+system_security_enable_unattended_upgrades: true

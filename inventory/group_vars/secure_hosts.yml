@@ -1,0 +1,34 @@
+---
+# Shared secure-host user for Ansible automation
+secure_managed_users:
+  - name: "{{ deploy_user }}"
+    state: present
+    shell: /bin/bash
+    create_home: true
+    password_lock: true
+    groups:
+      - sudo
+    append_groups: true
+    passwordless_sudo: true
+    authorized_keys:
+      - "{{ lookup('file', ssh_key_dir + '/' + deploy_user + '.pub') }}"
+    exclusive_keys: true
+
+# Shared security settings
+system_security_install_packages: true
+
+system_security_manage_sshd: true
+system_security_permit_root_login: "no"
+system_security_password_authentication: "no"
+system_security_kbd_interactive_authentication: "no"
+system_security_pubkey_authentication: "yes"
+system_security_x11_forwarding: "no"
+
+system_security_enable_firewall: true
+system_security_firewall_allow_ports:
+  - port: 22
+    proto: tcp
+    comment: SSH
+
+system_security_enable_fail2ban: true
+system_security_enable_unattended_upgrades: true
