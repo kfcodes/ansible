@@ -5,9 +5,6 @@ allow_reboot: true
 
 # system_host role
 system_host_install_docker: true
-system_host_enable_firewall: false
-system_host_enable_fail2ban: false
-system_host_enable_unattended_upgrades: false
 
 system_host_deploy_user: "{{ deploy_user }}"
 system_host_docker_users:

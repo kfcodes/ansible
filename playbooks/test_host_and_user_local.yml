@@ -20,13 +20,10 @@
         authorized_keys:
           - "{{ lookup('file', lookup('env', 'HOME') ~ '/.ssh/github_key.pub') }}"
 
-    # system_host local test — WSL-safe
+    # system_host local test
     system_host_packages: []
     system_host_app_root: /tmp/system-host-test-apps
     system_host_install_docker: false
-    system_host_enable_firewall: false
-    system_host_enable_fail2ban: false
-    system_host_enable_unattended_upgrades: false
     system_host_docker_users: []
 
   tasks:

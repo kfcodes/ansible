@@ -1,9 +1,6 @@
 ---
-# Host package setup
-system_host_packages:
-  - ufw
-  - fail2ban
-  - unattended-upgrades
+# Server/runtime host package setup
+system_host_packages: []
 
 # Application host paths
 system_host_app_root: /opt/apps
@@ -24,14 +21,3 @@ system_host_docker_packages:
 system_host_docker_service_name: docker
 system_host_docker_users:
   - "{{ system_host_deploy_user }}"
-
-# Security services
-system_host_enable_fail2ban: true
-system_host_enable_unattended_upgrades: true
-
-# Firewall
-# Keep false by default to avoid locking yourself out during testing.
-system_host_enable_firewall: false
-system_host_allowed_ssh_port: 22
-system_host_firewall_allow_ports:
-  - { port: "{{ system_host_allowed_ssh_port }}", proto: "tcp", rule: "allow", comment: "SSH" }
