@@ -1,42 +1,170 @@
 ---
-- name: Deploy frontend service (stable + update)
+- name: Deploy frontend service
   hosts: frontend_service
+  gather_facts: true
   become: true
-  tags: [frontend]
-  roles:
-    - container_service
 
-- name: Deploy label API service (stable + update)
-  hosts: label_service
+  vars_files:
+    - ../inventory/service_vars/frontend_service.yml
+
+  tasks:
+    - name: Deploy frontend containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - frontend
+            - services
+            - containers
+            - deploy
+      tags:
+        - frontend
+        - services
+        - containers
+        - deploy
+
+- name: Deploy database service
+  hosts: database_service
+  gather_facts: true
   become: true
-  tags: [labelapi]
-  roles:
-    - container_service
 
-- name: Deploy file service (stable + update)
+  vars_files:
+    - ../inventory/service_vars/database_service.yml
+
+  tasks:
+    - name: Deploy database containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - database
+            - services
+            - containers
+            - deploy
+      tags:
+        - database
+        - services
+        - containers
+        - deploy
+
+- name: Deploy file service
   hosts: file_service
+  gather_facts: true
   become: true
-  tags: [file]
-  roles:
-    - container_service
 
-- name: Deploy manufacturing service (stable + update)
+  vars_files:
+    - ../inventory/service_vars/file_service.yml
+
+  tasks:
+    - name: Deploy file containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - file
+            - services
+            - containers
+            - deploy
+      tags:
+        - file
+        - services
+        - containers
+        - deploy
+
+- name: Deploy manufacturing service
   hosts: manufacturing_service
+  gather_facts: true
   become: true
-  tags: [manufacturing]
-  roles:
-    - container_service
 
-- name: Deploy pallet service (stable + update)
+  vars_files:
+    - ../inventory/service_vars/manufacturing_service.yml
+
+  tasks:
+    - name: Deploy manufacturing containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - manufacturing
+            - services
+            - containers
+            - deploy
+      tags:
+        - manufacturing
+        - services
+        - containers
+        - deploy
+
+- name: Deploy pallet service
   hosts: pallet_service
+  gather_facts: true
   become: true
-  tags: [pallet]
-  roles:
-    - container_service
 
-- name: Deploy product service (stable + update)
+  vars_files:
+    - ../inventory/service_vars/pallet_service.yml
+
+  tasks:
+    - name: Deploy pallet containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - pallet
+            - services
+            - containers
+            - deploy
+      tags:
+        - pallet
+        - services
+        - containers
+        - deploy
+
+- name: Deploy product service
   hosts: product_service
+  gather_facts: true
   become: true
-  tags: [product]
-  roles:
-    - container_service
+
+  vars_files:
+    - ../inventory/service_vars/product_service.yml
+
+  tasks:
+    - name: Deploy product containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - product
+            - services
+            - containers
+            - deploy
+      tags:
+        - product
+        - services
+        - containers
+        - deploy
+
+- name: Deploy label service
+  hosts: label_service
+  gather_facts: true
+  become: true
+
+  vars_files:
+    - ../inventory/service_vars/label_service.yml
+
+  tasks:
+    - name: Deploy label containers
+      ansible.builtin.include_role:
+        name: container_service
+        apply:
+          tags:
+            - labelapi
+            - label
+            - services
+            - containers
+            - deploy
+      tags:
+        - labelapi
+        - label
+        - services
+        - containers
+        - deploy
