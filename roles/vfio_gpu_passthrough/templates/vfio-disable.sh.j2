@@ -9,6 +9,7 @@ fi
 echo "[vfio-disable] Switching to HOST mode..."
 
 GRUB_FILE="/etc/default/grub"
+ALLOW_REBOOT="{{ 'true' if vfio_allow_reboot | bool else 'false' }}"
 
 get_cmdline() {
   sed -n 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/\1/p' "$GRUB_FILE" | head -n1
@@ -35,9 +36,11 @@ strip_tokens() {
 ensure_token() {
   local cmd="$1"
   local tok="$2"
+
   if ! echo "$cmd" | grep -qw "$tok"; then
     cmd="$cmd $tok"
   fi
+
   echo "$cmd"
 }
 
@@ -45,26 +48,7 @@ cmd="$(get_cmdline)"
 cmd="$(strip_tokens "$cmd")"
 
 cmd="$(ensure_token "$cmd" "iommu=pt")"
+
 {% if iommu_platform == "intel" %}
 cmd="$(ensure_token "$cmd" "intel_iommu=on")"
 {% else %}
-cmd="$(ensure_token "$cmd" "amd_iommu=on")"
-{% endif %}
-
-set_cmdline "$cmd"
-
-echo "[vfio-disable] GRUB cmdline now:"
-grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
-
-echo "[vfio-disable] Removing any vfio-pci ids modprobe files..."
-rm -f /etc/modprobe.d/vfio-pci-ids.conf
-rm -f /etc/modprobe.d/vfio.conf
-
-# Also remove any other leftovers created by older iterations (safe no-op if not present)
-rm -f /etc/modprobe.d/*vfio*ids*.conf 2>/dev/null || true
-
-update-grub
-update-initramfs -u
-
-echo "[vfio-disable] Rebooting..."
-reboot

@@ -1,33 +1,61 @@
 ---
-- name: Fail if gpu_pci_ids not set
-  fail:
-    msg: >
-      gpu_pci_ids is empty. Set it in defaults/main.yml or inventory.
-      Example:
-        gpu_pci_ids:
-          - "1002:67ef"
-          - "1002:aae0"
-  when: gpu_pci_ids | length == 0
-
-- name: Validate gpu_pci_ids format
-  assert:
-    that:
-      - item is match("^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}$")
-    fail_msg: "Bad PCI ID format: {{ item }} (expected 'dddd:dddd', e.g. '1002:67ef')"
-  loop: "{{ gpu_pci_ids }}"
-
 - name: Validate vfio_mode
-  assert:
+  ansible.builtin.assert:
     that:
       - vfio_mode in ['host', 'vfio']
-    fail_msg: "vfio_mode must be 'host' or 'vfio' (got: {{ vfio_mode }})"
+    fail_msg: "vfio_mode must be 'host' or 'vfio'."
 
-- name: Show effective configuration
-  debug:
+- name: Validate iommu_platform
+  ansible.builtin.assert:
+    that:
+      - iommu_platform in ['intel', 'amd']
+    fail_msg: "iommu_platform must be 'intel' or 'amd'."
+
+- name: Validate gpu_pci_ids is a list
+  ansible.builtin.assert:
+    that:
+      - gpu_pci_ids is iterable
+      - gpu_pci_ids is not string
+      - gpu_pci_ids | length > 0
+    fail_msg: "gpu_pci_ids must be a non-empty list."
+
+- name: Validate gpu_pci_ids format
+  ansible.builtin.assert:
+    that:
+      - item is match("^[0-9a-fA-F]{4}:[0-9a-fA-F]{4}$")
+    fail_msg: "Bad PCI ID format: {{ item }}. Expected dddd:dddd, for example 1002:67ef."
+  loop: "{{ gpu_pci_ids }}"
+
+- name: Validate gpu_bdf format when provided
+  ansible.builtin.assert:
+    that:
+      - item is match("^([0-9a-fA-F]{4}:)?[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\\.[0-7]$")
+    fail_msg: "Bad BDF format: {{ item }}. Expected 0000:01:00.0."
+  loop: "{{ gpu_bdf }}"
+  when: gpu_bdf | length > 0
+
+- name: Validate demo VM requires at least two GPU BDFs
+  ansible.builtin.assert:
+    that:
+      - gpu_bdf | length >= 2
+    fail_msg: "Demo VM requires gpu_bdf with at least two entries: GPU and HDMI audio."
+  when: create_demo_vm | bool
+
+- name: Validate runtime scripts require at least two GPU BDFs
+  ansible.builtin.assert:
+    that:
+      - gpu_bdf | length >= 2
+    fail_msg: "Runtime bind/unbind scripts require gpu_bdf with at least two entries."
+  when: vfio_install_runtime_scripts | bool
+
+- name: Show effective VFIO configuration
+  ansible.builtin.debug:
     msg:
       - "vfio_mode={{ vfio_mode }}"
       - "iommu_platform={{ iommu_platform }}"
       - "gpu_pci_ids={{ gpu_pci_ids }}"
       - "gpu_bdf={{ gpu_bdf }}"
-      - "blacklist_host_gpu_drivers={{ blacklist_host_gpu_drivers }}"
-      - "disable_efi_framebuffer={{ disable_efi_framebuffer }}"
+      - "vfio_allow_reboot={{ vfio_allow_reboot }}"
+      - "create_vm={{ create_vm }}"
+      - "create_demo_vm={{ create_demo_vm }}"
+      - "vfio_install_runtime_scripts={{ vfio_install_runtime_scripts }}"

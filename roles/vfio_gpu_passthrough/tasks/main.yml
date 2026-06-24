@@ -1,38 +1,50 @@
 ---
-- name: Sanity check required vars
-  include_tasks: sanity.yml
+- name: Validate VFIO configuration
+  ansible.builtin.import_tasks: sanity.yml
+  tags: [always]
 
 - name: Install virtualization packages
-  include_tasks: install.yml
-  tags: [install]
+  ansible.builtin.import_tasks: install.yml
+  when: vfio_install_packages | bool
+  tags: [install, packages]
 
 - name: Configure VFIO modules and modprobe config
-  include_tasks: vfio.yml
-  tags: [vfio]
+  ansible.builtin.import_tasks: vfio.yml
+  when: vfio_configure_modules | bool
+  tags: [vfio, modules]
 
-- name: Configure GRUB for IOMMU + mode-specific VFIO binding
-  include_tasks: grub.yml
-  tags: [grub]
+- name: Configure GRUB for IOMMU and VFIO mode
+  ansible.builtin.import_tasks: grub.yml
+  when: vfio_apply_grub | bool
+  tags: [grub, bootloader]
 
-# Boot-mode scripts + wrapper command
 - name: Install VFIO mode toggle scripts
-  include_tasks: mode_scripts.yml
+  ansible.builtin.import_tasks: mode_scripts.yml
+  when: vfio_install_scripts | bool
   tags: [scripts]
 
-# (Optional) runtime bind/unbind scripts
-- name: Install GPU bind/unbind scripts
-  include_tasks: vfio_scripts.yml
-  tags: [scripts]
+- name: Install runtime GPU bind/unbind scripts
+  ansible.builtin.import_tasks: vfio_scripts.yml
+  when:
+    - vfio_install_runtime_scripts | bool
+    - gpu_bdf | length >= 2
+  tags: [runtime_scripts, scripts]
 
-- name: Optionally create VM (headless-friendly)
-  include_tasks: create_vm.yml
+- name: Optionally create VM
+  ansible.builtin.import_tasks: create_vm.yml
   when: create_vm | bool
   tags: [vm]
 
-- name: Optionally create Alpine demo VM for passthrough validation
-  include_tasks: demo_vm.yml
+- name: Optionally create Alpine demo VM
+  ansible.builtin.import_tasks: demo_vm.yml
   when: create_demo_vm | bool
   tags: [demo_vm]
 
-- name: Reboot now if required (flush handlers at end of role)
-  meta: flush_handlers
+- name: Warn if reboot is required but disabled
+  ansible.builtin.debug:
+    msg:
+      - "VFIO boot/module configuration may require a reboot."
+      - "Automatic reboot is disabled because vfio_allow_reboot=false."
+      - "Reboot manually when ready, or rerun with -e vfio_allow_reboot=true."
+  when: not vfio_allow_reboot | bool
+  tags: [always]

@@ -2,22 +2,40 @@
 set -euo pipefail
 
 case "${1:-}" in
-  status)  exec /usr/local/bin/vfio-status ;;
-  enable)  exec /usr/local/bin/vfio-enable ;;
-  disable) exec /usr/local/bin/vfio-disable ;;
-  bind)    exec /usr/local/bin/unbind_gpu.sh ;;
-  unbind)  exec /usr/local/bin/rebind_gpu.sh ;;
+  status)
+    exec /usr/local/bin/vfio-status
+    ;;
+
+  enable)
+    exec /usr/local/bin/vfio-enable
+    ;;
+
+  disable)
+    exec /usr/local/bin/vfio-disable
+    ;;
+
+  bind)
+    exec /usr/local/bin/unbind_gpu.sh
+    ;;
+
+  unbind)
+    exec /usr/local/bin/rebind_gpu.sh
+    ;;
+
   *)
-    cat <<EOF
+    cat <<USAGE
 Usage:
   sudo vfio status
-  sudo vfio enable    # switch to VFIO mode + reboot
-  sudo vfio disable   # switch to HOST mode + reboot
+  sudo vfio enable
+  sudo vfio disable
 
-Optional runtime (no reboot):
+Optional runtime, only installed when vfio_install_runtime_scripts=true:
   sudo vfio bind
   sudo vfio unbind
-EOF
+
+Notes:
+  vfio enable/disable will only reboot automatically if vfio_allow_reboot=true
+USAGE
     exit 1
     ;;
 esac

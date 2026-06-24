@@ -1,6 +1,6 @@
 ---
-- name: Ensure VFIO modules load at boot (late)
-  copy:
+- name: Ensure VFIO modules load at boot
+  ansible.builtin.copy:
     dest: /etc/modules-load.d/vfio.conf
     mode: "0644"
     content: |
@@ -8,9 +8,11 @@
       vfio_pci
       vfio_iommu_type1
       vfio_virqfd
+  notify:
+    - update-initramfs
 
-- name: Ensure VFIO modules are included in initramfs (early) - Ubuntu
-  blockinfile:
+- name: Ensure VFIO modules are included in initramfs on Ubuntu/Debian
+  ansible.builtin.blockinfile:
     path: /etc/initramfs-tools/modules
     create: true
     marker: "# {mark} ANSIBLE VFIO MODULES"
@@ -19,20 +21,20 @@
       vfio_pci
       vfio_iommu_type1
       vfio_virqfd
+  when: ansible_os_family == "Debian"
   notify:
     - update-initramfs
 
-- name: Configure vfio-pci device IDs (modprobe)
-  template:
+- name: Configure vfio-pci device IDs
+  ansible.builtin.template:
     src: vfio.conf.j2
     dest: /etc/modprobe.d/vfio.conf
     mode: "0644"
   notify:
     - update-initramfs
 
-# Toggleable setup: only blacklist host GPU drivers in VFIO mode, and only if enabled.
-- name: Optionally blacklist host GPU drivers (ONLY in vfio mode)
-  copy:
+- name: Optionally blacklist host GPU drivers only in VFIO mode
+  ansible.builtin.copy:
     dest: /etc/modprobe.d/blacklist-host-gpu.conf
     mode: "0644"
     content: |
@@ -40,17 +42,16 @@
       blacklist radeon
       blacklist nouveau
       blacklist nvidia
-  when: blacklist_host_gpu_drivers | bool and vfio_mode == 'vfio'
+  when:
+    - blacklist_host_gpu_drivers | bool
+    - vfio_mode == 'vfio'
   notify:
     - update-initramfs
 
-- name: Ensure blacklist file is absent in host mode (or if disabled)
-  file:
+- name: Ensure blacklist file is absent in host mode or when disabled
+  ansible.builtin.file:
     path: /etc/modprobe.d/blacklist-host-gpu.conf
     state: absent
   when: (not blacklist_host_gpu_drivers | bool) or (vfio_mode != 'vfio')
   notify:
     - update-initramfs
-
-- name: Flush handlers so initramfs is updated before reboot-triggering steps
-  meta: flush_handlers

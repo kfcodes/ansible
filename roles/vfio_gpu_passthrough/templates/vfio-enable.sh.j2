@@ -9,8 +9,8 @@ fi
 echo "[vfio-enable] Switching to VFIO mode..."
 
 IDS="{{ gpu_pci_ids | join(',') }}"
-
 GRUB_FILE="/etc/default/grub"
+ALLOW_REBOOT="{{ 'true' if vfio_allow_reboot | bool else 'false' }}"
 
 get_cmdline() {
   sed -n 's/^GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/\1/p' "$GRUB_FILE" | head -n1
@@ -18,13 +18,11 @@ get_cmdline() {
 
 set_cmdline() {
   local new="$1"
-  # normalize spaces
   new="$(echo "$new" | xargs)"
   sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=\"[^\"]*\"/GRUB_CMDLINE_LINUX_DEFAULT=\"${new}\"/" "$GRUB_FILE"
 }
 
 strip_tokens() {
-  # remove vfio-only and other mode-specific bits
   echo "$1" \
     | sed -E 's/\<vfio-pci\.ids=[^ ]+\>//g' \
     | sed -E 's/\<rd\.driver\.pre=vfio-pci\>//g' \
@@ -39,27 +37,29 @@ strip_tokens() {
 ensure_token() {
   local cmd="$1"
   local tok="$2"
+
   if ! echo "$cmd" | grep -qw "$tok"; then
     cmd="$cmd $tok"
   fi
+
   echo "$cmd"
 }
 
 cmd="$(get_cmdline)"
 cmd="$(strip_tokens "$cmd")"
 
-# Base tokens (always)
 cmd="$(ensure_token "$cmd" "iommu=pt")"
+
 {% if iommu_platform == "intel" %}
 cmd="$(ensure_token "$cmd" "intel_iommu=on")"
 {% else %}
 cmd="$(ensure_token "$cmd" "amd_iommu=on")"
 {% endif %}
 
-# VFIO-only tokens
 cmd="$(ensure_token "$cmd" "vfio-pci.ids=${IDS}")"
 cmd="$(ensure_token "$cmd" "rd.driver.pre=vfio-pci")"
 cmd="$(ensure_token "$cmd" "modprobe.blacklist=amdgpu")"
+
 {% if disable_efi_framebuffer | bool %}
 cmd="$(ensure_token "$cmd" "video=efifb:off")"
 {% endif %}
@@ -72,5 +72,9 @@ grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
 update-grub
 update-initramfs -u
 
-echo "[vfio-enable] Rebooting..."
-reboot
+if [[ "$ALLOW_REBOOT" == "true" ]]; then
+  echo "[vfio-enable] Rebooting..."
+  reboot
+else
+  e
+fi

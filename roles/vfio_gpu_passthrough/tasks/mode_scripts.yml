@@ -1,24 +1,24 @@
 ---
 - name: Install vfio-enable
-  template:
+  ansible.builtin.template:
     src: vfio-enable.sh.j2
     dest: /usr/local/bin/vfio-enable
     mode: "0755"
 
 - name: Install vfio-disable
-  template:
+  ansible.builtin.template:
     src: vfio-disable.sh.j2
     dest: /usr/local/bin/vfio-disable
     mode: "0755"
 
 - name: Install vfio-status
-  template:
+  ansible.builtin.template:
     src: vfio-status.sh.j2
     dest: /usr/local/bin/vfio-status
     mode: "0755"
 
 - name: Install vfio wrapper command
-  template:
+  ansible.builtin.template:
     src: vfio.sh.j2
     dest: /usr/local/bin/vfio
     mode: "0755"

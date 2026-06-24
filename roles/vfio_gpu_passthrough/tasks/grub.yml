@@ -1,100 +1,50 @@
 ---
-- name: Read /etc/default/grub (slurp)
-  slurp:
+- name: Read /etc/default/grub
+  ansible.builtin.slurp:
     path: /etc/default/grub
   register: grub_file
 
 - name: Decode grub file content
-  set_fact:
+  ansible.builtin.set_fact:
     grub_file_text: "{{ grub_file.content | b64decode }}"
 
-- name: Extract current GRUB_CMDLINE_LINUX_DEFAULT (safe)
-  set_fact:
+- name: Extract current GRUB_CMDLINE_LINUX_DEFAULT
+  ansible.builtin.set_fact:
     grub_cmdline_current_str: >-
       {{
         (grub_file_text
-          | regex_search('^GRUB_CMDLINE_LINUX_DEFAULT=(\"[^\"]*\"|\\x27[^\\x27]*\\x27|[^\\n]*)', multiline=True)
-          | default('GRUB_CMDLINE_LINUX_DEFAULT=\"\"'))
+          | regex_search('^GRUB_CMDLINE_LINUX_DEFAULT=(".*"|\\x27.*\\x27|[^\\n]*)', multiline=True)
+          | default('GRUB_CMDLINE_LINUX_DEFAULT=""'))
         | regex_replace('^GRUB_CMDLINE_LINUX_DEFAULT=', '')
         | trim
-        | regex_replace('^\"|\"$', '')
+        | regex_replace('^"|"$', '')
         | regex_replace("^\\x27|\\x27$", '')
       }}
 
-- name: Split current cmdline into list
-  set_fact:
+- name: Split current GRUB cmdline
+  ansible.builtin.set_fact:
     grub_cmdline_current: "{{ grub_cmdline_current_str.split(' ') | reject('equalto','') | list }}"
 
-- name: Remove existing vfio-only args
-  set_fact:
+- name: Remove old VFIO and IOMMU managed args
+  ansible.builtin.set_fact:
     grub_cmdline_current: >-
       {{
         grub_cmdline_current
         | reject('search','^vfio-pci\\.ids=')
         | reject('equalto','rd.driver.pre=vfio-pci')
         | reject('equalto','modprobe.blacklist=amdgpu')
+        | reject('equalto','modprobe.blacklist=snd_hda_intel')
         | reject('equalto','video=efifb:off')
+        | reject('equalto','intel_iommu=on')
+        | reject('equalto','amd_iommu=on')
+        | reject('equalto','iommu=pt')
         | list
       }}
 
-- name: Build always-on args (filter intel/amd correctly)
-  set_fact:
-    _always_args: >-
+- name: Build platform IOMMU args
+  ansible.builtin.set_fact:
+    vfio_platform_iommu_args: >-
       {{
-        grub_cmdline_always
-        | reject('search','^intel_iommu=on$') | list
-        if iommu_platform != 'intel' else grub_cmdline_always
-      }}
-
-- name: Filter AMD arg if not AMD platform
-  set_fact:
-    _always_args: >-
-      {{
-        _always_args
-        | reject('search','^amd_iommu=on$') | list
-        if iommu_platform != 'amd' else _always_args
-      }}
-
-- name: Start building desired args list
-  set_fact:
-    grub_cmdline_desired: "{{ (grub_cmdline_current + _always_args) | unique | list }}"
-
-- name: Add VFIO-only args if vfio_mode == vfio
-  set_fact:
-    grub_cmdline_desired: "{{ (grub_cmdline_desired + grub_cmdline_vfio_only) | unique | list }}"
-  when: vfio_mode == 'vfio'
-
-- name: Optionally disable EFI framebuffer (ONLY in vfio mode)
-  set_fact:
-    grub_cmdline_desired: "{{ (grub_cmdline_desired + ['video=efifb:off']) | unique | list }}"
-  when: disable_efi_framebuffer | bool and vfio_mode == 'vfio'
-
-- name: Compute expected vfio-pci.ids token
-  set_fact:
-    expected_vfio_ids_token: "vfio-pci.ids={{ gpu_pci_ids | join(',') }}"
-
-- name: Show resulting GRUB cmdline
-  debug:
-    msg: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_desired | join(" ") }}"'
-
-- name: Assert VFIO mode has required args
-  assert:
-    that:
-      - "{{ expected_vfio_ids_token in grub_cmdline_desired }}"
-      - "{{ 'modprobe.blacklist=amdgpu' in grub_cmdline_desired }}"
-    fail_msg: "VFIO mode requested but required vfio/blacklist args are missing from GRUB cmdline."
-  when: vfio_mode == 'vfio'
-
-- name: Write updated GRUB cmdline
-  lineinfile:
-    path: /etc/default/grub
-    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
-    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_desired | join(" ") }}"'
-    create: true
-  notify:
-    - update-grub
-    - update-initramfs
-    - reboot-host
-
-- name: Flush handlers (apply grub + reboot now)
-  meta: flush_handlers
+        ['iommu=pt', 'intel_iommu=on']
+        if iommu_platform == 'intel'
+        else ['iommu=pt', 'amd_iommu=on']

@@ -1,22 +1,21 @@
 ---
 - name: update-initramfs
-  command: update-initramfs -u
+  ansible.builtin.command: update-initramfs -u
   changed_when: true
-  notify: reboot-host
 
 - name: update-grub
-  command: update-grub
+  ansible.builtin.command: update-grub
   changed_when: true
-  notify: reboot-host
 
 - name: restart-libvirtd
-  service:
+  ansible.builtin.service:
     name: libvirtd
     state: restarted
 
 - name: reboot-host
-  reboot:
+  ansible.builtin.reboot:
     msg: "Rebooting to apply VFIO/IOMMU configuration"
     reboot_timeout: 900
     pre_reboot_delay: 3
     post_reboot_delay: 10
+  when: vfio_allow_reboot | bool

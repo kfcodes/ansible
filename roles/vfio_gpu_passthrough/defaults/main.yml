@@ -1,37 +1,44 @@
 ---
-# Toggleable VFIO design:
-# - vfio_mode=host  => GPU used by Linux (amdgpu/snd_hda_intel)
-# - vfio_mode=vfio  => GPU bound to vfio-pci at boot (for passthrough)
-vfio_mode: "host" # "host" or "vfio"
+# Mode:
+# - host: keep GPU available to Linux host
+# - vfio: bind GPU to vfio-pci at boot for passthrough
+vfio_mode: "host"
 
-# PCI IDs for passthrough GPU + its HDMI audio function.
-# Format MUST be "dddd:dddd"
+# Safety switches
+vfio_apply_grub: true
+vfio_configure_modules: true
+vfio_install_packages: true
+vfio_install_scripts: true
+vfio_install_runtime_scripts: false
+vfio_allow_reboot: false
+vfio_create_vm: false
+vfio_create_demo_vm: false
+
+# PCI IDs for passthrough GPU + HDMI audio function.
+# Format: "dddd:dddd"
 gpu_pci_ids:
   - "1002:67ef"
   - "1002:aae0"
 
-# Optional BDFs, used for status output and (optional) emergency scripts.
+# Optional BDFs for status/runtime scripts/demo VM.
+# Format: "0000:01:00.0"
 gpu_bdf: []
 
-# Platform IOMMU selection
-iommu_platform: "intel" # "intel" or "amd"
+# Platform IOMMU selection: intel or amd
+iommu_platform: "intel"
 
-# GRUB cmdline args that should ALWAYS be present (both host + vfio modes)
-# IMPORTANT: keep this Intel-only for your system (prevents amd_iommu=on showing up).
+# GRUB args always present
 grub_cmdline_always:
   - "iommu=pt"
   - "intel_iommu=on"
 
+# VFIO-only GRUB args
 grub_cmdline_vfio_only:
   - "vfio-pci.ids={{ gpu_pci_ids | join(',') }}"
   - "rd.driver.pre=vfio-pci"
   - "modprobe.blacklist=amdgpu"
 
-# Optional: reduce chance host grabs framebuffer early (useful in VFIO mode).
 disable_efi_framebuffer: true
-
-# Do NOT permanently blacklist drivers if you want to use GPU on Linux sometimes.
-# If you enable this, it will only apply in VFIO mode.
 blacklist_host_gpu_drivers: false
 
 virtualization_packages:
@@ -45,39 +52,33 @@ virtualization_packages:
   - cpu-checker
   - linux-firmware
 
-# Optional VM creation (leave false if you already manage VM separately)
-create_vm: false
+# Users to add to libvirt/kvm groups
+vfio_libvirt_users: []
+
+# Optional Windows VM creation
+create_vm: "{{ vfio_create_vm }}"
 vm_name: "win10"
 vm_ram_mb: 8192
 vm_vcpus: 4
 vm_disk_path: "/var/lib/libvirt/images/win10.qcow2"
 vm_disk_gb: 80
 vm_iso_path: "/var/lib/libvirt/boot/windows.iso"
+vm_graphics: "spice"
+vm_graphics_listen: "127.0.0.1"
 
-# Headless install access
-vm_graphics: "spice" # "spice" or "vnc" or "none"
-vm_graphics_listen: "127.0.0.1" # use SSH tunnel
-
-# ----------------------------
-# Demo VFIO VM (Alpine) - optional
-# ----------------------------
-create_demo_vm: true
+# Optional demo VM creation
+create_demo_vm: "{{ vfio_create_demo_vm }}"
 demo_vm_name: "alpine-vfio"
-
-# Alpine ISO
 demo_iso_url: "https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-standard-3.19.1-x86_64.iso"
 demo_iso_dir: "/var/lib/libvirt/boot"
 demo_iso_filename: "alpine-standard-3.19.1-x86_64.iso"
 demo_iso_path: "{{ demo_iso_dir }}/{{ demo_iso_filename }}"
-
-# VM resources
 demo_vm_ram_mb: 2048
 demo_vm_vcpus: 2
-
-# OVMF paths (Ubuntu)
 ovmf_code_path: "/usr/share/OVMF/OVMF_CODE.fd"
 ovmf_vars_template_path: "/usr/share/OVMF/OVMF_VARS.fd"
 demo_nvram_path: "/var/lib/libvirt/qemu/nvram/{{ demo_vm_name }}_VARS.fd"
-
-# Force passthrough GPU as primary VGA (often needed)
 demo_enable_x_vga: true
+
+host_gpu_driver: amdgpu
+host_audio_driver: snd_hda_intel

@@ -1,22 +1,18 @@
 ---
-- name: Fail if gpu_bdf not set (required for toggle scripts)
-  fail:
-    msg: >
-      gpu_bdf must be set for bind/unbind scripts.
-      Example:
-        gpu_bdf:
-          - "0000:01:00.0"
-          - "0000:01:00.1"
-  when: gpu_bdf | length < 2
+- name: Validate gpu_bdf for runtime bind/unbind scripts
+  ansible.builtin.assert:
+    that:
+      - gpu_bdf | length >= 2
+    fail_msg: "gpu_bdf must include at least GPU and HDMI audio BDFs for runtime scripts."
 
-- name: Install unbind GPU script (bind GPU -> vfio-pci)
-  template:
+- name: Install unbind GPU script
+  ansible.builtin.template:
     src: unbind_gpu.sh.j2
     dest: /usr/local/bin/unbind_gpu.sh
     mode: "0755"
 
-- name: Install rebind GPU script (bind GPU -> host drivers)
-  template:
+- name: Install rebind GPU script
+  ansible.builtin.template:
     src: rebind_gpu.sh.j2
     dest: /usr/local/bin/rebind_gpu.sh
     mode: "0755"
