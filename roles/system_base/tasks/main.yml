@@ -1,21 +1,23 @@
-# tasks/main.yml
-- import_tasks: update_and_install_packages.yml
+---
+- name: Update and install base packages
+  ansible.builtin.import_tasks: update_and_install_packages.yml
   tags: [packages]
 
-- import_tasks: install_neovim_appimage.yml
+- name: Install Neovim AppImage
+  ansible.builtin.import_tasks: install_neovim_appimage.yml
+  when: system_base_install_neovim | bool
   tags: [neovim]
 
-- import_tasks: install_docker.yml
-  tags: [docker]
-
-- import_tasks: hostname.yml
+- name: Configure hostname
+  ansible.builtin.import_tasks: hostname.yml
   tags: [hostname]
 
-- import_tasks: static_ip.yml
-  tags: [ip]
+- name: Configure static IP
+  ansible.builtin.import_tasks: static_ip.yml
+  when: system_base_manage_static_ip | bool
+  tags: [ip, network]
 
-- import_tasks: configure_git.yml
-  tags: [git]
-
-- import_tasks: setup_testing_tools.yml
+- name: Set up Ansible testing tools
+  ansible.builtin.import_tasks: setup_testing_tools.yml
+  when: system_base_setup_testing_tools | bool
   tags: [testing]

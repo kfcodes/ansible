@@ -1,9 +1,20 @@
+---
+# Reboot control
 allow_reboot: true
-install_docker: true
-docker_service_name: docker
-force_docker_reinstall: false
-docker_ubuntu_codename: "{{ ansible_distribution_release }}"
-github_username: your-github-username
-github_email: your.email@example.com
-ssh_key_comment: "{{ github_email }}"
-ssh_key_path: "{{ ansible_env.HOME }}/.ssh/id_ed25519"
+
+# Package management
+system_base_upgrade_packages: true
+system_base_package_state: present
+
+# Package lists are expected from inventory/group_vars/host_vars
+host_system_packages: []
+local_system_packages: []
+
+# Optional features
+system_base_install_neovim: true
+system_base_setup_testing_tools: false
+
+# Network/static IP
+system_base_manage_static_ip: true
+netplan_config_file: /etc/netplan/01-netcfg.yaml
+netplan_backup_file: /etc/netplan/01-netcfg.yaml.bak

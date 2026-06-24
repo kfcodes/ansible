@@ -3,15 +3,21 @@ network:
   renderer: networkd
   {{ 'ethernets' if net_type == 'ethernet' else 'wifis' }}:
     {{ net_interface }}:
-      dhcp4: {{ 'no' if has_static_ip else 'yes' }}
-      {% if has_static_ip %}
-      addresses: [{{ static_ip }}/{{ netmask }}]
-      gateway4: {{ gateway }}
+      dhcp4: {{ 'false' if has_static_ip | bool else 'true' }}
+{% if has_static_ip | bool %}
+      addresses:
+        - {{ static_ip }}/{{ netmask }}
+      routes:
+        - to: default
+          via: {{ gateway }}
       nameservers:
-        addresses: [{{ dns_servers | join(', ') }}]
-      {% endif %}
-      {% if net_type == 'wifi' and wifi_credentials is defined %}
+        addresses:
+{% for dns in dns_servers %}
+          - {{ dns }}
+{% endfor %}
+{% endif %}
+{% if net_type == 'wifi' and wifi_credentials is defined %}
       access-points:
         "{{ wifi_credentials.ssid }}":
           password: "{{ wifi_credentials.password }}"
-      {% endif %}
+{% endif %}

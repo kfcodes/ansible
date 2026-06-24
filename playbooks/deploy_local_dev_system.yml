@@ -22,25 +22,81 @@
       tags: always
 
   tasks:
+    - name: Configure GitHub SSH and Git settings only
+      ansible.builtin.include_role:
+        name: system_dev
+        tasks_from: github_access
+        apply:
+          become: true
+          tags:
+            - github_ssh
+            - git
+      tags:
+        - github_ssh
+        - git
+
+    - name: Configure development repositories
+      ansible.builtin.include_role:
+        name: system_dev
+        tasks_from: repos
+        apply:
+          become: true
+          tags:
+            - repos
+      tags:
+        - repos
+
+    - name: Configure development dotfiles
+      ansible.builtin.include_role:
+        name: system_dev
+        tasks_from: dotfiles
+        apply:
+          become: true
+          tags:
+            - dotfiles
+      tags:
+        - dotfiles
+
+    - name: Configure development env links
+      ansible.builtin.include_role:
+        name: system_dev
+        tasks_from: env_links
+        apply:
+          become: true
+          tags:
+            - env
+      tags:
+        - env
+
+    - name: Configure development application dependencies
+      ansible.builtin.include_role:
+        name: system_dev
+        tasks_from: app_setup
+        apply:
+          become: true
+          tags:
+            - apps
+      tags:
+        - apps
+
+    - name: Configure full development system
+      ansible.builtin.include_role:
+        name: system_dev
+        apply:
+          become: true
+          tags:
+            - system_dev
+      tags:
+        - system_dev
+
     - name: Configure base system
-      ansible.builtin.import_role:
+      ansible.builtin.include_role:
         name: system_base
-      become: true
+        apply:
+          become: true
+          tags:
+            - system_base
+            - base
       tags:
         - system_base
         - base
-        - packages
-        - git
-
-    - name: Configure development tools
-      ansible.builtin.import_role:
-        name: system_dev
-      become: true
-      tags:
-        - system_dev
-        - devtools
-        - github_ssh
-        - repos
-        - dotfiles
-        - env
-        - apps

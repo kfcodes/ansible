@@ -1,6 +1,5 @@
-# Installs or updates Neovim to the latest stable (0.11+) via its official AppImage.
-
-- name: Download latest Neovim AppImage via GitHub
+---
+- name: Download latest Neovim AppImage
   ansible.builtin.get_url:
     url: https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
     dest: /usr/local/bin/nvim.appimage

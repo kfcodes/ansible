@@ -1,13 +1,13 @@
-- name: Ensure required system packages are installed
+---
+- name: Ensure required testing system packages are installed
   ansible.builtin.package:
     name:
       - python3
       - python3-venv
       - python3-pip
     state: present
-  become: true
 
-- name: Create Python virtual environment
+- name: Create Python virtual environment for Ansible testing tools
   ansible.builtin.command:
     cmd: python3 -m venv /opt/molecule-venv
     creates: /opt/molecule-venv/bin/activate
@@ -15,6 +15,7 @@
 - name: Upgrade pip and tools inside venv
   ansible.builtin.command:
     cmd: /opt/molecule-venv/bin/pip install --upgrade pip setuptools wheel
+  changed_when: false
 
 - name: Install Ansible testing tools in venv
   ansible.builtin.pip:

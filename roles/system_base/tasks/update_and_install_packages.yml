@@ -1,27 +1,40 @@
-- name: Update packages (Debian)
-  apt:
-    update_cache: yes
+---
+- name: Update packages on Debian/Ubuntu
+  ansible.builtin.apt:
+    update_cache: true
     upgrade: dist
-    autoremove: yes
-    autoclean: yes
-  register: update_result
-  when: ansible_os_family == "Debian"
+    autoremove: true
+    autoclean: true
+  register: system_base_update_result
+  when:
+    - ansible_os_family == "Debian"
+    - system_base_upgrade_packages | bool
   notify: Reboot System
 
-- name: Upgrade packages (RedHat/Fedora)
-  dnf:
+- name: Upgrade packages on RedHat/Fedora
+  ansible.builtin.dnf:
     name: "*"
     state: latest
-    update_cache: yes
-  register: update_result
-  when: ansible_os_family == "RedHat"
+    update_cache: true
+  register: system_base_update_result
+  when:
+    - ansible_os_family == "RedHat"
+    - system_base_upgrade_packages | bool
   notify: Reboot System
 
 - name: Merge and deduplicate package lists
-  set_fact:
-    packages_to_install: "{{ host_system_packages | default([]) + local_system_packages | default([]) | unique }}"
+  ansible.builtin.set_fact:
+    system_base_packages_to_install: >-
+      {{
+        (
+          host_system_packages | default([])
+          +
+          local_system_packages | default([])
+        ) | unique | list
+      }}
 
-- name: Install combined packages
-  package:
-    name: "{{ packages_to_install }}"
-    state: latest
+- name: Install base packages
+  ansible.builtin.package:
+    name: "{{ system_base_packages_to_install }}"
+    state: "{{ system_base_package_state }}"
+  when: system_base_packages_to_install | length > 0

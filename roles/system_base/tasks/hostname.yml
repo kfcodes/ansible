@@ -1,31 +1,23 @@
-# ----------------------------------------
-# Set system hostname and update /etc/hosts
-# Only runs if 'hostname' is defined in host_vars
-# ----------------------------------------
-
+---
 - name: Configure system hostname if defined
+  when: hostname is defined and hostname | string | length > 0
   block:
     - name: Set system hostname
-      hostname:
-        name: "{{ host_hostname }}"
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
 
-    - name: Ensure hostname is listed in /etc/hosts (Debian-style)
-      lineinfile:
+    - name: Ensure hostname is listed in /etc/hosts on Debian-style systems
+      ansible.builtin.lineinfile:
         path: /etc/hosts
-        regexp: '^127\\.0\\.1\\.1\\s+'
-        line: "127.0.1.1 {{ host_hostname }}"
+        regexp: '^127\.0\.1\.1\s+'
+        line: "127.0.1.1 {{ hostname }}"
         state: present
-      when: ansible_facts['os_family'] == "Debian"
+      when: ansible_facts.os_family == "Debian"
 
-    - name: Ensure hostname is listed in /etc/hosts (Non-Debian fallback)
-      lineinfile:
+    - name: Ensure hostname is listed in /etc/hosts on non-Debian systems
+      ansible.builtin.lineinfile:
         path: /etc/hosts
-        regexp: '^127\\.0\\.0\\.1\\s+localhost'
-        line: "127.0.0.1 localhost {{ host_hostname }}"
+        regexp: '^127\.0\.0\.1\s+localhost'
+        line: "127.0.0.1 localhost {{ hostname }}"
         state: present
-      when: ansible_facts['os_family'] != "Debian"
-
-  when: host_hostname is defined
-
-  vars:
-    host_hostname: "{{ hostname }}"
+      when: ansible_facts.os_family != "Debian"
