@@ -1,36 +1,48 @@
-# Ansible Role: sync_resources
+# Ansible Role: backup_sync
 
-This role synchronizes resource directories between remote and local systems using `ansible.posix.synchronize`, powered by `rsync`. It supports custom job definitions, robust failure handling, and customizable rsync options.
+This role manages generic backup and synchronization workflows.
 
----
+It supports two separate workflows:
 
-## Features
-
-- Supports multiple sync jobs with flexible configuration
-- Push or pull mode per job
-- Customizable rsync options per job
-- Error-tolerant with clear failure logging
-- Summary of failed jobs at the end of play execution
+1. **Immediate sync jobs** using `ansible.posix.synchronize` / `rsync`
+2. **Scheduled backup jobs** by installing scripts and configuring cron
 
 ---
 
-## Role Variables
+## Responsibilities
 
-### `sync_jobs` (required)
+This role is responsible for:
 
-A list of jobs to run, each containing:
+- Running backup/sync jobs immediately
+- Pulling or pushing files with rsync
+- Installing backup scripts
+- Creating cron jobs for recurring backups
+- Reporting failed sync jobs
+
+This role is not responsible for:
+
+- Docker installation
+- Container deployment
+- User account creation
+- SSH login/bootstrap access
+- Base package installation
+
+---
+
+## Variables
+
+### `backup_sync_jobs`
+
+A list of sync jobs to run when the playbook runs.
+
+Legacy variable `sync_jobs` is still supported, but `backup_sync_jobs` is preferred.
 
 ```yaml
-sync_jobs:
-  - name: Sync DB backups
+backup_sync_jobs:
+  - name: Pull database backups
     src: /srv/db/backups/
-    dest: /mnt/devsync/db/
+    dest: /home/m/backups/db/
     mode: pull
     rsync_opts:
       - "--archive"
-      - "--progress"
-
-  - name: Sync App Scripts
-    src: /opt/scripts/
-    dest: /mnt/devsync/scripts/
-
+      - "--compress"

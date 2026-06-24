@@ -1,73 +1,21 @@
-- block:
-    # This list stores the names of any sync jobs that fail
-    - name: Ensure failed_syncs list is initialized
-      set_fact:
-        failed_syncs: []
-      when: failed_syncs is not defined
+---
+- name: Validate backup_sync inputs
+  ansible.builtin.import_tasks: validate.yml
+  tags: [backup_sync, sync, backup, cron, scripts]
 
-    # === Perform all defined sync jobs ===
-    - name: Synchronize resource directories with error tracking
-      block:
-        # --- Execute the sync job ---
-        - name: Run sync job '{{ item.name }}'
-          ansible.posix.synchronize:
-            src: "{{ item.src }}"
-            dest: "{{ item.dest }}"
-            mode: "{{ item.mode | default('pull') }}"
-            rsync_opts: "{{ item.rsync_opts | default(default_rsync_opts) }}"
-            checksum: true
-            delete: false
-            links: false
-            recursive: true
-            owner: false
-            group: false
-            perms: false
-            times: false
-          register: sync_result
-          failed_when: sync_result.rc != 0
-          ignore_errors: true
+- name: Run sync jobs
+  ansible.builtin.import_tasks: sync_jobs.yml
+  when: backup_sync_jobs | length > 0
+  tags: [sync, backup_sync]
 
-        # --- Report success ---
-        - name: Sync job '{{ item.name }}' succeeded
-          debug:
-            msg: "Sync succeeded: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
-          when: sync_result is defined and sync_result.rc == 0
+- name: Install backup scripts
+  ansible.builtin.import_tasks: install_scripts.yml
+  when:
+    - backup_install_scripts | bool
+    - backup_cron_jobs | length > 0
+  tags: [scripts, cron, backup]
 
-      rescue:
-        # --- Record failed job summary ---
-        - name: Record failed sync for '{{ item.name }}'
-          set_fact:
-            failed_syncs: "{{ failed_syncs + [item.name] }}"
-
-        # --- Log failure details ---
-        - name: Log sync failure for '{{ item.name }}'
-          debug:
-            msg: "Sync failed: {{ item.name }} (src={{ item.src }}, dest={{ item.dest }})"
-
-      loop: "{{ sync_jobs }}"
-      loop_control:
-        label: "{{ item.name }}"
-      become: false
-
-    # === Summary of failures ===
-    - name: Display summary of failed sync jobs
-      debug:
-        msg: |
-          The following sync jobs failed:
-          {{ failed_syncs | join(', ') }}
-      when: failed_syncs | length > 0
-
-    # === Summary of success (if all succeeded) ===
-    - name: All sync jobs completed successfully
-      debug:
-        msg: "All sync jobs completed without errors."
-      when: failed_syncs | length == 0
-
-  when: sync_jobs is defined and sync_jobs | length > 0
-
-# Entry point: only do anything if backup_cron_jobs is defined and not empty
-- name: Run backup script install and cron setup if jobs are defined
-  block:
-    - import_tasks: install_scripts.yml
-    - import_tasks: cron_jobs.yml
-  when: backup_cron_jobs is defined and backup_cron_jobs | length > 0
+- name: Configure backup cron jobs
+  ansible.builtin.import_tasks: cron_jobs.yml
+  when: backup_cron_jobs | length > 0
+  tags: [cron, backup]

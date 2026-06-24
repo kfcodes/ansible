@@ -1,9 +1,38 @@
+---
+# Sync jobs
+backup_sync_jobs: "{{ sync_jobs | default([]) }}"
+
+backup_sync_default_rsync_opts:
+  - "--archive"
+  - "--compress"
+
+backup_sync_checksum: true
+backup_sync_delete: false
+backup_sync_links: false
+backup_sync_recursive: true
+backup_sync_owner: false
+backup_sync_group: false
+backup_sync_perms: false
+backup_sync_times: false
+
+backup_sync_continue_on_error: true
+
+# Backup scripts and cron jobs
 backup_cron_user: root
 backup_script_dir: /usr/local/bin
+backup_install_scripts: true
 
 backup_cron_jobs: []
-# Each item:
-# - name: "Daily DB Backup"
-#   script: run_daily_backup.sh
-#   schedule: daily
-#   enabled: true
+# Example:
+# backup_cron_jobs:
+#   - name: "Daily database backup"
+#     script: run_daily_backup.sh
+#     special_time: daily
+#     enabled: true
+#
+# Or standard cron fields:
+#   - name: "Hourly backup"
+#     script: run_backup.sh
+#     minute: "0"
+#     hour: "*"
+#     enabled: true

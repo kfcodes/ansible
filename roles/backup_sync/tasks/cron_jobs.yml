@@ -1,39 +1,17 @@
-# === Create cron jobs for each enabled backup job ===
-
-- name: Ensure backup cron jobs are configured
-  cron:
+---
+- name: Configure backup cron jobs
+  ansible.builtin.cron:
     name: "{{ item.name }}"
-    special_time: "{{ item.schedule }}"
-    job: "{{ backup_script_dir }}/{{ item.script }} >> /var/log/{{ item.script | splitext | first }}.log 2>&1"
-    user: "{{ backup_cron_user }}"
+    user: "{{ item.user | default(backup_cron_user) }}"
+    job: >-
+      {{ item.job | default(backup_script_dir ~ '/' ~ item.script ~ ' >> /var/log/' ~ (item.script | splitext | first) ~ '.log 2>&1') }}
+    special_time: "{{ item.special_time | default(item.schedule | default(omit)) }}"
+    minute: "{{ item.minute | default(omit) }}"
+    hour: "{{ item.hour | default(omit) }}"
+    day: "{{ item.day | default(omit) }}"
+    month: "{{ item.month | default(omit) }}"
+    weekday: "{{ item.weekday | default(omit) }}"
     state: "{{ item.enabled | default(true) | bool | ternary('present', 'absent') }}"
   loop: "{{ backup_cron_jobs }}"
-
-- name: Sync application data
-  delegate_to: "{{ rsync_source_host }}"
-  synchronize:
-    src: "{{ rsync_source_path }}"
-    dest: "{{ rsync_dest_path }}"
-    rsync_opts:
-      - "--archive"
-      - "--delete"
-      - "--compress"
-    mode: push
-    ssh_args: "-o StrictHostKeyChecking=no"
-  when: rsync_enabled
-
-- name: Configure Cron job for regular DB backup
-  ansible.builtin.cron:
-    name: Backup DB every hour every hour
-    special_time: hourly
-    job: "/home/{{ scripts_directory }}/{{ regular_backup_script }}"
-    state: present
-  become: false
-
-- name: Configure Cron job for semi-regular DB backup
-  ansible.builtin.cron:
-    name: Backup DB every day
-    special_time: daily
-    job: "/home/{{ scripts_directory }}/{{ semi_regular_backup_script }}"
-    state: present
-  become: false
+  loop_control:
+    label: "{{ item.name }}"

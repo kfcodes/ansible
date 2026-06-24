@@ -1,0 +1,43 @@
+---
+- name: Validate backup_sync_jobs is a list
+  ansible.builtin.assert:
+    that:
+      - backup_sync_jobs is iterable
+      - backup_sync_jobs is not string
+    fail_msg: "backup_sync_jobs/sync_jobs must be a list."
+
+- name: Validate backup_cron_jobs is a list
+  ansible.builtin.assert:
+    that:
+      - backup_cron_jobs is iterable
+      - backup_cron_jobs is not string
+    fail_msg: "backup_cron_jobs must be a list."
+
+- name: Validate sync job entries
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name | string | length > 0
+      - item.src is defined
+      - item.src | string | length > 0
+      - item.dest is defined
+      - item.dest | string | length > 0
+      - item.mode | default('pull') in ['pull', 'push']
+      - item.rsync_opts | default(backup_sync_default_rsync_opts) is iterable
+      - item.rsync_opts | default(backup_sync_default_rsync_opts) is not string
+    fail_msg: "Each sync job requires name, src, dest, valid mode, and list rsync_opts."
+  loop: "{{ backup_sync_jobs }}"
+  loop_control:
+    label: "{{ item.name | default('undefined') }}"
+
+- name: Validate backup cron job entries
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - item.name | string | length > 0
+      - item.script is defined
+      - item.script | string | length > 0
+    fail_msg: "Each backup_cron_jobs entry requires name and script."
+  loop: "{{ backup_cron_jobs }}"
+  loop_control:
+    label: "{{ item.name | default('undefined') }}"

@@ -1,0 +1,28 @@
+---
+- name: Initialize failed sync job list
+  ansible.builtin.set_fact:
+    backup_sync_failed_jobs: []
+
+- name: Run configured sync jobs
+  ansible.builtin.include_tasks: sync_one.yml
+  loop: "{{ backup_sync_jobs }}"
+  loop_control:
+    loop_var: backup_sync_job
+    label: "{{ backup_sync_job.name }}"
+
+- name: Display summary of failed sync jobs
+  ansible.builtin.debug:
+    msg: "The following sync jobs failed: {{ backup_sync_failed_jobs | join(', ') }}"
+  when: backup_sync_failed_jobs | length > 0
+
+- name: Fail when sync jobs failed and continue_on_error is false
+  ansible.builtin.fail:
+    msg: "One or more sync jobs failed: {{ backup_sync_failed_jobs | join(', ') }}"
+  when:
+    - backup_sync_failed_jobs | length > 0
+    - not backup_sync_continue_on_error | bool
+
+- name: Report all sync jobs completed successfully
+  ansible.builtin.debug:
+    msg: "All sync jobs completed without errors."
+  when: backup_sync_failed_jobs | length == 0

@@ -1,0 +1,43 @@
+---
+- name: Test backup_sync locally
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  vars:
+    backup_sync_jobs:
+      - name: Local test sync
+        src: /tmp/backup-sync-src/
+        dest: /tmp/backup-sync-dest/
+        mode: push
+        rsync_opts:
+          - "--archive"
+
+    backup_script_dir: /tmp/backup-sync-scripts
+    backup_cron_user: root
+    backup_cron_jobs:
+      - name: Test backup cron
+        script: test_backup.sh
+        special_time: daily
+        enabled: true
+
+  pre_tasks:
+    - name: Create local sync source directory
+      ansible.builtin.file:
+        path: /tmp/backup-sync-src
+        state: directory
+        mode: "0755"
+
+    - name: Create local sync source file
+      ansible.builtin.copy:
+        dest: /tmp/backup-sync-src/example.txt
+        content: "backup sync test\n"
+        mode: "0644"
+
+  roles:
+    - role: backup_sync
+      tags:
+        - backup_sync
+        - sync
+        - cron
