@@ -1,0 +1,80 @@
+---
+- name: Converge system_dev safely
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  vars:
+    molecule_dev_home: /tmp/system-dev-molecule-home
+
+  pre_tasks:
+    - name: Remove old molecule dev home
+      ansible.builtin.file:
+        path: "{{ molecule_dev_home }}"
+        state: absent
+
+    - name: Create molecule dev home
+      ansible.builtin.file:
+        path: "{{ molecule_dev_home }}"
+        state: directory
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
+        mode: "0755"
+
+    - name: Create fake GitHub private key
+      ansible.builtin.copy:
+        dest: "{{ molecule_dev_home }}/.ssh_placeholder"
+        content: "not a real key - molecule only\n"
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
+        mode: "0600"
+
+  tasks:
+    - name: Configure safe dev environment without cloning or installing dependencies
+      ansible.builtin.include_role:
+        name: system_dev
+      vars:
+        system_dev_user: "{{ ansible_facts['user_id'] }}"
+        system_dev_home: "{{ molecule_dev_home }}"
+
+        system_dev_manage_github_ssh: true
+        system_dev_github_ssh_enabled: true
+        system_dev_github_ssh_require_key: false
+        system_dev_github_ssh_key: molecule_github_key
+
+        system_dev_manage_git_config: true
+        system_dev_manage_directories: true
+        system_dev_manage_repositories: false
+        system_dev_manage_dotfiles: true
+        system_dev_manage_env_links: true
+        system_dev_manage_app_setup: true
+        system_dev_run_dependency_installs: false
+        system_dev_fail_missing_required_links: false
+
+        dev_repositories:
+          - repo: git@example.invalid/demo.git
+            dest: ".demo"
+
+        application_directories:
+          - path: ".config"
+            attrs: "0755"
+          - path: ".local"
+            attrs: "0755"
+          - path: ".demo"
+            attrs: "0755"
+
+        dotfile_links:
+          - src: ".missing-dotfile"
+            dest: ".dotfile-link"
+            required: true
+
+        env_links:
+          - src: ".missing-env"
+            dest: ".demo/.env"
+            required: true
+
+        app_links:
+          - src: ".missing-app-data"
+            dest: ".demo/app-data"
+            required: true

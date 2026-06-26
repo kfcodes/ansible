@@ -24,6 +24,7 @@
     label: "{{ item.item.src }}"
   when:
     - not item.stat.exists
+    - system_dev_fail_missing_required_links | bool
     - item.item.required | default(true) | bool
 
 - name: Create symbolic links for dotfiles

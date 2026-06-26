@@ -24,6 +24,7 @@
     label: "{{ item.item.src }}"
   when:
     - not item.stat.exists
+    - system_dev_fail_missing_required_links | bool
     - item.item.required | default(false) | bool
 
 - name: Create .env file links for dev apps
@@ -65,6 +66,7 @@
     label: "{{ item.item.src }}"
   when:
     - not item.stat.exists
+    - system_dev_fail_missing_required_links | bool
     - item.item.required | default(false) | bool
 
 - name: Link application directories

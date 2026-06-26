@@ -8,10 +8,19 @@
   community.general.npm:
     path: "{{ system_dev_home }}/.reactapp"
     state: present
-  when: system_dev_react_package_json.stat.exists
+  when:
+    - system_dev_run_dependency_installs | bool
+    - system_dev_react_package_json.stat.exists
   become_user: "{{ system_dev_user }}"
   environment:
     HOME: "{{ system_dev_home }}"
+
+- name: Report skipped React dependency install
+  ansible.builtin.debug:
+    msg: "Skipping React dependency install."
+  when:
+    - not system_dev_run_dependency_installs | bool
+    - system_dev_react_package_json.stat.exists
 
 - name: Check FastAPI requirements file exists
   ansible.builtin.stat:
@@ -23,7 +32,16 @@
     requirements: "{{ system_dev_home }}/.fastapi/requirements.txt"
     virtualenv: "{{ system_dev_home }}/.fastapi/.venv"
     virtualenv_command: python3 -m venv
-  when: system_dev_fastapi_requirements.stat.exists
+  when:
+    - system_dev_run_dependency_installs | bool
+    - system_dev_fastapi_requirements.stat.exists
   become_user: "{{ system_dev_user }}"
   environment:
     HOME: "{{ system_dev_home }}"
+
+- name: Report skipped FastAPI dependency install
+  ansible.builtin.debug:
+    msg: "Skipping FastAPI dependency install."
+  when:
+    - not system_dev_run_dependency_installs | bool
+    - system_dev_fastapi_requirements.stat.exists

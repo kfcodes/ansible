@@ -3,6 +3,18 @@
 system_dev_user: "{{ local_usr | default(ansible_user_id | default(lookup('env', 'USER'))) }}"
 system_dev_home: "/home/{{ system_dev_user }}"
 
+# Safety/testability controls
+system_dev_manage_github_ssh: true
+system_dev_github_ssh_require_key: true
+system_dev_manage_git_config: true
+system_dev_manage_directories: true
+system_dev_manage_repositories: true
+system_dev_manage_dotfiles: true
+system_dev_manage_env_links: true
+system_dev_manage_app_setup: true
+system_dev_run_dependency_installs: true
+system_dev_fail_missing_required_links: true
+
 # Git identity
 system_dev_git_user_name: "kfcodes"
 system_dev_git_user_email: "+kfcodes@users.noreply.github.com"

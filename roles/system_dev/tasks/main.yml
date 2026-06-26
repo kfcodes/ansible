@@ -6,28 +6,36 @@
 - name: Configure GitHub SSH access
   ansible.builtin.import_tasks: github_ssh.yml
   tags: [github_ssh, ssh, git]
-  when: system_dev_github_ssh_enabled | bool
+  when:
+    - system_dev_manage_github_ssh | bool
+    - system_dev_github_ssh_enabled | bool
 
 - name: Configure Git settings
   ansible.builtin.import_tasks: git_config.yml
   tags: [github_ssh, git, git_config]
+  when: system_dev_manage_git_config | bool
 
 - name: Create base development directories
   ansible.builtin.import_tasks: directories.yml
   tags: [dirs, dotfiles, env, repos, apps]
+  when: system_dev_manage_directories | bool
 
 - name: Clone development repositories
   ansible.builtin.import_tasks: clone_repositories.yml
   tags: [repos]
+  when: system_dev_manage_repositories | bool
 
 - name: Apply dotfile configs
   ansible.builtin.import_tasks: dotfiles.yml
   tags: [dotfiles]
+  when: system_dev_manage_dotfiles | bool
 
 - name: Apply environment and application links
   ansible.builtin.import_tasks: env_links.yml
   tags: [env]
+  when: system_dev_manage_env_links | bool
 
 - name: Set up application dependencies
   ansible.builtin.import_tasks: app_setup.yml
   tags: [apps]
+  when: system_dev_manage_app_setup | bool

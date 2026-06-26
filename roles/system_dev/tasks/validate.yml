@@ -6,6 +6,14 @@
       - system_dev_user | string | length > 0
     fail_msg: "system_dev_user must be set."
 
+- name: Validate system_dev_home is absolute
+  ansible.builtin.assert:
+    that:
+      - system_dev_home is defined
+      - system_dev_home | string | length > 0
+      - system_dev_home is match('^/')
+    fail_msg: "system_dev_home must be an absolute path."
+
 - name: Check development user exists
   ansible.builtin.getent:
     database: passwd
@@ -16,7 +24,7 @@
 - name: Fail if development user does not exist
   ansible.builtin.fail:
     msg: "Development user '{{ system_dev_user }}' does not exist."
-  when: system_dev_user not in system_dev_user_getent.ansible_facts.getent_passwd
+  when: system_dev_user not in (system_dev_user_getent.ansible_facts.getent_passwd | default({}))
 
 - name: Validate dev_repositories is a list
   ansible.builtin.assert:
@@ -24,3 +32,104 @@
       - dev_repositories is iterable
       - dev_repositories is not string
     fail_msg: "dev_repositories must be a list."
+
+- name: Validate development repository definitions
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+      - item.repo is defined
+      - item.repo | string | length > 0
+      - item.dest is defined
+      - item.dest | string | length > 0
+      - item.dest is not match('^/')
+    fail_msg: "Each dev_repositories item must have repo and relative dest."
+  loop: "{{ dev_repositories }}"
+  loop_control:
+    label: "{{ item.dest | default(item.repo | default('unknown')) }}"
+
+- name: Validate application_directories is a list
+  ansible.builtin.assert:
+    that:
+      - application_directories is iterable
+      - application_directories is not string
+    fail_msg: "application_directories must be a list."
+
+- name: Validate application directory definitions
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+      - item.path is defined
+      - item.path | string | length > 0
+      - item.path is not match('^/')
+    fail_msg: "Each application_directories item must have a relative path."
+  loop: "{{ application_directories }}"
+  loop_control:
+    label: "{{ item.path | default('unknown') }}"
+
+- name: Validate dotfile/env/app link lists
+  ansible.builtin.assert:
+    that:
+      - dotfile_links is iterable
+      - dotfile_links is not string
+      - env_links is iterable
+      - env_links is not string
+      - app_links is iterable
+      - app_links is not string
+    fail_msg: "dotfile_links, env_links, and app_links must be lists."
+
+- name: Validate dotfile link definitions
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+      - item.src is defined
+      - item.src | string | length > 0
+      - item.src is not match('^/')
+      - item.dest is defined
+      - item.dest | string | length > 0
+      - item.dest is not match('^/')
+    fail_msg: "Each dotfile_links item must have relative src and dest."
+  loop: "{{ dotfile_links }}"
+  loop_control:
+    label: "{{ item.dest | default(item.src | default('unknown')) }}"
+
+- name: Validate env link definitions
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+      - item.src is defined
+      - item.src | string | length > 0
+      - item.src is not match('^/')
+      - item.dest is defined
+      - item.dest | string | length > 0
+      - item.dest is not match('^/')
+    fail_msg: "Each env_links item must have relative src and dest."
+  loop: "{{ env_links }}"
+  loop_control:
+    label: "{{ item.dest | default(item.src | default('unknown')) }}"
+
+- name: Validate app link definitions
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+      - item.src is defined
+      - item.src | string | length > 0
+      - item.src is not match('^/')
+      - item.dest is defined
+      - item.dest | string | length > 0
+      - item.dest is not match('^/')
+    fail_msg: "Each app_links item must have relative src and dest."
+  loop: "{{ app_links }}"
+  loop_control:
+    label: "{{ item.dest | default(item.src | default('unknown')) }}"
+
+- name: Validate GitHub SSH settings
+  ansible.builtin.assert:
+    that:
+      - system_dev_github_ssh_host | string | length > 0
+      - system_dev_github_ssh_hostname | string | length > 0
+      - system_dev_github_ssh_user | string | length > 0
+      - system_dev_github_ssh_key | string | length > 0
+    fail_msg: "GitHub SSH host, hostname, user, and key must be set."
+  when:
+    - system_dev_manage_github_ssh | bool
+    - system_dev_github_ssh_enabled | bool

@@ -1,0 +1,53 @@
+---
+- name: Verify system_dev safe render
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    molecule_dev_home: /tmp/system-dev-molecule-home
+
+  tasks:
+    - name: Check gitconfig exists
+      ansible.builtin.stat:
+        path: "{{ molecule_dev_home }}/.gitconfig"
+      register: molecule_gitconfig
+
+    - name: Check SSH config exists
+      ansible.builtin.stat:
+        path: "{{ molecule_dev_home }}/.ssh/config"
+      register: molecule_ssh_config
+
+    - name: Check base directory exists
+      ansible.builtin.stat:
+        path: "{{ molecule_dev_home }}/.config"
+      register: molecule_config_dir
+
+    - name: Assert managed files and dirs exist
+      ansible.builtin.assert:
+        that:
+          - molecule_gitconfig.stat.exists
+          - molecule_ssh_config.stat.exists
+          - molecule_config_dir.stat.isdir
+
+    - name: Read gitconfig
+      ansible.builtin.slurp:
+        src: "{{ molecule_dev_home }}/.gitconfig"
+      register: molecule_gitconfig_content
+
+    - name: Read SSH config
+      ansible.builtin.slurp:
+        src: "{{ molecule_dev_home }}/.ssh/config"
+      register: molecule_ssh_config_content
+
+    - name: Assert gitconfig content
+      ansible.builtin.assert:
+        that:
+          - "'[user]' in (molecule_gitconfig_content.content | b64decode)"
+          - "'insteadOf = https://github.com/' in (molecule_gitconfig_content.content | b64decode)"
+
+    - name: Assert SSH config content
+      ansible.builtin.assert:
+        that:
+          - "'Host github.com' in (molecule_ssh_config_content.content | b64decode)"
+          - "'IdentityFile ~/.ssh/molecule_github_key' in (molecule_ssh_config_content.content | b64decode)"

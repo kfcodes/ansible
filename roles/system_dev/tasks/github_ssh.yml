@@ -15,7 +15,9 @@
 - name: Fail if GitHub SSH private key is missing
   ansible.builtin.fail:
     msg: "Missing GitHub SSH private key: {{ system_dev_home }}/.ssh/{{ system_dev_github_ssh_key }}"
-  when: not system_dev_github_private_key.stat.exists
+  when:
+    - system_dev_github_ssh_require_key | bool
+    - not system_dev_github_private_key.stat.exists
 
 - name: Set GitHub SSH private key permissions
   ansible.builtin.file:
@@ -23,6 +25,7 @@
     owner: "{{ system_dev_user }}"
     group: "{{ system_dev_user }}"
     mode: "0600"
+  when: system_dev_github_private_key.stat.exists
 
 - name: Check GitHub SSH public key exists
   ansible.builtin.stat:
