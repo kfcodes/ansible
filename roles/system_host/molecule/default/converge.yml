@@ -1,0 +1,61 @@
+---
+- name: Converge system_host safely
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Validate Debian distro Docker package selection without installing packages
+      ansible.builtin.include_role:
+        name: system_host
+        tasks_from: docker_distro
+        public: true
+      vars:
+        system_host_os_family: Debian
+        system_host_docker_package_method: distro
+        system_host_docker_install_packages: false
+        system_host_docker_packages: []
+        system_host_docker_packages_debian_distro:
+          - docker.io
+          - docker-compose-plugin
+        system_host_docker_packages_redhat_distro:
+          - docker
+          - docker-compose-plugin
+
+    - name: Assert Debian distro Docker package selection
+      ansible.builtin.assert:
+        that:
+          - system_host_docker_distro_packages == ['docker.io', 'docker-compose-plugin']
+
+    - name: Validate RedHat official Docker task flow without installing packages
+      ansible.builtin.include_role:
+        name: system_host
+        tasks_from: docker_official_redhat
+      vars:
+        system_host_os_family: RedHat
+        system_host_distribution: Rocky
+        system_host_docker_install_packages: false
+        system_host_docker_redhat_manage_repo: true
+        system_host_docker_remove_conflicting_packages: true
+        system_host_docker_redhat_repo_helper_package: dnf-plugins-core
+        system_host_docker_redhat_repo_url: https://download.docker.com/linux/centos/docker-ce.repo
+        system_host_docker_official_redhat_packages:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+
+    - name: Validate role input checks
+      ansible.builtin.include_role:
+        name: system_host
+        tasks_from: validate
+      vars:
+        system_host_app_root: /tmp/system-host-molecule-apps
+        system_host_packages: []
+        system_host_packages_debian: []
+        system_host_packages_redhat: []
+        system_host_install_docker: true
+        system_host_docker_package_method: official
+        system_host_docker_users: []

@@ -1,0 +1,44 @@
+---
+- name: Remove conflicting Docker packages on RedHat-family hosts
+  ansible.builtin.package:
+    name: "{{ system_host_docker_conflicting_packages }}"
+    state: absent
+  when:
+    - system_host_docker_install_packages | bool
+    - system_host_docker_remove_conflicting_packages | bool
+
+- name: Install DNF repository helper
+  ansible.builtin.package:
+    name: "{{ system_host_docker_redhat_repo_helper_package }}"
+    state: present
+  when:
+    - system_host_docker_install_packages | bool
+    - system_host_docker_redhat_manage_repo | bool
+
+- name: Add official Docker RPM repository
+  ansible.builtin.command:
+    argv:
+      - dnf
+      - config-manager
+      - --add-repo
+      - "{{ system_host_docker_redhat_repo_url }}"
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when:
+    - system_host_docker_install_packages | bool
+    - system_host_docker_redhat_manage_repo | bool
+    - not ansible_check_mode
+
+- name: Show Docker repo check-mode notice
+  ansible.builtin.debug:
+    msg: "Skipping Docker RPM repository creation in check mode."
+  when:
+    - system_host_docker_install_packages | bool
+    - system_host_docker_redhat_manage_repo | bool
+    - ansible_check_mode
+
+- name: Install official Docker packages on RedHat-family hosts
+  ansible.builtin.package:
+    name: "{{ system_host_docker_official_redhat_packages }}"
+    state: present
+  when: system_host_docker_install_packages | bool

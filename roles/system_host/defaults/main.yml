@@ -1,6 +1,13 @@
 ---
+# OS-family helpers
+system_host_os_family: "{{ ansible_facts.get('os_family', 'Debian') }}"
+system_host_distribution: "{{ ansible_facts.get('distribution', 'Ubuntu') }}"
+
 # Server/runtime host package setup
+system_host_install_packages: true
 system_host_packages: []
+system_host_packages_debian: []
+system_host_packages_redhat: []
 
 # Application host paths
 system_host_app_root: /opt/apps
@@ -13,11 +20,61 @@ system_host_deploy_user: deploy
 
 # Docker
 system_host_install_docker: true
-system_host_docker_package_method: distro
-system_host_docker_packages:
+system_host_docker_install_packages: true
+
+# Supported:
+# - distro: use distro packages such as docker.io on Debian/Ubuntu
+# - official: use Docker upstream repository where supported
+# RedHat/Rocky-family defaults to official because distro Docker packages are inconsistent.
+system_host_docker_package_method: "{{ 'official' if system_host_os_family == 'RedHat' else 'distro' }}"
+
+system_host_docker_service_name: docker
+system_host_docker_group: docker
+system_host_docker_users:
+  - "{{ system_host_deploy_user }}"
+
+# Distro package defaults
+system_host_docker_packages_debian_distro:
   - docker.io
   - docker-compose-plugin
 
-system_host_docker_service_name: docker
-system_host_docker_users:
-  - "{{ system_host_deploy_user }}"
+system_host_docker_packages_redhat_distro:
+  - docker
+  - docker-compose-plugin
+
+# Backward-compatible package override.
+# If set non-empty, this list wins for distro installs.
+system_host_docker_packages: []
+
+# Official Docker RPM repository support
+system_host_docker_redhat_manage_repo: true
+system_host_docker_redhat_repo_helper_package: dnf-plugins-core
+
+system_host_docker_redhat_repo_url: >-
+  {{
+    'https://download.docker.com/linux/rhel/docker-ce.repo'
+    if system_host_distribution in ['RedHat', 'Red Hat Enterprise Linux']
+    else 'https://download.docker.com/linux/centos/docker-ce.repo'
+  }}
+
+system_host_docker_official_redhat_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+system_host_docker_remove_conflicting_packages: true
+system_host_docker_conflicting_packages:
+  - docker
+  - docker-client
+  - docker-client-latest
+  - docker-common
+  - docker-latest
+  - docker-latest-logrotate
+  - docker-logrotate
+  - docker-engine
+  - podman
+  - runc
+
+system_host_manage_docker_service: true

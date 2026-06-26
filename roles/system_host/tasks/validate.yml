@@ -13,6 +13,22 @@
       - system_host_packages is not string
     fail_msg: "system_host_packages must be a list."
 
+- name: Validate OS-family package lists
+  ansible.builtin.assert:
+    that:
+      - system_host_packages_debian is iterable
+      - system_host_packages_debian is not string
+      - system_host_packages_redhat is iterable
+      - system_host_packages_redhat is not string
+    fail_msg: "system_host_packages_debian and system_host_packages_redhat must be lists."
+
+- name: Validate Docker package method
+  ansible.builtin.assert:
+    that:
+      - system_host_docker_package_method in ['distro', 'official']
+    fail_msg: "system_host_docker_package_method must be one of: distro, official."
+  when: system_host_install_docker | bool
+
 - name: Validate system_host_docker_users is a list
   ansible.builtin.assert:
     that:

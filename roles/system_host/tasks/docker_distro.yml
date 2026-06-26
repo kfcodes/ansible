@@ -1,0 +1,21 @@
+---
+- name: Select distro Docker packages
+  ansible.builtin.set_fact:
+    system_host_docker_distro_packages: >-
+      {{
+        system_host_docker_packages
+        if system_host_docker_packages | length > 0
+        else system_host_docker_packages_debian_distro
+        if system_host_os_family == 'Debian'
+        else system_host_docker_packages_redhat_distro
+        if system_host_os_family == 'RedHat'
+        else []
+      }}
+
+- name: Install distro Docker packages
+  ansible.builtin.package:
+    name: "{{ system_host_docker_distro_packages }}"
+    state: present
+  when:
+  - system_host_docker_install_packages | bool
+  - system_host_docker_distro_packages | length > 0

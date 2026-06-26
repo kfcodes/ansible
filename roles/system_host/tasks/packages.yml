@@ -1,14 +1,23 @@
 ---
-- name: Install system host packages on Debian/Ubuntu
-  ansible.builtin.apt:
-    name: "{{ system_host_packages }}"
-    state: present
-    update_cache: true
-  when: ansible_os_family == "Debian"
+- name: Select OS-family system host packages
+  ansible.builtin.set_fact:
+    system_host_os_packages: >-
+      {{
+        system_host_packages_debian
+        if system_host_os_family == 'Debian'
+        else system_host_packages_redhat
+        if system_host_os_family == 'RedHat'
+        else []
+      }}
 
-- name: Install system host packages on RedHat/Fedora
-  ansible.builtin.dnf:
-    name: "{{ system_host_packages }}"
+- name: Build effective system host package list
+  ansible.builtin.set_fact:
+    system_host_effective_packages: "{{ (system_host_packages + system_host_os_packages) | unique | list }}"
+
+- name: Install system host packages
+  ansible.builtin.package:
+    name: "{{ system_host_effective_packages }}"
     state: present
-    update_cache: true
-  when: ansible_os_family == "RedHat"
+  when:
+  - system_host_install_packages | bool
+  - system_host_effective_packages | length > 0

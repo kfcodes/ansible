@@ -4,9 +4,3 @@
     name: "{{ system_host_docker_service_name }}"
     state: restarted
     enabled: true
-
-- name: Restart fail2ban
-  ansible.builtin.service:
-    name: fail2ban
-    state: restarted
-    enabled: true

@@ -1,25 +1,24 @@
 ---
-- name: Install Docker packages on Debian/Ubuntu
-  ansible.builtin.apt:
-    name: "{{ system_host_docker_packages }}"
-    state: present
-    update_cache: true
-  when:
-    - ansible_os_family == "Debian"
-    - system_host_docker_package_method == "distro"
+- name: Install Docker through distro packages
+  ansible.builtin.include_tasks: docker_distro.yml
+  when: system_host_docker_package_method == "distro"
 
-- name: Install Docker packages on RedHat/Fedora
-  ansible.builtin.dnf:
-    name: "{{ system_host_docker_packages }}"
-    state: present
-    update_cache: true
+- name: Install Docker through official Docker repository
+  ansible.builtin.include_tasks: docker_official_redhat.yml
   when:
-    - ansible_os_family == "RedHat"
-    - system_host_docker_package_method == "distro"
+    - system_host_docker_package_method == "official"
+    - system_host_os_family == "RedHat"
+
+- name: Fail when official Docker method is unsupported for this OS family
+  ansible.builtin.fail:
+    msg: "system_host_docker_package_method=official is currently implemented for RedHat-family hosts only."
+  when:
+    - system_host_docker_package_method == "official"
+    - system_host_os_family != "RedHat"
 
 - name: Ensure docker group exists
   ansible.builtin.group:
-    name: docker
+    name: "{{ system_host_docker_group }}"
     state: present
 
 - name: Check Docker user accounts exist
@@ -35,7 +34,7 @@
 - name: Add existing users to docker group
   ansible.builtin.user:
     name: "{{ item.item }}"
-    groups: docker
+    groups: "{{ system_host_docker_group }}"
     append: true
   loop: "{{ system_host_docker_user_getent.results }}"
   loop_control:
@@ -44,7 +43,7 @@
 
 - name: Report skipped Docker users that do not exist
   ansible.builtin.debug:
-    msg: "Skipped adding '{{ item.item }}' to docker group because the user does not exist."
+    msg: "Skipped adding '{{ item.item }}' to {{ system_host_docker_group }} group because the user does not exist."
   loop: "{{ system_host_docker_user_getent.results }}"
   loop_control:
     label: "{{ item.item }}"
@@ -55,3 +54,4 @@
     name: "{{ system_host_docker_service_name }}"
     state: started
     enabled: true
+  when: system_host_manage_docker_service | bool

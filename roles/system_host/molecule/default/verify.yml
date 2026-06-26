@@ -1,0 +1,29 @@
+---
+- name: Verify system_host defaults
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Load system_host defaults publicly
+      ansible.builtin.include_role:
+        name: system_host
+        tasks_from: validate
+        public: true
+      vars:
+        system_host_install_docker: false
+        system_host_packages: []
+        system_host_packages_debian: []
+        system_host_packages_redhat: []
+        system_host_docker_users: []
+
+    - name: Assert Docker package method is valid
+      ansible.builtin.assert:
+        that:
+          - system_host_docker_package_method in ['distro', 'official']
+
+    - name: Assert Docker service default is docker
+      ansible.builtin.assert:
+        that:
+          - system_host_docker_service_name == 'docker'
