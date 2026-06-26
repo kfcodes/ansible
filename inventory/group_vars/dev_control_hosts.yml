@@ -108,7 +108,7 @@ gui_utils:
   - git
   - curl
   - rsync
-  - sudo
+  - "{{ linux_admin_group }}"
   - openssh-server
   - yamllint
 
