@@ -1,0 +1,14 @@
+---
+- name: Install backup sync packages
+  ansible.builtin.package:
+    name:
+      - "{{ backup_sync_rsync_package }}"
+      - "{{ backup_sync_cron_package }}"
+    state: present
+
+- name: Enable cron service when available
+  ansible.builtin.service:
+    name: "{{ backup_sync_cron_service_name }}"
+    state: started
+    enabled: true
+  failed_when: false

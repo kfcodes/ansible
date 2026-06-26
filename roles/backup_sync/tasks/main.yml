@@ -1,4 +1,9 @@
 ---
+- name: Install backup sync dependencies
+  ansible.builtin.import_tasks: packages.yml
+  when: backup_sync_install_packages | bool
+  tags: [backup_sync, backup, sync, packages]
+
 - name: Validate backup_sync inputs
   ansible.builtin.import_tasks: validate.yml
   tags: [backup_sync, sync, backup, cron, scripts]
