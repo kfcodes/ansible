@@ -1,18 +1,19 @@
 ---
-# Package/security service setup
 system_security_install_packages: true
 
-system_security_packages:
-  - openssh-server
-  - ufw
-  - fail2ban
-  - unattended-upgrades
+# OS-family selected backends
+system_security_os_family: "{{ ansible_os_family | default('Debian') }}"
+system_security_firewall_backend: "{{ 'firewalld' if system_security_os_family == 'RedHat' else 'ufw' }}"
 
-# SSH daemon hardening
+# SSH
+system_security_ssh_package: openssh-server
+system_security_ssh_service_name: "{{ 'sshd' if system_security_os_family == 'RedHat' else 'ssh' }}"
+
 system_security_manage_sshd: true
-system_security_ssh_service_name: ssh
+system_security_sshd_config_file: /etc/ssh/sshd_config
 system_security_sshd_dropin_dir: /etc/ssh/sshd_config.d
 system_security_sshd_dropin_file: /etc/ssh/sshd_config.d/99-ansible-security.conf
+system_security_manage_sshd_include: true
 
 system_security_permit_root_login: "no"
 system_security_password_authentication: "no"
@@ -21,16 +22,26 @@ system_security_pubkey_authentication: "yes"
 system_security_x11_forwarding: "no"
 
 # Firewall
-# Keep default false so a new host is not accidentally locked out.
 system_security_enable_firewall: false
+system_security_firewall_package: "{{ 'firewalld' if system_security_firewall_backend == 'firewalld' else 'ufw' }}"
+
 system_security_firewall_default_incoming: deny
 system_security_firewall_default_outgoing: allow
+system_security_firewalld_zone: public
 
 system_security_firewall_allow_ports:
   - port: 22
     proto: tcp
     comment: SSH
 
-# Security services
-system_security_enable_fail2ban: true
+# Fail2ban
+# Debian/Ubuntu usually has fail2ban in normal repos.
+# Rocky/RHEL often needs EPEL, so default it off there unless explicitly enabled.
+system_security_enable_fail2ban: "{{ system_security_os_family == 'Debian' }}"
+system_security_fail2ban_package: fail2ban
+system_security_fail2ban_service_name: fail2ban
+
+# Automatic updates
 system_security_enable_unattended_upgrades: true
+system_security_auto_updates_package: "{{ 'dnf-automatic' if system_security_os_family == 'RedHat' else 'unattended-upgrades' }}"
+system_security_auto_updates_service_name: "{{ 'dnf-automatic.timer' if system_security_os_family == 'RedHat' else 'unattended-upgrades' }}"

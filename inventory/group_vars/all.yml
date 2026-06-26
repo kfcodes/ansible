@@ -47,3 +47,8 @@ user_defaults:
   append_groups: false
   exclusive_keys: true
   passwordless_sudo: false
+
+# Admin group differs by OS family:
+# Debian/Ubuntu/Pop!_OS: sudo
+# Fedora/Rocky/RHEL: wheel
+linux_admin_group: "{{ 'wheel' if ansible_os_family | default('Debian') == 'RedHat' else 'sudo' }}"

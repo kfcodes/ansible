@@ -7,6 +7,21 @@
     group: root
     mode: "0755"
 
+- name: Ensure sshd_config includes drop-in directory
+  ansible.builtin.lineinfile:
+    path: "{{ system_security_sshd_config_file }}"
+    regexp: '^Include\s+{{ system_security_sshd_dropin_dir | regex_escape }}/\*\.conf$'
+    line: "Include {{ system_security_sshd_dropin_dir }}/*.conf"
+    insertbefore: BOF
+    owner: root
+    group: root
+    mode: "0644"
+    create: false
+  when: system_security_manage_sshd_include | bool
+  notify:
+    - validate sshd config
+    - reload sshd
+
 - name: Install SSH daemon hardening drop-in
   ansible.builtin.template:
     src: sshd-security.conf.j2

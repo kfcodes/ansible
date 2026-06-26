@@ -1,5 +1,5 @@
 ---
-# Shared security layer for servers and kiosks
+# Shared security layer for service runtime and kiosk display hosts
 
 secure_managed_users:
   - name: "{{ deploy_user }}"
@@ -8,7 +8,7 @@ secure_managed_users:
     create_home: true
     password_lock: true
     groups:
-      - sudo
+      - "{{ linux_admin_group }}"
     append_groups: true
     passwordless_sudo: true
     authorized_keys:
@@ -25,12 +25,14 @@ system_security_kbd_interactive_authentication: "no"
 system_security_pubkey_authentication: "yes"
 system_security_x11_forwarding: "no"
 
-# Keep this true for managed secure hosts once bootstrap SSH is working.
 system_security_enable_firewall: true
 system_security_firewall_allow_ports:
   - port: 22
     proto: tcp
     comment: SSH
 
-system_security_enable_fail2ban: true
+# Debian/Ubuntu usually has fail2ban available by default.
+# Rocky/RHEL often needs EPEL first, so leave it off there unless explicitly enabled.
+system_security_enable_fail2ban: "{{ ansible_os_family | default('Debian') == 'Debian' }}"
+
 system_security_enable_unattended_upgrades: true

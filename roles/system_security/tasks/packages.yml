@@ -1,7 +1,18 @@
 ---
-- name: Install security packages on Debian/Ubuntu
-  ansible.builtin.apt:
-    name: "{{ system_security_packages }}"
+- name: Build security package list
+  ansible.builtin.set_fact:
+    system_security_effective_packages: >-
+      {{
+        [
+          system_security_ssh_package,
+          system_security_firewall_package
+        ]
+        + ([system_security_fail2ban_package] if system_security_enable_fail2ban | bool else [])
+        + ([system_security_auto_updates_package] if system_security_enable_unattended_upgrades | bool else [])
+      }}
+
+- name: Install security packages
+  ansible.builtin.package:
+    name: "{{ system_security_effective_packages | unique | list }}"
     state: present
-    update_cache: true
-  when: ansible_os_family == "Debian"
+  when: system_security_effective_packages | length > 0

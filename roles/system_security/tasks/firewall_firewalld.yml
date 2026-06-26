@@ -1,0 +1,23 @@
+---
+- name: Enable and start firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: Allow configured firewalld ports
+  ansible.posix.firewalld:
+    zone: "{{ system_security_firewalld_zone }}"
+    port: "{{ item.port }}/{{ item.proto | default('tcp') }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: "{{ system_security_firewall_allow_ports }}"
+  loop_control:
+    label: "{{ item.port }}/{{ item.proto | default('tcp') }}"
+  when: not ansible_check_mode
+
+- name: Show firewalld check-mode notice
+  ansible.builtin.debug:
+    msg: "Skipping firewalld rule changes in check mode."
+  when: ansible_check_mode

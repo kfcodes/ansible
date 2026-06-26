@@ -1,0 +1,23 @@
+---
+- name: Validate firewall backend
+  ansible.builtin.assert:
+    that:
+      - system_security_firewall_backend in ['ufw', 'firewalld']
+    fail_msg: "system_security_firewall_backend must be either 'ufw' or 'firewalld'."
+
+- name: Validate firewall port list
+  ansible.builtin.assert:
+    that:
+      - system_security_firewall_allow_ports is iterable
+      - system_security_firewall_allow_ports is not string
+    fail_msg: "system_security_firewall_allow_ports must be a list."
+
+- name: Validate firewall port entries
+  ansible.builtin.assert:
+    that:
+      - item.port is defined
+      - item.proto | default('tcp') in ['tcp', 'udp']
+    fail_msg: "Each firewall rule requires port and proto tcp/udp."
+  loop: "{{ system_security_firewall_allow_ports }}"
+  loop_control:
+    label: "{{ item.port | default('undefined') }}/{{ item.proto | default('tcp') }}"
