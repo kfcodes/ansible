@@ -3,19 +3,20 @@
   ansible.builtin.file:
     path: "{{ backup_script_dir }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ backup_script_owner }}"
+    group: "{{ backup_script_group }}"
     mode: "0755"
 
 - name: Copy backup scripts
   ansible.builtin.copy:
     src: "{{ item.src | default(item.script) }}"
     dest: "{{ backup_script_dir }}/{{ item.script }}"
-    owner: root
-    group: root
+    owner: "{{ backup_script_owner }}"
+    group: "{{ backup_script_group }}"
     mode: "{{ item.mode | default('0755') }}"
   loop: "{{ backup_cron_jobs }}"
   loop_control:
-    label: "{{ item.script }}"
+    label: "{{ item.script | default(item.name) }}"
   when:
     - item.install | default(true) | bool
+    - item.script is defined

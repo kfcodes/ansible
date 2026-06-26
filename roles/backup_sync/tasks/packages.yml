@@ -12,3 +12,13 @@
     state: started
     enabled: true
   failed_when: false
+  when:
+    - backup_sync_manage_cron_service | bool
+    - not ansible_check_mode
+
+- name: Report skipped cron service management in check mode
+  ansible.builtin.debug:
+    msg: "Skipping cron service management in check mode."
+  when:
+    - backup_sync_manage_cron_service | bool
+    - ansible_check_mode

@@ -13,9 +13,25 @@
       - backup_cron_jobs is not string
     fail_msg: "backup_cron_jobs must be a list."
 
+- name: Validate backup_sync_default_rsync_opts is a list
+  ansible.builtin.assert:
+    that:
+      - backup_sync_default_rsync_opts is iterable
+      - backup_sync_default_rsync_opts is not string
+    fail_msg: "backup_sync_default_rsync_opts must be a list."
+
+- name: Validate backup script directory is absolute
+  ansible.builtin.assert:
+    that:
+      - backup_script_dir is defined
+      - backup_script_dir | string | length > 0
+      - backup_script_dir is match('^/')
+    fail_msg: "backup_script_dir must be an absolute path."
+
 - name: Validate sync job entries
   ansible.builtin.assert:
     that:
+      - item is mapping
       - item.name is defined
       - item.name | string | length > 0
       - item.src is defined
@@ -33,11 +49,22 @@
 - name: Validate backup cron job entries
   ansible.builtin.assert:
     that:
+      - item is mapping
       - item.name is defined
       - item.name | string | length > 0
-      - item.script is defined
-      - item.script | string | length > 0
-    fail_msg: "Each backup_cron_jobs entry requires name and script."
+      - item.job is defined or item.script is defined
+      - item.special_time is defined or item.schedule is defined or item.minute is defined or item.hour is defined or item.day is defined or item.month is defined or item.weekday is defined
+    fail_msg: "Each backup_cron_jobs entry requires name, job or script, and an explicit schedule."
   loop: "{{ backup_cron_jobs }}"
   loop_control:
     label: "{{ item.name | default('undefined') }}"
+
+- name: Validate backup cron scripts are safe filenames
+  ansible.builtin.assert:
+    that:
+      - item.script is not search('/')
+    fail_msg: "backup_cron_jobs script must be a filename, not a path: {{ item.script }}"
+  loop: "{{ backup_cron_jobs }}"
+  loop_control:
+    label: "{{ item.name | default('undefined') }}"
+  when: item.script is defined

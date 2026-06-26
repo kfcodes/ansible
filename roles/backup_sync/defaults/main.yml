@@ -1,11 +1,17 @@
 ---
+backup_sync_os_family: "{{ ansible_facts.get('os_family', 'Debian') }}"
+
 backup_sync_jobs: "{{ sync_jobs | default([]) }}"
 
 backup_sync_install_packages: true
+backup_sync_manage_cron_service: true
+backup_sync_run_sync_jobs: true
+backup_sync_allow_check_mode_sync: false
+
 
 backup_sync_rsync_package: rsync
-backup_sync_cron_package: "{{ 'cronie' if ansible_facts.get('os_family', 'Debian') == 'RedHat' else 'cron' }}"
-backup_sync_cron_service_name: "{{ 'crond' if ansible_facts.get('os_family', 'Debian') == 'RedHat' else 'cron' }}"
+backup_sync_cron_package: "{{ 'cronie' if backup_sync_os_family == 'RedHat' else 'cron' }}"
+backup_sync_cron_service_name: "{{ 'crond' if backup_sync_os_family == 'RedHat' else 'cron' }}"
 
 backup_sync_default_rsync_opts:
   - "--archive"
@@ -24,6 +30,9 @@ backup_sync_continue_on_error: true
 
 backup_cron_user: root
 backup_script_dir: /usr/local/bin
+backup_script_owner: root
+backup_script_group: root
 backup_install_scripts: true
 
 backup_cron_jobs: []
+backup_sync_manage_cron_jobs: true

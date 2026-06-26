@@ -1,16 +1,18 @@
 ---
+- name: Validate backup_sync inputs
+  ansible.builtin.import_tasks: validate.yml
+  tags: [backup_sync, sync, backup, cron, scripts, always]
+
 - name: Install backup sync dependencies
   ansible.builtin.import_tasks: packages.yml
   when: backup_sync_install_packages | bool
   tags: [backup_sync, backup, sync, packages]
 
-- name: Validate backup_sync inputs
-  ansible.builtin.import_tasks: validate.yml
-  tags: [backup_sync, sync, backup, cron, scripts]
-
 - name: Run sync jobs
   ansible.builtin.import_tasks: sync_jobs.yml
-  when: backup_sync_jobs | length > 0
+  when:
+    - backup_sync_run_sync_jobs | bool
+    - backup_sync_jobs | length > 0
   tags: [sync, backup_sync]
 
 - name: Install backup scripts
@@ -22,5 +24,7 @@
 
 - name: Configure backup cron jobs
   ansible.builtin.import_tasks: cron_jobs.yml
-  when: backup_cron_jobs | length > 0
+  when:
+    - backup_sync_manage_cron_jobs | bool
+    - backup_cron_jobs | length > 0
   tags: [cron, backup]

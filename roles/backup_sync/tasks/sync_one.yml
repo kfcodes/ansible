@@ -1,4 +1,11 @@
 ---
+- name: Report skipped sync job in check mode
+  ansible.builtin.debug:
+    msg: "Skipping sync job in check mode: {{ backup_sync_job.name }}"
+  when:
+    - ansible_check_mode
+    - not backup_sync_allow_check_mode_sync | bool
+
 - name: Run sync job
   ansible.posix.synchronize:
     src: "{{ backup_sync_job.src }}"
@@ -17,16 +24,22 @@
   register: backup_sync_result
   failed_when: false
   become: "{{ backup_sync_job.become | default(false) }}"
+  when:
+    - not ansible_check_mode or backup_sync_allow_check_mode_sync | bool
 
 - name: Report successful sync job
   ansible.builtin.debug:
     msg: "Sync succeeded: {{ backup_sync_job.name }} (src={{ backup_sync_job.src }}, dest={{ backup_sync_job.dest }})"
-  when: backup_sync_result.rc | default(0) == 0
+  when:
+    - backup_sync_result is defined
+    - backup_sync_result.rc | default(0) == 0
 
 - name: Record failed sync job
   ansible.builtin.set_fact:
     backup_sync_failed_jobs: "{{ backup_sync_failed_jobs + [backup_sync_job.name] }}"
-  when: backup_sync_result.rc | default(0) != 0
+  when:
+    - backup_sync_result is defined
+    - backup_sync_result.rc | default(0) != 0
 
 - name: Report failed sync job
   ansible.builtin.debug:
@@ -36,4 +49,6 @@
       - "dest={{ backup_sync_job.dest }}"
       - "rc={{ backup_sync_result.rc | default('unknown') }}"
       - "{{ backup_sync_result.msg | default('') }}"
-  when: backup_sync_result.rc | default(0) != 0
+  when:
+    - backup_sync_result is defined
+    - backup_sync_result.rc | default(0) != 0
