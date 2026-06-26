@@ -1,8 +1,16 @@
 ---
 managed_users: []
 
+# Manage authorized_keys entries for managed users.
+# Keep enabled by default because deploy/bootstrap users rely on this.
+user_accounts_enable_key_mgmt: true
+
 user_account_generate_ssh_keys: false
 ssh_keys_to_generate: []
+
+# Preferred variable for control-node SSH key generation.
+# Defaults to the older ssh_keys_to_generate variable for backward compatibility.
+user_accounts_generate_keys: "{{ ssh_keys_to_generate | default([]) }}"
 
 ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
 ssh_key_type: ed25519
@@ -26,3 +34,7 @@ user_defaults:
 
 user_account_sudoers_dir: /etc/sudoers.d
 user_account_validate_sudoers: true
+
+# Manage per-user SSH client config files.
+# Disabled by default; GitHub/dev-specific SSH config belongs to system_dev.
+user_accounts_manage_ssh_config: false

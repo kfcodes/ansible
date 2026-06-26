@@ -1,0 +1,39 @@
+---
+- name: Verify user_account
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: true
+
+  vars:
+    molecule_user_name: ansible_molecule_user
+    linux_admin_group: "{{ 'wheel' if ansible_facts['os_family'] == 'RedHat' else 'sudo' }}"
+
+  tasks:
+    - name: Check molecule user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ molecule_user_name }}"
+
+    - name: Assert molecule user exists
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.getent_passwd[molecule_user_name] is defined
+
+    - name: Check molecule user groups
+      ansible.builtin.command:
+        cmd: "id -nG {{ molecule_user_name }}"
+      changed_when: false
+      register: molecule_user_groups
+
+    - name: Assert molecule user is in admin group
+      ansible.builtin.assert:
+        that:
+          - linux_admin_group in molecule_user_groups.stdout.split()
+
+    - name: Verify molecule user has passwordless sudo
+      ansible.builtin.command:
+        cmd: sudo -n true
+      become: true
+      become_user: "{{ molecule_user_name }}"
+      changed_when: false

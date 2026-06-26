@@ -1,0 +1,22 @@
+---
+- name: Cleanup user_account molecule test
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+
+  vars:
+    molecule_user_name: ansible_molecule_user
+
+  tasks:
+    - name: Remove molecule sudoers file
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/{{ molecule_user_name }}"
+        state: absent
+
+    - name: Remove molecule test user
+      ansible.builtin.user:
+        name: "{{ molecule_user_name }}"
+        state: absent
+        remove: true
+      failed_when: false
