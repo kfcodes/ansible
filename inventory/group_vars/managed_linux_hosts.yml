@@ -13,4 +13,9 @@ common_system_packages:
   - curl
   - git
   - python3
+
+common_system_packages_debian:
+  - python3-pip
+
+common_system_packages_redhat:
   - python3-pip

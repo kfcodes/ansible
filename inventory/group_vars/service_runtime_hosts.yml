@@ -1,5 +1,5 @@
 ---
-# Server/runtime hosts: API/data/container machines only
+# Service runtime hosts: machines that run containers/services
 
 allow_reboot: true
 
@@ -15,8 +15,14 @@ system_host_app_root_owner: root
 system_host_app_root_group: root
 system_host_app_root_mode: "0755"
 
-# Server-only base packages
-server_system_packages:
+# Portable server packages
+server_system_packages: []
+
+# Debian-only extras
+server_system_packages_debian:
   - ripgrep
   - ranger
   - ttf-mscorefonts-installer
+
+# Keep RedHat extras conservative until repos/EPEL are configured.
+server_system_packages_redhat: []

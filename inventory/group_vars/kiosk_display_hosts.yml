@@ -1,9 +1,13 @@
 ---
-# Kiosk hosts: browser/interface machines only
+# Kiosk display hosts: browser/interface machines only
 
 # Base packages needed before kiosk role packages
-kiosk_system_packages:
+kiosk_system_packages: []
+
+kiosk_system_packages_debian:
   - x11-xserver-utils
+
+kiosk_system_packages_redhat: []
 
 # Kiosk target user
 kiosk_user: kiosk
