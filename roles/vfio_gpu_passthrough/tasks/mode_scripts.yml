@@ -1,24 +1,30 @@
 ---
+- name: Ensure VFIO script install directory exists
+  ansible.builtin.file:
+    path: "{{ vfio_script_install_dir }}"
+    state: directory
+    mode: "0755"
+
 - name: Install vfio-enable
   ansible.builtin.template:
     src: vfio-enable.sh.j2
-    dest: /usr/local/bin/vfio-enable
+    dest: "{{ vfio_script_install_dir }}/vfio-enable"
     mode: "0755"
 
 - name: Install vfio-disable
   ansible.builtin.template:
     src: vfio-disable.sh.j2
-    dest: /usr/local/bin/vfio-disable
+    dest: "{{ vfio_script_install_dir }}/vfio-disable"
     mode: "0755"
 
 - name: Install vfio-status
   ansible.builtin.template:
     src: vfio-status.sh.j2
-    dest: /usr/local/bin/vfio-status
+    dest: "{{ vfio_script_install_dir }}/vfio-status"
     mode: "0755"
 
 - name: Install vfio wrapper command
   ansible.builtin.template:
     src: vfio.sh.j2
-    dest: /usr/local/bin/vfio
+    dest: "{{ vfio_script_install_dir }}/vfio"
     mode: "0755"

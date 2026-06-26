@@ -1,0 +1,64 @@
+---
+- name: Verify VFIO rendered files
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    vfio_molecule_root: /tmp/vfio-molecule
+
+  tasks:
+    - name: Check rendered files
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - "{{ vfio_molecule_root }}/etc/default/grub"
+        - "{{ vfio_molecule_root }}/etc/modules-load.d/vfio.conf"
+        - "{{ vfio_molecule_root }}/etc/initramfs-tools/modules"
+        - "{{ vfio_molecule_root }}/etc/modprobe.d/vfio.conf"
+        - "{{ vfio_molecule_root }}/usr/local/bin/vfio-enable"
+        - "{{ vfio_molecule_root }}/usr/local/bin/vfio-disable"
+        - "{{ vfio_molecule_root }}/usr/local/bin/vfio-status"
+        - "{{ vfio_molecule_root }}/usr/local/bin/vfio"
+        - "{{ vfio_molecule_root }}/usr/local/bin/unbind_gpu.sh"
+        - "{{ vfio_molecule_root }}/usr/local/bin/rebind_gpu.sh"
+      register: vfio_rendered_files
+
+    - name: Assert rendered files exist
+      ansible.builtin.assert:
+        that:
+          - vfio_rendered_files.results | map(attribute='stat.exists') | min
+
+    - name: Read rendered GRUB file
+      ansible.builtin.slurp:
+        src: "{{ vfio_molecule_root }}/etc/default/grub"
+      register: vfio_grub_content
+
+    - name: Read rendered modprobe file
+      ansible.builtin.slurp:
+        src: "{{ vfio_molecule_root }}/etc/modprobe.d/vfio.conf"
+      register: vfio_modprobe_content
+
+    - name: Read rendered enable script
+      ansible.builtin.slurp:
+        src: "{{ vfio_molecule_root }}/usr/local/bin/vfio-enable"
+      register: vfio_enable_content
+
+    - name: Assert rendered GRUB content
+      ansible.builtin.assert:
+        that:
+          - "'intel_iommu=on' in (vfio_grub_content.content | b64decode)"
+          - "'iommu=pt' in (vfio_grub_content.content | b64decode)"
+          - "'vfio-pci.ids=1002:67ef,1002:aae0' in (vfio_grub_content.content | b64decode)"
+          - "'video=efifb:off' in (vfio_grub_content.content | b64decode)"
+
+    - name: Assert rendered modprobe content
+      ansible.builtin.assert:
+        that:
+          - "'options vfio-pci ids=1002:67ef,1002:aae0' in (vfio_modprobe_content.content | b64decode)"
+
+    - name: Assert rendered script content
+      ansible.builtin.assert:
+        that:
+          - "'/tmp/vfio-molecule/etc/default/grub' in (vfio_enable_content.content | b64decode)"
+          - "'/bin/true' in (vfio_enable_content.content | b64decode)"

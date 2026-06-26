@@ -1,4 +1,11 @@
 ---
+# OS support
+vfio_os_family: "{{ ansible_facts.get('os_family', 'Debian') }}"
+vfio_supported_os_families:
+  - Debian
+vfio_fail_on_unsupported_os: true
+vfio_is_supported_os: "{{ vfio_os_family in vfio_supported_os_families }}"
+
 # Mode:
 # - host: keep GPU available to Linux host
 # - vfio: bind GPU to vfio-pci at boot for passthrough
@@ -13,6 +20,24 @@ vfio_install_runtime_scripts: false
 vfio_allow_reboot: false
 vfio_create_vm: false
 vfio_create_demo_vm: false
+
+# Required for real boot/module changes outside check mode.
+# This prevents accidental GRUB/initramfs/module edits.
+vfio_confirm_boot_changes: false
+vfio_boot_changes_requested: "{{ (vfio_apply_grub | bool) or (vfio_configure_modules | bool) }}"
+vfio_run_bootloader_handlers: true
+
+# Paths. Override these in tests to avoid touching /etc and /usr/local.
+vfio_grub_default_path: /etc/default/grub
+vfio_modules_load_path: /etc/modules-load.d/vfio.conf
+vfio_initramfs_modules_path: /etc/initramfs-tools/modules
+vfio_modprobe_conf_path: /etc/modprobe.d/vfio.conf
+vfio_blacklist_conf_path: /etc/modprobe.d/blacklist-host-gpu.conf
+vfio_script_install_dir: /usr/local/bin
+
+# Commands
+vfio_grub_update_command: update-grub
+vfio_initramfs_update_command: update-initramfs -u
 
 # PCI IDs for passthrough GPU + HDMI audio function.
 # Format: "dddd:dddd"
@@ -30,18 +55,17 @@ iommu_platform: "intel"
 # GRUB args always present
 grub_cmdline_always:
   - "iommu=pt"
-  - "intel_iommu=on"
 
 # VFIO-only GRUB args
 grub_cmdline_vfio_only:
   - "vfio-pci.ids={{ gpu_pci_ids | join(',') }}"
   - "rd.driver.pre=vfio-pci"
-  - "modprobe.blacklist=amdgpu"
+  - "modprobe.blacklist={{ host_gpu_driver }}"
 
 disable_efi_framebuffer: true
 blacklist_host_gpu_drivers: false
 
-virtualization_packages:
+virtualization_packages_debian:
   - qemu-system-x86
   - qemu-utils
   - ovmf
@@ -51,6 +75,15 @@ virtualization_packages:
   - bridge-utils
   - cpu-checker
   - linux-firmware
+
+virtualization_packages_redhat: []
+
+# Backward-compatible package variable.
+virtualization_packages: "{{ virtualization_packages_debian if vfio_os_family == 'Debian' else virtualization_packages_redhat }}"
+
+vfio_libvirt_service_name: libvirtd
+vfio_manage_libvirt_service: true
+vfio_manage_libvirt_groups: true
 
 # Users to add to libvirt/kvm groups
 vfio_libvirt_users: []

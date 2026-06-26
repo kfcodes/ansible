@@ -1,10 +1,22 @@
 ---
-- name: Read /etc/default/grub
+- name: Ensure GRUB config parent directory exists
+  ansible.builtin.file:
+    path: "{{ vfio_grub_default_path | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure GRUB defaults file exists
+  ansible.builtin.file:
+    path: "{{ vfio_grub_default_path }}"
+    state: touch
+    mode: "0644"
+
+- name: Read GRUB defaults file
   ansible.builtin.slurp:
-    path: /etc/default/grub
+    path: "{{ vfio_grub_default_path }}"
   register: grub_file
 
-- name: Decode grub file content
+- name: Decode GRUB file content
   ansible.builtin.set_fact:
     grub_file_text: "{{ grub_file.content | b64decode }}"
 
@@ -32,8 +44,7 @@
         grub_cmdline_current
         | reject('search','^vfio-pci\\.ids=')
         | reject('equalto','rd.driver.pre=vfio-pci')
-        | reject('equalto','modprobe.blacklist=amdgpu')
-        | reject('equalto','modprobe.blacklist=snd_hda_intel')
+        | reject('search','^modprobe\\.blacklist=')
         | reject('equalto','video=efifb:off')
         | reject('equalto','intel_iommu=on')
         | reject('equalto','amd_iommu=on')
@@ -48,3 +59,38 @@
         ['iommu=pt', 'intel_iommu=on']
         if iommu_platform == 'intel'
         else ['iommu=pt', 'amd_iommu=on']
+      }}
+
+- name: Build effective VFIO-only GRUB args
+  ansible.builtin.set_fact:
+    vfio_effective_vfio_grub_args: >-
+      {{
+        grub_cmdline_vfio_only
+        + (['video=efifb:off'] if disable_efi_framebuffer | bool else [])
+      }}
+
+- name: Build final GRUB cmdline
+  ansible.builtin.set_fact:
+    grub_cmdline_final: >-
+      {{
+        (
+          grub_cmdline_current
+          + vfio_platform_iommu_args
+          + (vfio_effective_vfio_grub_args if vfio_mode == 'vfio' else [])
+        ) | unique | list
+      }}
+
+- name: Set GRUB_CMDLINE_LINUX_DEFAULT
+  ansible.builtin.lineinfile:
+    path: "{{ vfio_grub_default_path }}"
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ grub_cmdline_final | join(" ") }}"'
+    create: true
+    mode: "0644"
+  notify:
+    - update-grub
+    - reboot-host
+
+- name: Show final GRUB cmdline
+  ansible.builtin.debug:
+    msg: "GRUB_CMDLINE_LINUX_DEFAULT={{ grub_cmdline_final | join(' ') }}"

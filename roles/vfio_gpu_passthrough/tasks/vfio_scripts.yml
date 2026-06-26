@@ -5,14 +5,20 @@
       - gpu_bdf | length >= 2
     fail_msg: "gpu_bdf must include at least GPU and HDMI audio BDFs for runtime scripts."
 
+- name: Ensure VFIO script install directory exists
+  ansible.builtin.file:
+    path: "{{ vfio_script_install_dir }}"
+    state: directory
+    mode: "0755"
+
 - name: Install unbind GPU script
   ansible.builtin.template:
     src: unbind_gpu.sh.j2
-    dest: /usr/local/bin/unbind_gpu.sh
+    dest: "{{ vfio_script_install_dir }}/unbind_gpu.sh"
     mode: "0755"
 
 - name: Install rebind GPU script
   ansible.builtin.template:
     src: rebind_gpu.sh.j2
-    dest: /usr/local/bin/rebind_gpu.sh
+    dest: "{{ vfio_script_install_dir }}/rebind_gpu.sh"
     mode: "0755"

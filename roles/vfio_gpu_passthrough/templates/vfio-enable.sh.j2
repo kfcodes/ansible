@@ -9,7 +9,7 @@ fi
 echo "[vfio-enable] Switching to VFIO mode..."
 
 IDS="{{ gpu_pci_ids | join(',') }}"
-GRUB_FILE="/etc/default/grub"
+GRUB_FILE="{{ vfio_grub_default_path }}"
 ALLOW_REBOOT="{{ 'true' if vfio_allow_reboot | bool else 'false' }}"
 
 get_cmdline() {
@@ -26,8 +26,7 @@ strip_tokens() {
   echo "$1" \
     | sed -E 's/\<vfio-pci\.ids=[^ ]+\>//g' \
     | sed -E 's/\<rd\.driver\.pre=vfio-pci\>//g' \
-    | sed -E 's/\<modprobe\.blacklist=amdgpu\>//g' \
-    | sed -E 's/\<modprobe\.blacklist=snd_hda_intel\>//g' \
+    | sed -E 's/\<modprobe\.blacklist=[^ ]+\>//g' \
     | sed -E 's/\<video=efifb:off\>//g' \
     | sed -E 's/\<intel_iommu=on\>//g' \
     | sed -E 's/\<amd_iommu=on\>//g' \
@@ -58,7 +57,7 @@ cmd="$(ensure_token "$cmd" "amd_iommu=on")"
 
 cmd="$(ensure_token "$cmd" "vfio-pci.ids=${IDS}")"
 cmd="$(ensure_token "$cmd" "rd.driver.pre=vfio-pci")"
-cmd="$(ensure_token "$cmd" "modprobe.blacklist=amdgpu")"
+cmd="$(ensure_token "$cmd" "modprobe.blacklist={{ host_gpu_driver }}")"
 
 {% if disable_efi_framebuffer | bool %}
 cmd="$(ensure_token "$cmd" "video=efifb:off")"
@@ -69,12 +68,12 @@ set_cmdline "$cmd"
 echo "[vfio-enable] GRUB cmdline now:"
 grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
 
-update-grub
-update-initramfs -u
+{{ vfio_grub_update_command }}
+{{ vfio_initramfs_update_command }}
 
 if [[ "$ALLOW_REBOOT" == "true" ]]; then
   echo "[vfio-enable] Rebooting..."
   reboot
 else
-  e
+  echo "[vfio-enable] Reboot disabled. Reboot manually when ready."
 fi

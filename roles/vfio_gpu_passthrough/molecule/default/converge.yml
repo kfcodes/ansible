@@ -1,0 +1,67 @@
+---
+- name: Converge vfio_gpu_passthrough safely
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  vars:
+    vfio_molecule_root: /tmp/vfio-molecule
+
+  pre_tasks:
+    - name: Remove old molecule root
+      ansible.builtin.file:
+        path: "{{ vfio_molecule_root }}"
+        state: absent
+
+    - name: Create molecule GRUB directory
+      ansible.builtin.file:
+        path: "{{ vfio_molecule_root }}/etc/default"
+        state: directory
+        mode: "0755"
+
+    - name: Create molecule GRUB defaults file
+      ansible.builtin.copy:
+        dest: "{{ vfio_molecule_root }}/etc/default/grub"
+        mode: "0644"
+        content: |
+          GRUB_DEFAULT=0
+          GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+
+  tasks:
+    - name: Render VFIO boot/module/script config under tmp only
+      ansible.builtin.include_role:
+        name: vfio_gpu_passthrough
+      vars:
+        vfio_os_family: Debian
+        vfio_confirm_boot_changes: true
+        vfio_run_bootloader_handlers: false
+
+        vfio_install_packages: false
+        vfio_configure_modules: true
+        vfio_apply_grub: true
+        vfio_install_scripts: true
+        vfio_install_runtime_scripts: true
+        vfio_create_vm: false
+        vfio_create_demo_vm: false
+        create_vm: false
+        create_demo_vm: false
+
+        vfio_mode: vfio
+        iommu_platform: intel
+        gpu_pci_ids:
+          - "1002:67ef"
+          - "1002:aae0"
+        gpu_bdf:
+          - "0000:01:00.0"
+          - "0000:01:00.1"
+
+        vfio_grub_default_path: "{{ vfio_molecule_root }}/etc/default/grub"
+        vfio_modules_load_path: "{{ vfio_molecule_root }}/etc/modules-load.d/vfio.conf"
+        vfio_initramfs_modules_path: "{{ vfio_molecule_root }}/etc/initramfs-tools/modules"
+        vfio_modprobe_conf_path: "{{ vfio_molecule_root }}/etc/modprobe.d/vfio.conf"
+        vfio_blacklist_conf_path: "{{ vfio_molecule_root }}/etc/modprobe.d/blacklist-host-gpu.conf"
+        vfio_script_install_dir: "{{ vfio_molecule_root }}/usr/local/bin"
+
+        vfio_grub_update_command: /bin/true
+        vfio_initramfs_update_command: /bin/true

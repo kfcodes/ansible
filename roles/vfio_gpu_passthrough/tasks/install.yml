@@ -1,33 +1,65 @@
 ---
-- name: Install KVM/libvirt packages on Debian/Ubuntu
-  ansible.builtin.apt:
+- name: Install KVM/libvirt packages
+  ansible.builtin.package:
     name: "{{ virtualization_packages }}"
     state: present
-    update_cache: true
-  when: ansible_os_family == "Debian"
+  when: virtualization_packages | length > 0
 
-- name: Enable and start libvirtd
+- name: Enable and start libvirt service
   ansible.builtin.service:
-    name: libvirtd
+    name: "{{ vfio_libvirt_service_name }}"
     state: started
     enabled: true
+  when:
+    - vfio_manage_libvirt_service | bool
+    - not ansible_check_mode
+
+- name: Report skipped libvirt service management in check mode
+  ansible.builtin.debug:
+    msg: "Skipping libvirt service management in check mode."
+  when:
+    - vfio_manage_libvirt_service | bool
+    - ansible_check_mode
 
 - name: Ensure libvirt group exists
   ansible.builtin.group:
     name: libvirt
     state: present
+  when: vfio_manage_libvirt_groups | bool
 
 - name: Ensure kvm group exists
   ansible.builtin.group:
     name: kvm
     state: present
+  when: vfio_manage_libvirt_groups | bool
 
-- name: Add configured users to libvirt and kvm groups
-  ansible.builtin.user:
-    name: "{{ item }}"
-    groups: libvirt,kvm
-    append: true
+- name: Check configured libvirt users exist
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item }}"
+    fail_key: false
   loop: "{{ vfio_libvirt_users }}"
   loop_control:
     label: "{{ item }}"
-  when: vfio_libvirt_users | length > 0
+  register: vfio_libvirt_user_getent
+  when:
+    - vfio_manage_libvirt_groups | bool
+    - vfio_libvirt_users | length > 0
+
+- name: Add existing users to libvirt and kvm groups
+  ansible.builtin.user:
+    name: "{{ item.item }}"
+    groups: libvirt,kvm
+    append: true
+  loop: "{{ vfio_libvirt_user_getent.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.ansible_facts.getent_passwd | default({}) | length > 0
+
+- name: Report skipped missing libvirt users
+  ansible.builtin.debug:
+    msg: "Skipped adding '{{ item.item }}' to libvirt/kvm because the user does not exist."
+  loop: "{{ vfio_libvirt_user_getent.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: item.ansible_facts.getent_passwd | default({}) | length == 0

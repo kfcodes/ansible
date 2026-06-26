@@ -8,7 +8,7 @@ fi
 
 echo "[vfio-disable] Switching to HOST mode..."
 
-GRUB_FILE="/etc/default/grub"
+GRUB_FILE="{{ vfio_grub_default_path }}"
 ALLOW_REBOOT="{{ 'true' if vfio_allow_reboot | bool else 'false' }}"
 
 get_cmdline() {
@@ -25,8 +25,7 @@ strip_tokens() {
   echo "$1" \
     | sed -E 's/\<vfio-pci\.ids=[^ ]+\>//g' \
     | sed -E 's/\<rd\.driver\.pre=vfio-pci\>//g' \
-    | sed -E 's/\<modprobe\.blacklist=amdgpu\>//g' \
-    | sed -E 's/\<modprobe\.blacklist=snd_hda_intel\>//g' \
+    | sed -E 's/\<modprobe\.blacklist=[^ ]+\>//g' \
     | sed -E 's/\<video=efifb:off\>//g' \
     | sed -E 's/\<intel_iommu=on\>//g' \
     | sed -E 's/\<amd_iommu=on\>//g' \
@@ -52,3 +51,20 @@ cmd="$(ensure_token "$cmd" "iommu=pt")"
 {% if iommu_platform == "intel" %}
 cmd="$(ensure_token "$cmd" "intel_iommu=on")"
 {% else %}
+cmd="$(ensure_token "$cmd" "amd_iommu=on")"
+{% endif %}
+
+set_cmdline "$cmd"
+
+echo "[vfio-disable] GRUB cmdline now:"
+grep '^GRUB_CMDLINE_LINUX_DEFAULT=' "$GRUB_FILE" || true
+
+{{ vfio_grub_update_command }}
+{{ vfio_initramfs_update_command }}
+
+if [[ "$ALLOW_REBOOT" == "true" ]]; then
+  echo "[vfio-disable] Rebooting..."
+  reboot
+else
+  echo "[vfio-disable] Reboot disabled. Reboot manually when ready."
+fi

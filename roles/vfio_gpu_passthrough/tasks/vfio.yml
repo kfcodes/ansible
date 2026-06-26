@@ -1,7 +1,18 @@
 ---
+- name: Ensure VFIO config parent directories exist
+  ansible.builtin.file:
+    path: "{{ item | dirname }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ vfio_modules_load_path }}"
+    - "{{ vfio_initramfs_modules_path }}"
+    - "{{ vfio_modprobe_conf_path }}"
+    - "{{ vfio_blacklist_conf_path }}"
+
 - name: Ensure VFIO modules load at boot
   ansible.builtin.copy:
-    dest: /etc/modules-load.d/vfio.conf
+    dest: "{{ vfio_modules_load_path }}"
     mode: "0644"
     content: |
       vfio
@@ -13,7 +24,7 @@
 
 - name: Ensure VFIO modules are included in initramfs on Ubuntu/Debian
   ansible.builtin.blockinfile:
-    path: /etc/initramfs-tools/modules
+    path: "{{ vfio_initramfs_modules_path }}"
     create: true
     marker: "# {mark} ANSIBLE VFIO MODULES"
     block: |
@@ -21,21 +32,21 @@
       vfio_pci
       vfio_iommu_type1
       vfio_virqfd
-  when: ansible_os_family == "Debian"
+  when: vfio_os_family == "Debian"
   notify:
     - update-initramfs
 
 - name: Configure vfio-pci device IDs
   ansible.builtin.template:
     src: vfio.conf.j2
-    dest: /etc/modprobe.d/vfio.conf
+    dest: "{{ vfio_modprobe_conf_path }}"
     mode: "0644"
   notify:
     - update-initramfs
 
 - name: Optionally blacklist host GPU drivers only in VFIO mode
   ansible.builtin.copy:
-    dest: /etc/modprobe.d/blacklist-host-gpu.conf
+    dest: "{{ vfio_blacklist_conf_path }}"
     mode: "0644"
     content: |
       blacklist amdgpu
@@ -50,7 +61,7 @@
 
 - name: Ensure blacklist file is absent in host mode or when disabled
   ansible.builtin.file:
-    path: /etc/modprobe.d/blacklist-host-gpu.conf
+    path: "{{ vfio_blacklist_conf_path }}"
     state: absent
   when: (not blacklist_host_gpu_drivers | bool) or (vfio_mode != 'vfio')
   notify:

@@ -1,4 +1,11 @@
 ---
+- name: Validate VFIO OS support list
+  ansible.builtin.assert:
+    that:
+      - vfio_supported_os_families is iterable
+      - vfio_supported_os_families is not string
+    fail_msg: "vfio_supported_os_families must be a list."
+
 - name: Validate vfio_mode
   ansible.builtin.assert:
     that:
@@ -34,6 +41,29 @@
   loop: "{{ gpu_bdf }}"
   when: gpu_bdf | length > 0
 
+- name: Validate path variables are absolute
+  ansible.builtin.assert:
+    that:
+      - item | string | length > 0
+      - item is match('^/')
+    fail_msg: "VFIO path variables must be absolute paths."
+  loop:
+    - "{{ vfio_grub_default_path }}"
+    - "{{ vfio_modules_load_path }}"
+    - "{{ vfio_initramfs_modules_path }}"
+    - "{{ vfio_modprobe_conf_path }}"
+    - "{{ vfio_blacklist_conf_path }}"
+    - "{{ vfio_script_install_dir }}"
+
+- name: Validate package and user lists
+  ansible.builtin.assert:
+    that:
+      - virtualization_packages is iterable
+      - virtualization_packages is not string
+      - vfio_libvirt_users is iterable
+      - vfio_libvirt_users is not string
+    fail_msg: "virtualization_packages and vfio_libvirt_users must be lists."
+
 - name: Validate demo VM requires at least two GPU BDFs
   ansible.builtin.assert:
     that:
@@ -48,13 +78,34 @@
     fail_msg: "Runtime bind/unbind scripts require gpu_bdf with at least two entries."
   when: vfio_install_runtime_scripts | bool
 
+- name: Fail if real boot/module changes are not explicitly confirmed
+  ansible.builtin.fail:
+    msg: >-
+      Refusing to modify VFIO boot/module configuration without vfio_confirm_boot_changes=true.
+      This protects GRUB, initramfs, and module config from accidental edits.
+  when:
+    - vfio_boot_changes_requested | bool
+    - not vfio_confirm_boot_changes | bool
+    - not ansible_check_mode
+
+- name: Show check-mode boot-change notice
+  ansible.builtin.debug:
+    msg: "Check mode only: boot/module changes would require vfio_confirm_boot_changes=true for a real run."
+  when:
+    - vfio_boot_changes_requested | bool
+    - not vfio_confirm_boot_changes | bool
+    - ansible_check_mode
+
 - name: Show effective VFIO configuration
   ansible.builtin.debug:
     msg:
+      - "vfio_os_family={{ vfio_os_family }}"
+      - "vfio_is_supported_os={{ vfio_is_supported_os }}"
       - "vfio_mode={{ vfio_mode }}"
       - "iommu_platform={{ iommu_platform }}"
       - "gpu_pci_ids={{ gpu_pci_ids }}"
       - "gpu_bdf={{ gpu_bdf }}"
+      - "vfio_confirm_boot_changes={{ vfio_confirm_boot_changes }}"
       - "vfio_allow_reboot={{ vfio_allow_reboot }}"
       - "create_vm={{ create_vm }}"
       - "create_demo_vm={{ create_demo_vm }}"

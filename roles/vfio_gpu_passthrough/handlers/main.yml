@@ -1,16 +1,25 @@
 ---
 - name: update-initramfs
-  ansible.builtin.command: update-initramfs -u
+  ansible.builtin.command: "{{ vfio_initramfs_update_command }}"
   changed_when: true
+  when:
+    - vfio_run_bootloader_handlers | bool
+    - not ansible_check_mode
 
 - name: update-grub
-  ansible.builtin.command: update-grub
+  ansible.builtin.command: "{{ vfio_grub_update_command }}"
   changed_when: true
+  when:
+    - vfio_run_bootloader_handlers | bool
+    - not ansible_check_mode
 
 - name: restart-libvirtd
   ansible.builtin.service:
-    name: libvirtd
+    name: "{{ vfio_libvirt_service_name }}"
     state: restarted
+  when:
+    - vfio_manage_libvirt_service | bool
+    - not ansible_check_mode
 
 - name: reboot-host
   ansible.builtin.reboot:
@@ -18,4 +27,7 @@
     reboot_timeout: 900
     pre_reboot_delay: 3
     post_reboot_delay: 10
-  when: vfio_allow_reboot | bool
+  when:
+    - vfio_allow_reboot | bool
+    - vfio_run_bootloader_handlers | bool
+    - not ansible_check_mode

@@ -3,41 +3,72 @@
   ansible.builtin.import_tasks: sanity.yml
   tags: [always]
 
+- name: Report unsupported VFIO OS family
+  ansible.builtin.debug:
+    msg:
+      - "vfio_gpu_passthrough is not enabled for os_family={{ vfio_os_family }}."
+      - "Set vfio_supported_os_families to opt in intentionally."
+  when:
+    - not vfio_is_supported_os | bool
+    - not vfio_fail_on_unsupported_os | bool
+  tags: [always]
+
+- name: Fail on unsupported VFIO OS family
+  ansible.builtin.fail:
+    msg: "vfio_gpu_passthrough does not support os_family={{ vfio_os_family }} by default."
+  when:
+    - not vfio_is_supported_os | bool
+    - vfio_fail_on_unsupported_os | bool
+  tags: [always]
+
 - name: Install virtualization packages
   ansible.builtin.import_tasks: install.yml
-  when: vfio_install_packages | bool
+  when:
+    - vfio_is_supported_os | bool
+    - vfio_install_packages | bool
   tags: [install, packages]
 
 - name: Configure VFIO modules and modprobe config
   ansible.builtin.import_tasks: vfio.yml
-  when: vfio_configure_modules | bool
+  when:
+    - vfio_is_supported_os | bool
+    - vfio_configure_modules | bool
   tags: [vfio, modules]
 
 - name: Configure GRUB for IOMMU and VFIO mode
   ansible.builtin.import_tasks: grub.yml
-  when: vfio_apply_grub | bool
+  when:
+    - vfio_is_supported_os | bool
+    - vfio_apply_grub | bool
   tags: [grub, bootloader]
 
 - name: Install VFIO mode toggle scripts
   ansible.builtin.import_tasks: mode_scripts.yml
-  when: vfio_install_scripts | bool
+  when:
+    - vfio_is_supported_os | bool
+    - vfio_install_scripts | bool
   tags: [scripts]
 
 - name: Install runtime GPU bind/unbind scripts
   ansible.builtin.import_tasks: vfio_scripts.yml
   when:
+    - vfio_is_supported_os | bool
     - vfio_install_runtime_scripts | bool
     - gpu_bdf | length >= 2
   tags: [runtime_scripts, scripts]
 
 - name: Optionally create VM
   ansible.builtin.import_tasks: create_vm.yml
-  when: create_vm | bool
+  when:
+    - vfio_is_supported_os | bool
+    - create_vm | bool
   tags: [vm]
 
 - name: Optionally create Alpine demo VM
   ansible.builtin.import_tasks: demo_vm.yml
-  when: create_demo_vm | bool
+  when:
+    - vfio_is_supported_os | bool
+    - create_demo_vm | bool
   tags: [demo_vm]
 
 - name: Warn if reboot is required but disabled
@@ -46,5 +77,7 @@
       - "VFIO boot/module configuration may require a reboot."
       - "Automatic reboot is disabled because vfio_allow_reboot=false."
       - "Reboot manually when ready, or rerun with -e vfio_allow_reboot=true."
-  when: not vfio_allow_reboot | bool
+  when:
+    - vfio_is_supported_os | bool
+    - not vfio_allow_reboot | bool
   tags: [always]
