@@ -1,0 +1,166 @@
+---
+- name: Prompt for fresh Linux host connection details
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  vars_prompt:
+    - name: bootstrap_target_ip
+      prompt: "Fresh Linux host IP address"
+      private: false
+
+    - name: bootstrap_initial_user
+      prompt: "Initial SSH user, for example ubuntu, rocky, cloud-user, or root"
+      private: false
+      default: "ubuntu"
+
+    - name: bootstrap_admin_user
+      prompt: "Admin user to create for future Ansible runs"
+      private: false
+      default: "deploy"
+
+    - name: bootstrap_admin_pubkey_path
+      prompt: "Public SSH key path to install"
+      private: false
+      default: "{{ lookup('env', 'HOME') }}/.ssh/host_systems.pub"
+
+    - name: bootstrap_become
+      prompt: "Use sudo/become? true for ubuntu/rocky/cloud-user, false for root"
+      private: false
+      default: "true"
+
+  tasks:
+    - name: Add prompted bootstrap target
+      ansible.builtin.add_host:
+        name: bootstrap_target
+        groups: bootstrap_targets
+        ansible_host: "{{ bootstrap_target_ip }}"
+        ansible_user: "{{ bootstrap_initial_user }}"
+        bootstrap_admin_user: "{{ bootstrap_admin_user }}"
+        bootstrap_admin_pubkey_path: "{{ bootstrap_admin_pubkey_path }}"
+        bootstrap_become: "{{ bootstrap_become | bool }}"
+        bootstrap_dynamic_target: true
+
+- name: Bootstrap fresh Ubuntu or Rocky hosts for Ansible management
+  hosts: bootstrap_targets
+  gather_facts: false
+  become: "{{ bootstrap_become | default(true) | bool }}"
+
+  vars:
+    bootstrap_passwordless_sudo: true
+    bootstrap_admin_shell: /bin/bash
+    bootstrap_dynamic_target: false
+
+  pre_tasks:
+    - name: Skip placeholder hosts
+      ansible.builtin.meta: end_host
+      when: not bootstrap_dynamic_target | bool
+
+    - name: Install Python and sudo before normal Ansible modules run
+      ansible.builtin.raw: |
+        set -eu
+
+        if command -v apt-get >/dev/null 2>&1; then
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -y python3 python3-apt sudo openssh-server ca-certificates curl rsync
+        elif command -v dnf >/dev/null 2>&1; then
+          dnf install -y python3 sudo openssh-server ca-certificates curl rsync
+        elif command -v yum >/dev/null 2>&1; then
+          yum install -y python3 sudo openssh-server ca-certificates curl rsync
+        else
+          echo "Unsupported package manager. Expected apt-get, dnf, or yum." >&2
+          exit 1
+        fi
+      changed_when: false
+
+    - name: Gather facts after Python is available
+      ansible.builtin.setup:
+
+    - name: Compute platform-specific bootstrap settings
+      ansible.builtin.set_fact:
+        bootstrap_admin_groups: "{{ ['wheel'] if ansible_facts['os_family'] == 'RedHat' else ['sudo'] }}"
+        bootstrap_ssh_service_name: "{{ 'sshd' if ansible_facts['os_family'] == 'RedHat' else 'ssh' }}"
+
+  tasks:
+    - name: Validate target is Ubuntu or Rocky Linux
+      ansible.builtin.assert:
+        that:
+          - ansible_facts['distribution'] in ['Ubuntu', 'Rocky']
+        fail_msg: "This bootstrap playbook currently supports Ubuntu and Rocky Linux only."
+
+    - name: Install minimum bootstrap packages on Ubuntu
+      ansible.builtin.apt:
+        name:
+          - python3
+          - python3-apt
+          - sudo
+          - openssh-server
+          - ca-certificates
+          - curl
+          - rsync
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts['distribution'] == 'Ubuntu'
+
+    - name: Install minimum bootstrap packages on Rocky Linux
+      ansible.builtin.dnf:
+        name:
+          - python3
+          - sudo
+          - openssh-server
+          - ca-certificates
+          - curl
+          - rsync
+        state: present
+      when: ansible_facts['distribution'] == 'Rocky'
+
+    - name: Ensure SSH service is enabled and running
+      ansible.builtin.service:
+        name: "{{ bootstrap_ssh_service_name }}"
+        state: started
+        enabled: true
+
+    - name: Ensure admin user exists
+      ansible.builtin.user:
+        name: "{{ bootstrap_admin_user }}"
+        shell: "{{ bootstrap_admin_shell }}"
+        create_home: true
+        groups: "{{ bootstrap_admin_groups }}"
+        append: true
+        state: present
+
+    - name: Install admin SSH authorized key
+      ansible.posix.authorized_key:
+        user: "{{ bootstrap_admin_user }}"
+        key: "{{ lookup('file', bootstrap_admin_pubkey_path) }}"
+        state: present
+        exclusive: false
+
+    - name: Configure passwordless sudo for admin user
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/90-ansible-bootstrap-{{ bootstrap_admin_user }}"
+        owner: root
+        group: root
+        mode: "0440"
+        content: "{{ bootstrap_admin_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        validate: "visudo -cf %s"
+      when: bootstrap_passwordless_sudo | bool
+
+    - name: Confirm bootstrap user exists
+      ansible.builtin.command:
+        cmd: id "{{ bootstrap_admin_user }}"
+      changed_when: false
+
+    - name: Bootstrap summary
+      ansible.builtin.debug:
+        msg:
+          - "Bootstrap complete."
+          - "Distribution: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+          - "Host IP: {{ ansible_host }}"
+          - "Future Ansible user: {{ bootstrap_admin_user }}"
+          - "Admin groups: {{ bootstrap_admin_groups }}"
+          - "SSH service: {{ bootstrap_ssh_service_name }}"
+          - "SSH key installed from: {{ bootstrap_admin_pubkey_path }}"
+          - "Next: add this host to inventory/hosts.yml under the correct groups."

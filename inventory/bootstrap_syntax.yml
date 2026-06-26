@@ -1,0 +1,9 @@
+---
+all:
+  children:
+    bootstrap_targets:
+      hosts:
+        bootstrap_syntax_placeholder:
+          ansible_connection: local
+          bootstrap_dynamic_target: false
+          bootstrap_become: false
