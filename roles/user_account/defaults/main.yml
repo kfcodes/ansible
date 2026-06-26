@@ -1,29 +1,28 @@
 ---
 managed_users: []
 
+user_account_generate_ssh_keys: false
+ssh_keys_to_generate: []
+
+ssh_key_dir: "{{ lookup('env','HOME') }}/.ssh"
+ssh_key_type: ed25519
+ssh_key_comment: "Managed by Ansible"
+
+# Debian/Ubuntu/Pop!_OS: sudo
+# Fedora/Rocky/RHEL: wheel
+linux_admin_group: "{{ 'wheel' if ansible_os_family | default('Debian') == 'RedHat' else 'sudo' }}"
+
 user_defaults:
   state: present
   shell: /bin/bash
   create_home: true
   system: false
   password_lock: false
-  groups: []
+  groups:
+    - users
   append_groups: false
   exclusive_keys: true
   passwordless_sudo: false
 
-# SSH authorized_keys management
-user_accounts_enable_key_mgmt: "{{ enable_ssh_key_management | default(true) }}"
-
-# Optional per-user ~/.ssh/config management.
-# Do not use this for GitHub dev SSH. That belongs in system_dev.
-user_accounts_manage_ssh_config: false
-user_accounts_ssh_config_hosts: []
-
-# Optional key generation on the Ansible control node.
-# This is for bootstrap/login keys, not GitHub personal keys.
-user_accounts_generate_keys: "{{ ssh_keys_to_generate | default([]) }}"
-user_accounts_ssh_key_dir: "{{ ssh_key_dir | default(lookup('env','HOME') ~ '/.ssh') }}"
-user_accounts_key_type: "{{ ssh_key_type | default('ed25519') }}"
-user_accounts_key_bits: "{{ ssh_key_bits | default(4096) }}"
-user_accounts_key_comment: "{{ ssh_key_comment | default('Managed by Ansible') }}"
+user_account_sudoers_dir: /etc/sudoers.d
+user_account_validate_sudoers: true
