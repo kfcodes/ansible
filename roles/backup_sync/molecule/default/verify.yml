@@ -1,0 +1,26 @@
+---
+- name: Verify backup_sync
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Check synced file exists
+      ansible.builtin.stat:
+        path: /tmp/backup-sync-molecule-dest/example.txt
+      register: synced_file
+
+    - name: Assert synced file exists
+      ansible.builtin.assert:
+        that:
+          - synced_file.stat.exists
+
+    - name: Read synced file
+      ansible.builtin.slurp:
+        src: /tmp/backup-sync-molecule-dest/example.txt
+      register: synced_file_content
+
+    - name: Assert synced file content
+      ansible.builtin.assert:
+        that:
+          - synced_file_content.content | b64decode == "backup sync molecule test\n"

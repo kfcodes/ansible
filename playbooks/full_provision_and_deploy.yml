@@ -1,4 +1,22 @@
 ---
-- import_playbook: provision_hosts.yml
-- import_playbook: deploy_services.yml
-- import_playbook: maintenance.yml
+# Full workflow for already-bootstrapped hosts.
+#
+# First-time SSH access still belongs to:
+#   playbooks/bootstrap_ssh_access.yml
+#
+# This playbook assumes the long-term automation user/key already works.
+
+- name: Configure shared security layer
+  ansible.builtin.import_playbook: configure_security.yml
+
+- name: Provision base systems and runtime hosts
+  ansible.builtin.import_playbook: provision_hosts.yml
+
+- name: Configure kiosk display hosts
+  ansible.builtin.import_playbook: configure_kiosk.yml
+
+- name: Deploy configured services
+  ansible.builtin.import_playbook: deploy_services.yml
+
+- name: Run maintenance tasks
+  ansible.builtin.import_playbook: maintenance.yml

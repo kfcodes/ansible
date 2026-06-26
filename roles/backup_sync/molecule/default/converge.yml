@@ -1,0 +1,42 @@
+---
+- name: Converge backup_sync
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  vars:
+    backup_sync_install_packages: false
+    backup_sync_jobs:
+      - name: molecule sync test
+        src: /tmp/backup-sync-molecule-src/
+        dest: /tmp/backup-sync-molecule-dest/
+        mode: push
+    backup_install_scripts: false
+    backup_cron_jobs: []
+
+  pre_tasks:
+    - name: Remove old molecule source
+      ansible.builtin.file:
+        path: /tmp/backup-sync-molecule-src
+        state: absent
+
+    - name: Remove old molecule destination
+      ansible.builtin.file:
+        path: /tmp/backup-sync-molecule-dest
+        state: absent
+
+    - name: Prepare source directory
+      ansible.builtin.file:
+        path: /tmp/backup-sync-molecule-src
+        state: directory
+        mode: "0755"
+
+    - name: Create source test file
+      ansible.builtin.copy:
+        dest: /tmp/backup-sync-molecule-src/example.txt
+        content: "backup sync molecule test\n"
+        mode: "0644"
+
+  roles:
+    - role: backup_sync
