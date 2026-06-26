@@ -5,4 +5,6 @@
     state: present
     recreate: auto
   listen: "restart container service"
-  when: container_service_state == 'present'
+  when:
+    - container_service_state == 'present'
+    - not ansible_check_mode or container_service_allow_check_mode_runtime | default(false) | bool

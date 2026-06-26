@@ -1,0 +1,48 @@
+---
+- name: Verify container_service rendered files
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    molecule_app_path: /tmp/container-service-molecule/demoapi
+
+  tasks:
+    - name: Check Dockerfile exists
+      ansible.builtin.stat:
+        path: "{{ molecule_app_path }}/Dockerfile"
+      register: molecule_dockerfile
+
+    - name: Check docker-compose.yml exists
+      ansible.builtin.stat:
+        path: "{{ molecule_app_path }}/docker-compose.yml"
+      register: molecule_compose
+
+    - name: Assert rendered files exist
+      ansible.builtin.assert:
+        that:
+          - molecule_dockerfile.stat.exists
+          - molecule_compose.stat.exists
+
+    - name: Read Dockerfile
+      ansible.builtin.slurp:
+        src: "{{ molecule_app_path }}/Dockerfile"
+      register: molecule_dockerfile_content
+
+    - name: Read compose file
+      ansible.builtin.slurp:
+        src: "{{ molecule_app_path }}/docker-compose.yml"
+      register: molecule_compose_content
+
+    - name: Assert Dockerfile content
+      ansible.builtin.assert:
+        that:
+          - "'FROM python:3.11.1-slim' in (molecule_dockerfile_content.content | b64decode)"
+          - "'uvicorn' in (molecule_dockerfile_content.content | b64decode)"
+
+    - name: Assert compose content
+      ansible.builtin.assert:
+        that:
+          - "'demoapi' in (molecule_compose_content.content | b64decode)"
+          - "'18080:8000' in (molecule_compose_content.content | b64decode)"
+          - "'molecule_net' in (molecule_compose_content.content | b64decode)"

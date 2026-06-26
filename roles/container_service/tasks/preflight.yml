@@ -15,8 +15,34 @@
     msg: "container_service requires at least one service in container_services or container_service_services."
   when: container_service_effective_services | length == 0
 
+- name: Validate each service definition is a mapping
+  ansible.builtin.assert:
+    that:
+      - item is mapping
+    fail_msg: "Each container service definition must be a dictionary."
+  loop: "{{ container_service_effective_services }}"
+  loop_control:
+    label: "{{ item.name | default(item.name_suffix | default('unnamed')) }}"
+
 - name: Validate service_state
   ansible.builtin.assert:
     that:
       - container_service_state in ['present', 'absent']
     fail_msg: "container_service_state/service_state must be present or absent."
+
+- name: Validate runtime backend
+  ansible.builtin.assert:
+    that:
+      - container_service_runtime_backend in ['docker_compose_v2']
+    fail_msg: "container_service_runtime_backend currently supports: docker_compose_v2."
+
+- name: Validate container service list variables
+  ansible.builtin.assert:
+    that:
+      - container_service_default_networks is iterable
+      - container_service_default_networks is not string
+      - container_service_default_env_files is iterable
+      - container_service_default_env_files is not string
+      - container_service_default_volumes is iterable
+      - container_service_default_volumes is not string
+    fail_msg: "container_service default networks/env_files/volumes must be lists."

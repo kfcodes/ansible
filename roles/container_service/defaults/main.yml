@@ -8,6 +8,7 @@ container_service_state: "{{ service_state }}"
 container_service_services: "{{ container_services | default([]) }}"
 
 # Paths
+container_service_manage_app_directory: true
 container_service_root_path: "{{ system_host_app_root | default('/opt/apps') }}"
 container_service_app_owner: root
 container_service_app_group: root
@@ -19,6 +20,7 @@ container_service_default_networks:
   - app_net
 
 # Docker Compose behavior
+container_service_runtime_backend: docker_compose_v2
 compose_pull: missing          # missing | always | never | policy
 compose_recreate: auto         # auto | always | never
 compose_remove_orphans: true
@@ -35,6 +37,9 @@ service_common:
 
 container_service_default_env_files: "{{ service_common.env_files | default([]) }}"
 container_service_default_volumes: "{{ service_common.volumes | default([]) }}"
+
+# Repository checkout
+container_service_manage_repo: true
 
 # Config sync from controller to remote host
 container_service_sync_config: true
@@ -59,4 +64,5 @@ container_service_uvicorn_app: "app:app"
 
 # Local/testing controls
 container_service_manage_runtime: true
+container_service_allow_check_mode_runtime: false
 container_service_run_healthchecks: true

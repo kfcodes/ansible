@@ -6,7 +6,9 @@
     owner: "{{ container_service_app_owner }}"
     group: "{{ container_service_app_group }}"
     mode: "{{ container_service_app_mode }}"
-  when: container_service_state == 'present'
+  when:
+    - container_service_state == 'present'
+    - container_service_manage_app_directory | bool
 
 - name: Clone or update git repository
   ansible.builtin.git:
@@ -17,4 +19,13 @@
     force: false
     accept_hostkey: true
   register: repo_result
-  when: container_service_state == 'present'
+  when:
+    - container_service_state == 'present'
+    - container_service_manage_repo | bool
+
+- name: Report skipped repository checkout
+  ansible.builtin.debug:
+    msg: "Skipping repository checkout for {{ app.name }} because container_service_manage_repo=false."
+  when:
+    - container_service_state == 'present'
+    - not container_service_manage_repo | bool

@@ -1,4 +1,10 @@
 ---
+- name: Validate runtime backend before managing containers
+  ansible.builtin.assert:
+    that:
+      - container_service_runtime_backend == 'docker_compose_v2'
+    fail_msg: "Unsupported container_service_runtime_backend={{ container_service_runtime_backend }}."
+
 - name: Ensure external Docker networks exist
   community.docker.docker_network:
     name: "{{ item }}"
@@ -10,6 +16,17 @@
     - container_service_state == 'present'
     - service_manage_networks | bool
     - container_service_networks | length > 0
+    - not ansible_check_mode or container_service_allow_check_mode_runtime | bool
+
+- name: Report skipped Docker network management in check mode
+  ansible.builtin.debug:
+    msg: "Skipping Docker network management in check mode for {{ app.name }}."
+  when:
+    - container_service_state == 'present'
+    - service_manage_networks | bool
+    - container_service_networks | length > 0
+    - ansible_check_mode
+    - not container_service_allow_check_mode_runtime | bool
 
 - name: Compute whether compose build is needed
   ansible.builtin.set_fact:
@@ -29,7 +46,17 @@
     recreate: "{{ compose_recreate }}"
     remove_orphans: "{{ compose_remove_orphans }}"
     build: "{{ ((compose_build | bool) and (container_service_needs_build | default(false) | bool)) | ternary('always', 'never') }}"
-  when: container_service_state == 'present'
+  when:
+    - container_service_state == 'present'
+    - not ansible_check_mode or container_service_allow_check_mode_runtime | bool
+
+- name: Report skipped Docker Compose deployment in check mode
+  ansible.builtin.debug:
+    msg: "Skipping Docker Compose deployment in check mode for {{ app.name }}."
+  when:
+    - container_service_state == 'present'
+    - ansible_check_mode
+    - not container_service_allow_check_mode_runtime | bool
 
 - name: Check compose project path before removal
   ansible.builtin.stat:
@@ -45,3 +72,13 @@
   when:
     - container_service_state == 'absent'
     - container_service_compose_file.stat.exists
+    - not ansible_check_mode or container_service_allow_check_mode_runtime | bool
+
+- name: Report skipped Docker Compose removal in check mode
+  ansible.builtin.debug:
+    msg: "Skipping Docker Compose removal in check mode for {{ app.name }}."
+  when:
+    - container_service_state == 'absent'
+    - container_service_compose_file.stat.exists | default(false)
+    - ansible_check_mode
+    - not container_service_allow_check_mode_runtime | bool
