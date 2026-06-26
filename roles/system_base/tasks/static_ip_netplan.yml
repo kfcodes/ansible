@@ -1,0 +1,21 @@
+---
+- name: Check existing Netplan config
+  ansible.builtin.stat:
+    path: "{{ netplan_config_file }}"
+  register: system_base_netplan_config
+
+- name: Backup original Netplan config when present
+  ansible.builtin.copy:
+    src: "{{ netplan_config_file }}"
+    dest: "{{ netplan_backup_file }}"
+    remote_src: true
+    force: false
+    mode: "0644"
+  when: system_base_netplan_config.stat.exists
+
+- name: Generate Netplan config
+  ansible.builtin.template:
+    src: netplan.yaml.j2
+    dest: "{{ netplan_config_file }}"
+    mode: "0644"
+  notify: Apply netplan

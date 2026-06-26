@@ -1,22 +1,28 @@
+---
 dependency:
   name: galaxy
 
 driver:
-  name: docker
+  name: default
 
 platforms:
-  - name: instance
-    image: geerlingguy/docker-debian11-ansible
-    pre_build_image: true
-    privileged: true
-    published_ports:
-      - 0.0.0.0:2222:22/tcp
+  - name: localhost
 
 provisioner:
   name: ansible
-  lint: |
-    yamllint .
-    ansible-lint .
+  env:
+    ANSIBLE_ROLES_PATH: "/home/m/ansible/roles"
+  inventory:
+    host_vars:
+      localhost:
+        ansible_connection: local
 
 verifier:
   name: ansible
+
+scenario:
+  test_sequence:
+    - dependency
+    - syntax
+    - converge
+    - verify

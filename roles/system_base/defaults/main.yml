@@ -37,7 +37,10 @@ system_base_setup_testing_tools: false
 
 # Network/static IP
 system_base_manage_static_ip: true
-system_base_network_backend: "{{ 'networkmanager' if ansible_os_family | default('Debian') == 'RedHat' else 'netplan' }}"
+system_base_network_backend: "{{ 'networkmanager' if ansible_facts.get('os_family', 'Debian') == 'RedHat' else 'netplan' }}"
 
 netplan_config_file: /etc/netplan/01-netcfg.yaml
 netplan_backup_file: /etc/netplan/01-netcfg.yaml.bak
+
+# NetworkManager behavior
+system_base_networkmanager_activate: true

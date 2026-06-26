@@ -18,7 +18,7 @@ ssh_key_comment: "Managed by Ansible"
 
 # Debian/Ubuntu/Pop!_OS: sudo
 # Fedora/Rocky/RHEL: wheel
-linux_admin_group: "{{ 'wheel' if ansible_os_family | default('Debian') == 'RedHat' else 'sudo' }}"
+linux_admin_group: "{{ 'wheel' if ansible_facts.get('os_family', 'Debian') == 'RedHat' else 'sudo' }}"
 
 user_defaults:
   state: present

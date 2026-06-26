@@ -1,6 +1,53 @@
 ---
-- name: Converge
-  hosts: all
-  become: true
-  roles:
-    - role: system_base
+- name: Converge system_base network backends safely
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Exercise Netplan backend in check mode
+      ansible.builtin.include_role:
+        name: system_base
+        tasks_from: static_ip
+        apply:
+          check_mode: true
+      vars:
+        system_base_manage_static_ip: true
+        system_base_network_backend: netplan
+        netplan_config_file: /tmp/system-base-molecule-netplan.yaml
+        netplan_backup_file: /tmp/system-base-molecule-netplan.yaml.bak
+        network:
+          configure: true
+          interface: eth0
+          type: ethernet
+          static:
+            enabled: true
+            address: 192.0.2.10/24
+            gateway: 192.0.2.1
+            dns:
+              - 1.1.1.1
+              - 1.0.0.1
+
+    - name: Exercise NetworkManager backend in check mode
+      ansible.builtin.include_role:
+        name: system_base
+        tasks_from: static_ip
+        apply:
+          check_mode: true
+      vars:
+        system_base_manage_static_ip: true
+        system_base_network_backend: networkmanager
+        system_base_networkmanager_activate: false
+        network:
+          configure: true
+          interface: eth0
+          type: ethernet
+          connection_name: molecule-eth0
+          static:
+            enabled: true
+            address: 192.0.2.20/24
+            gateway: 192.0.2.1
+            dns:
+              - 9.9.9.9
+              - 149.112.112.112

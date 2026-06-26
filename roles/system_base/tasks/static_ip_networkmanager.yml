@@ -1,0 +1,140 @@
+---
+- name: Check nmcli is available
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - --version
+  register: system_base_nmcli_version
+  changed_when: false
+  failed_when: system_base_nmcli_version.rc != 0
+  when: not ansible_check_mode
+
+- name: Check existing NetworkManager connection
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - -t
+      - -f
+      - NAME
+      - connection
+      - show
+      - "{{ system_base_nm_connection_name }}"
+  register: system_base_nm_connection
+  changed_when: false
+  failed_when: false
+  when: not ansible_check_mode
+
+- name: Create ethernet NetworkManager connection when missing
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - connection
+      - add
+      - type
+      - ethernet
+      - ifname
+      - "{{ system_base_net_interface }}"
+      - con-name
+      - "{{ system_base_nm_connection_name }}"
+      - autoconnect
+      - "yes"
+  when:
+    - system_base_net_type == 'ethernet'
+    - system_base_nm_connection.rc != 0
+    - not ansible_check_mode
+
+- name: Create WiFi NetworkManager connection when missing
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - connection
+      - add
+      - type
+      - wifi
+      - ifname
+      - "{{ system_base_net_interface }}"
+      - con-name
+      - "{{ system_base_nm_connection_name }}"
+      - ssid
+      - "{{ system_base_wifi_config.ssid }}"
+  when:
+    - system_base_net_type == 'wifi'
+    - system_base_nm_connection.rc != 0
+    - not ansible_check_mode
+
+- name: Configure WiFi password when provided
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - connection
+      - modify
+      - "{{ system_base_nm_connection_name }}"
+      - wifi-sec.key-mgmt
+      - wpa-psk
+      - wifi-sec.psk
+      - "{{ system_base_wifi_config.password }}"
+  no_log: true
+  when:
+    - system_base_net_type == 'wifi'
+    - system_base_wifi_config.password is defined
+    - system_base_wifi_config.password | string | length > 0
+    - not ansible_check_mode
+
+- name: Configure static IPv4 NetworkManager settings
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - connection
+      - modify
+      - "{{ system_base_nm_connection_name }}"
+      - ipv4.method
+      - manual
+      - ipv4.addresses
+      - "{{ system_base_static_address }}"
+      - ipv4.gateway
+      - "{{ system_base_static_gateway }}"
+      - ipv4.dns
+      - "{{ system_base_dns_servers | join(' ') }}"
+      - connection.autoconnect
+      - "yes"
+  when:
+    - system_base_static_enabled | bool
+    - not ansible_check_mode
+
+- name: Configure DHCP IPv4 NetworkManager settings
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - connection
+      - modify
+      - "{{ system_base_nm_connection_name }}"
+      - ipv4.method
+      - auto
+      - ipv4.addresses
+      - ""
+      - ipv4.gateway
+      - ""
+      - ipv4.dns
+      - ""
+      - connection.autoconnect
+      - "yes"
+  when:
+    - not system_base_static_enabled | bool
+    - not ansible_check_mode
+
+- name: Activate NetworkManager connection
+  ansible.builtin.command:
+    argv:
+      - nmcli
+      - connection
+      - up
+      - "{{ system_base_nm_connection_name }}"
+  changed_when: true
+  when:
+    - system_base_networkmanager_activate | bool
+    - not ansible_check_mode
+
+- name: Show NetworkManager check-mode notice
+  ansible.builtin.debug:
+    msg: "NetworkManager configuration skipped in check mode."
+  when: ansible_check_mode

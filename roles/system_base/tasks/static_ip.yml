@@ -1,52 +1,96 @@
 ---
-- name: Configure static IP with Netplan
+- name: Capture raw network configuration
+  ansible.builtin.set_fact:
+    system_base_network_config: "{{ network | default({}) }}"
+    system_base_legacy_static_ip_present: "{{ static_ip is defined and static_ip is not none and static_ip | string | length > 0 }}"
+
+- name: Normalize network configuration
+  ansible.builtin.set_fact:
+    system_base_network_configure: "{{ system_base_network_config.configure | default(interface_name is defined and interface_name | default('') | string | length > 0) | bool }}"
+    system_base_net_interface: "{{ system_base_network_config.interface | default(interface_name | default('')) }}"
+    system_base_net_type: "{{ system_base_network_config.type | default(interface_type | default('ethernet')) }}"
+    system_base_static_config: "{{ system_base_network_config.static | default({}) }}"
+    system_base_wifi_config: "{{ system_base_network_config.wifi | default(wifi_credentials | default({})) }}"
+
+- name: Normalize static network values
+  ansible.builtin.set_fact:
+    system_base_static_enabled: "{{ system_base_static_config.enabled | default(system_base_legacy_static_ip_present) | bool }}"
+    system_base_static_address: >-
+      {{
+        system_base_static_config.address
+        | default((static_ip ~ '/' ~ netmask) if (static_ip is defined and netmask is defined) else '')
+      }}
+    system_base_static_gateway: "{{ system_base_static_config.gateway | default(gateway | default('')) }}"
+    system_base_dns_servers: "{{ system_base_static_config.dns | default(dns_servers | default([])) }}"
+    system_base_nm_connection_name: "{{ system_base_network_config.connection_name | default(system_base_net_interface) }}"
+
+- name: Skip static network configuration when not configured for this host
+  ansible.builtin.debug:
+    msg: "Static network configuration skipped for {{ inventory_hostname }} because network.configure is false or no interface is defined."
+  when: not system_base_network_configure | bool or system_base_net_interface | string | length == 0
+
+- name: Validate selected network backend
+  ansible.builtin.assert:
+    that:
+      - system_base_network_backend in ['netplan', 'networkmanager']
+    fail_msg: "system_base_network_backend must be one of: netplan, networkmanager."
   when:
-    - ansible_facts.distribution == "Ubuntu"
-    - interface_name is defined
-    - interface_name | string | length > 0
-  block:
-    - name: Set interface configuration facts
-      ansible.builtin.set_fact:
-        net_interface: "{{ interface_name }}"
-        net_type: "{{ interface_type | default('ethernet') }}"
-        has_static_ip: "{{ static_ip is defined and static_ip is not none and static_ip | string | length > 0 }}"
+    - system_base_network_configure | bool
+    - system_base_net_interface | string | length > 0
 
-    - name: Validate required static IP variables when static_ip is set
-      ansible.builtin.assert:
-        that:
-          - netmask is defined
-          - gateway is defined
-          - dns_servers is defined
-          - dns_servers is iterable
-        fail_msg: "static_ip requires netmask, gateway, and dns_servers."
-      when: has_static_ip | bool
+- name: Validate network interface type
+  ansible.builtin.assert:
+    that:
+      - system_base_net_type in ['ethernet', 'wifi']
+    fail_msg: "network.type/interface_type must be either ethernet or wifi."
+  when:
+    - system_base_network_configure | bool
+    - system_base_net_interface | string | length > 0
 
-    - name: Check existing Netplan config
-      ansible.builtin.stat:
-        path: "{{ netplan_config_file }}"
-      register: system_base_netplan_config
+- name: Validate required static IP values
+  ansible.builtin.assert:
+    that:
+      - system_base_static_address | string | length > 0
+      - system_base_static_gateway | string | length > 0
+      - system_base_dns_servers is iterable
+      - system_base_dns_servers | length > 0
+    fail_msg: "Static networking requires address, gateway, and at least one DNS server."
+  when:
+    - system_base_network_configure | bool
+    - system_base_net_interface | string | length > 0
+    - system_base_static_enabled | bool
 
-    - name: Backup original Netplan config when present
-      ansible.builtin.copy:
-        src: "{{ netplan_config_file }}"
-        dest: "{{ netplan_backup_file }}"
-        remote_src: true
-        force: false
-        mode: "0644"
-      when: system_base_netplan_config.stat.exists
+- name: Validate WiFi settings when using wifi
+  ansible.builtin.assert:
+    that:
+      - system_base_wifi_config.ssid is defined
+      - system_base_wifi_config.ssid | string | length > 0
+    fail_msg: "WiFi networking requires network.wifi.ssid or wifi_credentials.ssid."
+  when:
+    - system_base_network_configure | bool
+    - system_base_net_interface | string | length > 0
+    - system_base_net_type == 'wifi'
 
-    - name: Show planned network configuration
-      ansible.builtin.debug:
-        msg:
-          - "Host: {{ inventory_hostname }}"
-          - "Interface: {{ net_interface }}"
-          - "Type: {{ net_type }}"
-          - "Static IP enabled: {{ has_static_ip }}"
-          - "Static IP: {{ static_ip | default('dhcp') }}"
+- name: Show planned network configuration
+  ansible.builtin.debug:
+    msg:
+      - "Host: {{ inventory_hostname }}"
+      - "Backend: {{ system_base_network_backend }}"
+      - "Interface: {{ system_base_net_interface }}"
+      - "Type: {{ system_base_net_type }}"
+      - "Static IP enabled: {{ system_base_static_enabled }}"
+      - "Static address: {{ system_base_static_address | default('dhcp') }}"
 
-    - name: Generate Netplan config
-      ansible.builtin.template:
-        src: netplan.yaml.j2
-        dest: "{{ netplan_config_file }}"
-        mode: "0644"
-      notify: Apply netplan
+- name: Configure static networking with Netplan
+  ansible.builtin.include_tasks: static_ip_netplan.yml
+  when:
+    - system_base_network_configure | bool
+    - system_base_net_interface | string | length > 0
+    - system_base_network_backend == 'netplan'
+
+- name: Configure static networking with NetworkManager
+  ansible.builtin.include_tasks: static_ip_networkmanager.yml
+  when:
+    - system_base_network_configure | bool
+    - system_base_net_interface | string | length > 0
+    - system_base_network_backend == 'networkmanager'

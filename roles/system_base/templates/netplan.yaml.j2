@@ -1,23 +1,25 @@
 network:
   version: 2
   renderer: networkd
-  {{ 'ethernets' if net_type == 'ethernet' else 'wifis' }}:
-    {{ net_interface }}:
-      dhcp4: {{ 'false' if has_static_ip | bool else 'true' }}
-{% if has_static_ip | bool %}
+  {{ 'ethernets' if system_base_net_type == 'ethernet' else 'wifis' }}:
+    {{ system_base_net_interface }}:
+      dhcp4: {{ 'false' if system_base_static_enabled | bool else 'true' }}
+{% if system_base_static_enabled | bool %}
       addresses:
-        - {{ static_ip }}/{{ netmask }}
+        - {{ system_base_static_address }}
       routes:
         - to: default
-          via: {{ gateway }}
+          via: {{ system_base_static_gateway }}
       nameservers:
         addresses:
-{% for dns in dns_servers %}
+{% for dns in system_base_dns_servers %}
           - {{ dns }}
 {% endfor %}
 {% endif %}
-{% if net_type == 'wifi' and wifi_credentials is defined %}
+{% if system_base_net_type == 'wifi' %}
       access-points:
-        "{{ wifi_credentials.ssid }}":
-          password: "{{ wifi_credentials.password }}"
+        "{{ system_base_wifi_config.ssid }}":
+{% if system_base_wifi_config.password is defined %}
+          password: "{{ system_base_wifi_config.password }}"
+{% endif %}
 {% endif %}

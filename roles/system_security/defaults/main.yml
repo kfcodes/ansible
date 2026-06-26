@@ -2,7 +2,7 @@
 system_security_install_packages: true
 
 # OS-family selected backends
-system_security_os_family: "{{ ansible_facts['os_family'] | default('Debian') }}"
+system_security_os_family: "{{ ansible_facts.get('os_family', 'Debian') }}"
 system_security_firewall_backend: "{{ 'firewalld' if system_security_os_family == 'RedHat' else 'ufw' }}"
 
 # SSH

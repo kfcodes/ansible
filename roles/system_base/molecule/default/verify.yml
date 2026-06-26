@@ -1,0 +1,18 @@
+---
+- name: Verify system_base network backend decisions
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Assert Debian-family default backend
+      ansible.builtin.assert:
+        that:
+          - "'netplan' == ('networkmanager' if ansible_facts['os_family'] == 'RedHat' else 'netplan')"
+
+    - name: Assert supported backend names
+      ansible.builtin.assert:
+        that:
+          - "'netplan' in ['netplan', 'networkmanager']"
+          - "'networkmanager' in ['netplan', 'networkmanager']"
