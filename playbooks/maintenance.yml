@@ -5,14 +5,27 @@
   become: true
 
   tasks:
-    - name: Update apt cache
+    - name: Refresh Debian-family package cache
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
-      when: ansible_os_family == "Debian"
+      when: ansible_facts['os_family'] == "Debian"
       tags:
         - maintenance
         - apt
+        - packages
+
+    - name: Refresh RedHat-family package cache
+      ansible.builtin.command:
+        argv:
+          - dnf
+          - -y
+          - makecache
+      changed_when: false
+      when: ansible_facts['os_family'] == "RedHat"
+      tags:
+        - maintenance
+        - dnf
         - packages
 
 - name: Backup synchronization
