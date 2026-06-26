@@ -1,0 +1,47 @@
+---
+- name: Verify system_security platform decisions
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Load system_security safely for variable verification
+      ansible.builtin.include_role:
+        name: system_security
+        public: true
+      vars:
+        system_security_install_packages: false
+        system_security_manage_sshd: false
+        system_security_enable_firewall: false
+        system_security_enable_fail2ban: false
+        system_security_enable_unattended_upgrades: false
+
+    - name: Assert firewall backend is valid
+      ansible.builtin.assert:
+        that:
+          - system_security_firewall_backend in ['ufw', 'firewalld']
+
+    - name: Assert SSH service name is valid
+      ansible.builtin.assert:
+        that:
+          - system_security_ssh_service_name in ['ssh', 'sshd']
+
+    - name: Assert automatic updates package is valid
+      ansible.builtin.assert:
+        that:
+          - system_security_auto_updates_package in ['unattended-upgrades', 'dnf-automatic']
+
+    - name: Assert automatic updates service is valid
+      ansible.builtin.assert:
+        that:
+          - system_security_auto_updates_service_name in ['unattended-upgrades', 'dnf-automatic.timer']
+
+    - name: Assert current Debian-family choices on WSL/Ubuntu
+      ansible.builtin.assert:
+        that:
+          - system_security_firewall_backend == 'ufw'
+          - system_security_ssh_service_name == 'ssh'
+          - system_security_auto_updates_package == 'unattended-upgrades'
+          - system_security_auto_updates_service_name == 'unattended-upgrades'
+      when: ansible_facts['os_family'] == 'Debian'

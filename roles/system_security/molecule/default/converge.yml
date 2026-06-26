@@ -1,0 +1,16 @@
+---
+- name: Converge system_security safely
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  vars:
+    system_security_install_packages: false
+    system_security_manage_sshd: false
+    system_security_enable_firewall: false
+    system_security_enable_fail2ban: false
+    system_security_enable_unattended_upgrades: false
+
+  roles:
+    - role: system_security
