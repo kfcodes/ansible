@@ -1,4 +1,14 @@
 ---
+# OS support
+kiosk_os_family: "{{ ansible_facts.get('os_family', 'Debian') }}"
+kiosk_supported_os_families:
+  - Debian
+
+# false = skip safely on unsupported OS families
+# true  = fail clearly on unsupported OS families
+kiosk_fail_on_unsupported_os: false
+kiosk_is_supported_os: "{{ kiosk_os_family in kiosk_supported_os_families }}"
+
 # Enable/disable kiosk behavior.
 # true  = configure autologin and kiosk startup
 # false = remove the managed autologin override and bash_profile block
@@ -21,6 +31,7 @@ kiosk_restart_getty: false
 
 # Whether to install packages from this role
 kiosk_install_packages: true
+kiosk_package_install_enabled: true
 kiosk_apt_install_recommends: "{{ apt_install_recommends | default(false) }}"
 
 # Kiosk URL
@@ -50,32 +61,35 @@ kiosk_enable_onboard: true
 kiosk_enable_unclutter: "{{ enable_unclutter | default(true) }}"
 kiosk_disable_screen_blanking: true
 
-# Packages
-kiosk_base_packages:
+# Generic package extensions
+kiosk_extra_packages: "{{ extra_packages | default([]) }}"
+
+# Debian/Ubuntu package set
+kiosk_base_packages_debian:
   - xorg
   - at-spi2-core
   - "{{ kiosk_browser }}"
 
-kiosk_onboard_packages:
+kiosk_onboard_packages_debian:
   - onboard
   - onboard-data
 
-kiosk_wm_packages:
+kiosk_wm_packages_debian:
   - matchbox-window-manager
 
-kiosk_helper_packages:
+kiosk_helper_packages_debian:
   - unclutter
 
-kiosk_extra_packages: "{{ extra_packages | default([]) }}"
+# RedHat/Rocky package set.
+# Intentionally empty by default because kiosk display/session setup is Debian-first.
+kiosk_base_packages_redhat: []
+kiosk_onboard_packages_redhat: []
+kiosk_wm_packages_redhat: []
+kiosk_helper_packages_redhat: []
 
-kiosk_packages: >-
-  {{
-    kiosk_base_packages
-    + kiosk_wm_packages
-    + (kiosk_onboard_packages if kiosk_enable_onboard | bool else [])
-    + (kiosk_helper_packages if kiosk_enable_unclutter | bool else [])
-    + kiosk_extra_packages
-  }}
+# Backward-compatible generic override.
+# If set non-empty, this list wins.
+kiosk_packages: []
 
 # Managed file paths
 kiosk_xinitrc_path: "{{ kiosk_user_home }}/.xinitrc"

@@ -1,0 +1,66 @@
+---
+- name: Converge kiosk_mode safely
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Validate Debian package selection without installing packages
+      ansible.builtin.include_role:
+        name: kiosk_mode
+        tasks_from: packages
+        public: true
+      vars:
+        kiosk_os_family: Debian
+        kiosk_browser: chromium-browser
+        kiosk_install_packages: false
+        kiosk_package_install_enabled: false
+        kiosk_packages: []
+        kiosk_extra_packages:
+          - x11-xserver-utils
+        kiosk_enable_onboard: true
+        kiosk_enable_unclutter: true
+
+    - name: Assert Debian effective package list contains expected packages
+      ansible.builtin.assert:
+        that:
+          - "'xorg' in kiosk_effective_packages"
+          - "'chromium-browser' in kiosk_effective_packages"
+          - "'matchbox-window-manager' in kiosk_effective_packages"
+          - "'onboard' in kiosk_effective_packages"
+          - "'unclutter' in kiosk_effective_packages"
+          - "'x11-xserver-utils' in kiosk_effective_packages"
+
+    - name: Validate unsupported RedHat path skips safely
+      ansible.builtin.include_role:
+        name: kiosk_mode
+      vars:
+        kiosk_os_family: RedHat
+        kiosk_supported_os_families:
+          - Debian
+        kiosk_fail_on_unsupported_os: false
+        kiosk_mode_enabled: true
+        kiosk_install_packages: true
+        kiosk_package_install_enabled: false
+        kiosk_manage_autologin: true
+        kiosk_user: kiosk
+        kiosk_user_group: kiosk
+        kiosk_user_home: /tmp/nonexistent-kiosk-home
+        kiosk_url: http://localhost:3000
+
+    - name: Validate disabled Debian session skips missing home safely
+      ansible.builtin.include_role:
+        name: kiosk_mode
+      vars:
+        kiosk_os_family: Debian
+        kiosk_supported_os_families:
+          - Debian
+        kiosk_mode_enabled: false
+        kiosk_install_packages: false
+        kiosk_package_install_enabled: false
+        kiosk_manage_autologin: false
+        kiosk_user: kiosk
+        kiosk_user_group: kiosk
+        kiosk_user_home: /tmp/nonexistent-kiosk-home
+        kiosk_url: http://localhost:3000

@@ -3,25 +3,49 @@
   ansible.builtin.import_tasks: validate.yml
   tags: [kiosk, kiosk_mode, validate]
 
+- name: Report unsupported kiosk OS family
+  ansible.builtin.debug:
+    msg:
+      - "kiosk_mode is Debian-first and is not enabled for os_family={{ kiosk_os_family }}."
+      - "Set kiosk_supported_os_families or kiosk_fail_on_unsupported_os=true if you want stricter behavior."
+  when:
+    - not kiosk_is_supported_os | bool
+    - not kiosk_fail_on_unsupported_os | bool
+  tags: [kiosk, kiosk_mode]
+
+- name: Fail on unsupported kiosk OS family when requested
+  ansible.builtin.fail:
+    msg: "kiosk_mode does not support os_family={{ kiosk_os_family }} by default."
+  when:
+    - not kiosk_is_supported_os | bool
+    - kiosk_fail_on_unsupported_os | bool
+  tags: [kiosk, kiosk_mode]
+
 - name: Install kiosk packages
   ansible.builtin.import_tasks: packages.yml
   when:
+    - kiosk_is_supported_os | bool
     - kiosk_mode_enabled | bool
     - kiosk_install_packages | bool
   tags: [kiosk, kiosk_mode, packages]
 
 - name: Configure kiosk autologin
   ansible.builtin.import_tasks: autologin.yml
-  when: kiosk_manage_autologin | bool
+  when:
+    - kiosk_is_supported_os | bool
+    - kiosk_manage_autologin | bool
   tags: [kiosk, kiosk_mode, autologin]
 
 - name: Configure kiosk user session
   ansible.builtin.import_tasks: user_session.yml
+  when: kiosk_is_supported_os | bool
   tags: [kiosk, kiosk_mode, session]
 
 - name: Kiosk summary
   ansible.builtin.debug:
     msg:
+      - "kiosk_os_family={{ kiosk_os_family }}"
+      - "kiosk_is_supported_os={{ kiosk_is_supported_os }}"
       - "kiosk_mode_enabled={{ kiosk_mode_enabled }}"
       - "kiosk_user={{ kiosk_user }}"
       - "kiosk_autologin_tty={{ kiosk_autologin_tty }}"

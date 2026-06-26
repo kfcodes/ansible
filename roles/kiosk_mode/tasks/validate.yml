@@ -1,4 +1,11 @@
 ---
+- name: Validate supported kiosk OS list
+  ansible.builtin.assert:
+    that:
+      - kiosk_supported_os_families is iterable
+      - kiosk_supported_os_families is not string
+    fail_msg: "kiosk_supported_os_families must be a list."
+
 - name: Validate kiosk user
   ansible.builtin.assert:
     that:
@@ -34,9 +41,27 @@
       - kiosk_browser_flags is not string
     fail_msg: "kiosk_browser_flags must be a list."
 
-- name: Validate package list
+- name: Validate package lists
   ansible.builtin.assert:
     that:
       - kiosk_packages is iterable
       - kiosk_packages is not string
-    fail_msg: "kiosk_packages must be a list."
+      - kiosk_base_packages_debian is iterable
+      - kiosk_base_packages_debian is not string
+      - kiosk_onboard_packages_debian is iterable
+      - kiosk_onboard_packages_debian is not string
+      - kiosk_wm_packages_debian is iterable
+      - kiosk_wm_packages_debian is not string
+      - kiosk_helper_packages_debian is iterable
+      - kiosk_helper_packages_debian is not string
+      - kiosk_base_packages_redhat is iterable
+      - kiosk_base_packages_redhat is not string
+      - kiosk_onboard_packages_redhat is iterable
+      - kiosk_onboard_packages_redhat is not string
+      - kiosk_wm_packages_redhat is iterable
+      - kiosk_wm_packages_redhat is not string
+      - kiosk_helper_packages_redhat is iterable
+      - kiosk_helper_packages_redhat is not string
+      - kiosk_extra_packages is iterable
+      - kiosk_extra_packages is not string
+    fail_msg: "All kiosk package variables must be lists."

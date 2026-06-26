@@ -1,8 +1,66 @@
 ---
+- name: Select kiosk OS-family package groups
+  ansible.builtin.set_fact:
+    kiosk_base_packages_os: >-
+      {{
+        kiosk_base_packages_debian
+        if kiosk_os_family == 'Debian'
+        else kiosk_base_packages_redhat
+        if kiosk_os_family == 'RedHat'
+        else []
+      }}
+    kiosk_onboard_packages_os: >-
+      {{
+        kiosk_onboard_packages_debian
+        if kiosk_os_family == 'Debian'
+        else kiosk_onboard_packages_redhat
+        if kiosk_os_family == 'RedHat'
+        else []
+      }}
+    kiosk_wm_packages_os: >-
+      {{
+        kiosk_wm_packages_debian
+        if kiosk_os_family == 'Debian'
+        else kiosk_wm_packages_redhat
+        if kiosk_os_family == 'RedHat'
+        else []
+      }}
+    kiosk_helper_packages_os: >-
+      {{
+        kiosk_helper_packages_debian
+        if kiosk_os_family == 'Debian'
+        else kiosk_helper_packages_redhat
+        if kiosk_os_family == 'RedHat'
+        else []
+      }}
+
+- name: Build effective kiosk package list
+  ansible.builtin.set_fact:
+    kiosk_effective_packages: >-
+      {{
+        kiosk_packages
+        if kiosk_packages | length > 0
+        else (
+          kiosk_base_packages_os
+          + kiosk_wm_packages_os
+          + (kiosk_onboard_packages_os if kiosk_enable_onboard | bool else [])
+          + (kiosk_helper_packages_os if kiosk_enable_unclutter | bool else [])
+          + kiosk_extra_packages
+        ) | unique | list
+      }}
+
 - name: Install kiosk packages on Debian/Ubuntu
   ansible.builtin.apt:
-    name: "{{ kiosk_packages }}"
+    name: "{{ kiosk_effective_packages }}"
     state: present
     update_cache: true
     install_recommends: "{{ kiosk_apt_install_recommends }}"
-  when: ansible_os_family == "Debian"
+  when:
+    - kiosk_package_install_enabled | bool
+    - kiosk_os_family == "Debian"
+    - kiosk_effective_packages | length > 0
+
+- name: Report skipped kiosk package installation on unsupported OS family
+  ansible.builtin.debug:
+    msg: "Skipping kiosk package installation for os_family={{ kiosk_os_family }}."
+  when: kiosk_os_family != "Debian"

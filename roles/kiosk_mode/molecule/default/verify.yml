@@ -1,0 +1,36 @@
+---
+- name: Verify kiosk_mode defaults and guards
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Load kiosk_mode defaults publicly
+      ansible.builtin.include_role:
+        name: kiosk_mode
+        tasks_from: validate
+        public: true
+      vars:
+        kiosk_mode_enabled: false
+        kiosk_install_packages: false
+        kiosk_manage_autologin: false
+        kiosk_user: kiosk
+        kiosk_user_home: /tmp/nonexistent-kiosk-home
+        kiosk_url: http://localhost:3000
+
+    - name: Assert default support is Debian-only
+      ansible.builtin.assert:
+        that:
+          - kiosk_supported_os_families == ['Debian']
+
+    - name: Assert fail-on-unsupported default is safe
+      ansible.builtin.assert:
+        that:
+          - not kiosk_fail_on_unsupported_os | bool
+
+    - name: Assert browser flags are present
+      ansible.builtin.assert:
+        that:
+          - "'--kiosk' in kiosk_browser_flags"
+          - "'--app={{ kiosk_url }}' in kiosk_browser_flags"
