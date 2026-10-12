@@ -1,0 +1,8 @@
+# Rocky Linux 10 with systemd as PID 1, for Molecule.
+# Built by ./run_molecule.sh as molecule-systemd:rocky10
+FROM docker.io/rockylinux/rockylinux:10
+RUN dnf -y install systemd python3 sudo acl iproute procps-ng \
+ && dnf clean all \
+ && systemctl mask systemd-logind.service getty.target console-getty.service
+STOPSIGNAL SIGRTMIN+3
+CMD ["/usr/sbin/init"]
